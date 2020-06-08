@@ -94,7 +94,7 @@ static BOOL (WINAPI *pSetupDiDestroyDeviceInfoList)(HDEVINFO);
 
 static int symlookup(HMODULE dll, void **addr, const char *sym)
 {
-    *addr = GetProcAddress(dll, sym);
+    *addr = (void*)GetProcAddress(dll, sym);
     if (*addr == NULL)
     {
         FreeLibrary(dll);

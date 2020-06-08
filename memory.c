@@ -23,8 +23,6 @@
 #include <psapi.h>
 #include "memory.h"
 
-#define DOLPHIN_PTR 0xF84800 // offset within dolphin.exe module that points to gamecube memory
-
 static uint64_t emuoffset = 0;
 static HANDLE emuhandle = NULL;
 
@@ -76,23 +74,26 @@ void MEM_Quit(void)
 // Purpose: update emuoffset pointer to location of gamecube memory
 // Changed Globals: emuoffset
 //==========================================================================
-void MEM_UpdateEmuoffset(void)
+uint8_t MEM_FindRamOffset(void)
 {
 	emuoffset = 0;
-	HMODULE modules[1024]; // stores all modules for process
-	DWORD totalbytes; // the number of bytes required to store all module handles in the modules array
-	if(EnumProcessModules(emuhandle, modules, sizeof(modules), &totalbytes)) // get a list of all the modules in dolphin
+
+	MEMORY_BASIC_INFORMATION info; // store a snapshot of memory information
+
+	PVOID gamecube_ptr = NULL;
+
+	while (VirtualQueryEx(emuhandle, gamecube_ptr, &info, sizeof(info))) // loop continues until we reach the last possible memory region
 	{
-		for(uint32_t index = 0; index < (totalbytes / sizeof(HMODULE)); index++)
-		{
-			TCHAR szModName[MAX_PATH]; // get the full path to the module's file
-			if(GetModuleFileNameEx(emuhandle, modules[index], szModName, sizeof(szModName) / sizeof(TCHAR)))
-			{
-				if(strstr(szModName, "Dolphin.exe")) // scan for dolphin.exe (usually the first entry in module array)
-				{
-					uint64_t gamebase = (uint64_t)modules[index];
-					ReadProcessMemory(emuhandle, (LPVOID)(gamebase + DOLPHIN_PTR), &emuoffset, sizeof(emuoffset), NULL);
-					break;
+		gamecube_ptr = info.BaseAddress + info.RegionSize; // update address to next region of memory for loop
+
+		if (info.RegionSize == 0x2000000 && info.Type == MEM_MAPPED) { // check if the mapped memory region is the size of the maximum gamecube ram address
+			PSAPI_WORKING_SET_EX_INFORMATION wsinfo;
+			wsinfo.VirtualAddress = info.BaseAddress;
+
+			if (QueryWorkingSetEx(emuhandle, &wsinfo, sizeof(wsinfo))) { // query extended info about the memory page at the current virtual address space
+				if (wsinfo.VirtualAttributes.Valid) { // check if the address space is valid
+					memcpy(&emuoffset, &(info.BaseAddress), sizeof(info.BaseAddress)); // copy the base address location to our emuoffset pointer
+					return (emuoffset != 0x0);
 				}
 			}
 		}
