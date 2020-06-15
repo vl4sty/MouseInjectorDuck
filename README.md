@@ -1,12 +1,8 @@
-# Mouse Injector for Dolphin 5.0 (11990)
+# Mouse Injector for Dolphin 5.0 (ANY VERSION)
 
-* [dolphin-5.0-11990-mouse-injector.7z](https://github.com/CrashOveride95/MouseInjectorDolphin/releases/download/v0.31/dolphin-5.0-11990-mouse-injector.7z)
+* [MouseInjectorDolphin.exe](https://github.com/bkacjios/MouseInjectorDolphin/releases/download/v0.32/MouseInjectorDolphin.exe)
 
-A external app that injects cursor input into game memory, bundled with Dolphin emulator.
-
-## Please Note
-#### This injector is COMPLETELY AND ABSOLUTELY UNSUPPORTED, WITHOUT PREJUDICE. 
-#### The original author does NOT support this project anymore, and any questions directed to me will be IGNORED
+A external app that injects cursor input into game memory, with added support for any version of dolphin, but new and old.
 
 # How to Use
 Follow the quick start guide in the included readme.txt file
