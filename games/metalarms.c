@@ -26,6 +26,12 @@
 #define PI 3.14159265f // 0x40490FDB
 #define TAU 6.2831853f // 0x40C90FDB
 
+
+//TODO
+//1. Yaw does not work on elevators???
+//2. Does not work at all when inside a vehicle
+//3. When stationary, glitch moves to the center of the screen, only when moving again does it snap to being correct - fix math
+
 // MA CONSTANTS
 #define PLAYER_NUMBER 0
 // Metal Arms Addresses
@@ -33,8 +39,14 @@
 #define PLAYER_STRUCT_OFFSET 0x80481af8
 #define PLAYER_STRUCT_SIZE 0x24c8
 #define PLAYER_STRUCT_ACTUAL (PLAYER_STRUCT_OFFSET + PLAYER_NUMBER * PLAYER_STRUCT_SIZE)
-#define PLAYER_STRUCT_ORIG_BOT_POINTER 0x18d8 # CHECK
-#define PLAYER_STRUCT_CURRENT_BOT_POINTER 0x18dc # CHECK
+#define PLAYER_STRUCT_ORIG_BOT_POINTER 0x18d8
+#define PLAYER_STRUCT_CURRENT_BOT_POINTER 0x18dc
+
+#define PITCH_UPPER_BOUND 1.
+#define PITCH_LOWER_BOUND -1.
+
+#define YAW_UPPER_BOUND 1.
+#define YAW_LOWER_BOUND -1.
 
 #define BOT_STRUCT_PITCH_OFFSET 0x258
 #define BOT_STRUCT_YAW_OFFSET 0x264
@@ -68,25 +80,24 @@ static void METALARMS_Inject(void)
 	if(xmouse == 0 && ymouse == 0) // if mouse is idle
 		return;
 	const uint32_t current_bot_offset = MEM_ReadUInt(PLAYER_STRUCT_ACTUAL + PLAYER_STRUCT_CURRENT_BOT_POINTER);
-	if(NOTWITHINMEMRANGE(playerbase)) // if playerbase is invalid
+	if(NOTWITHINMEMRANGE(current_bot_offset))
 		return;
-  const float pitch = MEM_ReadFloat(current_bot_offset + BOT_STRUCT_PITCH_OFFSET);
-  const float yaw = MEM_ReadFloat(current_bot_offset + BOT_STRUCT_YAW_OFFSET);
-	//const float fov = MEM_ReadFloat(playerbase + MOHEA_fov);
-	//const float health = MEM_ReadFloat(playerbase + MOHEA_health);
-	//float camx = MEM_ReadFloat(playerbase + MOHEA_camx);
-	//float camy = MEM_ReadFloat(playerbase + MOHEA_camy);
-	//const float looksensitivity = (float)sensitivity / 40.f;
-	//if(camx >= -TAU && camx <= TAU && camy >= -CROSSHAIRY && camy <= CROSSHAIRY && health > 0)
-	//{
-	//	camx -= (float)xmouse / 10.f * looksensitivity / (360.f / TAU) / (35.f / fov); // normal calculation method for X
-	//	camy += (float)(!invertpitch ? -ymouse : ymouse) / 10.f * looksensitivity / (90.f / CROSSHAIRY) / (35.f / fov); // normal calculation method for Y
-	//	while(camx <= -TAU)
-	//		camx += TAU;
-	//	while(camx >= TAU)
-	//		camx -= TAU;
-	//	camy = ClampFloat(camy, -CROSSHAIRY, CROSSHAIRY);
-	//	MEM_WriteFloat(playerbase + MOHEA_camx, camx);
-	//	MEM_WriteFloat(playerbase + MOHEA_camy, camy);
-	//}
+  float pitch = MEM_ReadFloat(current_bot_offset + BOT_STRUCT_PITCH_OFFSET);
+  float yaw = MEM_ReadFloat(current_bot_offset + BOT_STRUCT_YAW_OFFSET);
+
+  const float looksensitivity = (float)sensitivity / 1500.f; //Using equivalent 360 distance at my dpi for tf2
+
+  pitch += (float)(!invertpitch ? ymouse : -ymouse)/10. * looksensitivity;
+  yaw += (float)xmouse/10 * looksensitivity;
+  
+  if (pitch > PITCH_UPPER_BOUND) pitch = PITCH_UPPER_BOUND;
+  if (pitch < PITCH_LOWER_BOUND) pitch = PITCH_LOWER_BOUND;
+
+	while(yaw <= -TAU)
+		yaw += TAU;
+	while(yaw >= TAU)
+		yaw -= TAU;
+
+  MEM_WriteFloat(current_bot_offset + BOT_STRUCT_PITCH_OFFSET, pitch);
+  MEM_WriteFloat(current_bot_offset + BOT_STRUCT_YAW_OFFSET, yaw);
 }
