@@ -61,6 +61,7 @@
 #define BOT_STRUCT_UNIT_FRONT_Y_OFFSET 0x274
 #define BOT_STRUCT_VEHICLE_OFFSET 0x3F0
 
+#define VEHICLE_SENTINEL_CBOTDEF_OFFSET 0x1a8
 #define VEHICLE_SENTINEL_TURRET_YAW_OFFSET 0x2e30
 #define VEHICLE_SENTINEL_TURRET_PITCH_OFFSET 0x2e38
 
@@ -149,9 +150,9 @@ static void METALARMS_Inject(void)
   // If not null must be in a vehicle
   if (vehicle_offset) {
     // Get Vehicle type
-    uint32_t vehicle_cbotdef_offset = MEM_ReadUInt(vehicle_offset + BOT_STRUCT_CBOTDEF_OFFSET);
+    uint32_t vehicle_cbotdef_offset = MEM_ReadUInt(vehicle_offset + VEHICLE_SENTINEL_CBOTDEF_OFFSET);
     BotClass_e vehicle_class = MEM_ReadUInt(vehicle_cbotdef_offset + CBOTDEF_STRUCT_BOT_CLASS_OFFSET);
-    //if (vehicle_class == BOTCLASS_SENTINEL) {
+    if (vehicle_class == BOTCLASS_SENTINEL) {
       pitch = MEM_ReadFloat(vehicle_offset + VEHICLE_SENTINEL_TURRET_PITCH_OFFSET);
       yaw = MEM_ReadFloat(vehicle_offset + VEHICLE_SENTINEL_TURRET_YAW_OFFSET);
     
@@ -167,7 +168,7 @@ static void METALARMS_Inject(void)
 
       MEM_WriteFloat(vehicle_offset + VEHICLE_SENTINEL_TURRET_PITCH_OFFSET, pitch);
       MEM_WriteFloat(vehicle_offset + VEHICLE_SENTINEL_TURRET_YAW_OFFSET, yaw);
-    //}
+    }
 
   } else {
     pitch = MEM_ReadFloat(current_bot_offset + BOT_STRUCT_PITCH_OFFSET);
