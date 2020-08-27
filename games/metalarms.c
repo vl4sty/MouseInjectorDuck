@@ -48,8 +48,25 @@
 #define YAW_UPPER_BOUND 1.
 #define YAW_LOWER_BOUND -1.
 
+#define SENTINEL_PITCH_UPPER_BOUND 1.
+#define SENTINEL_PITCH_LOWER_BOUND -1.
+
+#define BOT_STRUCT_CBOTDEF_OFFSET 0x0
+
 #define BOT_STRUCT_PITCH_OFFSET 0x258
 #define BOT_STRUCT_YAW_OFFSET 0x264
+#define BOT_STRUCT_YAW_SIN_OFFSET 0x268
+#define BOT_STRUCT_YAW_COS_OFFSET 0x26c
+#define BOT_STRUCT_UNIT_FRONT_X_OFFSET 0x270
+#define BOT_STRUCT_UNIT_FRONT_Y_OFFSET 0x274
+#define BOT_STRUCT_VEHICLE_OFFSET 0x3F0
+
+#define VEHICLE_SENTINEL_TURRET_YAW_OFFSET 0x2e30
+#define VEHICLE_SENTINEL_TURRET_PITCH_OFFSET 0x2e38
+
+#define CBOTDEF_STRUCT_BOT_RACE_OFFSET 0x0
+#define CBOTDEF_STRUCT_BOT_CLASS_OFFSET 0x4
+#define CBOTDEF_STRUCT_BOT_SUB_CLASS_OFFSET 0x8
 
 static uint8_t METALARMS_Status(void);
 static void METALARMS_Inject(void);
@@ -63,7 +80,41 @@ static const GAMEDRIVER GAMEDRIVER_INTERFACE =
 	0 // crosshair sway not supported for driver
 };
 
+typedef enum {
+  BOTCLASS_MINER,
+  BOTCLASS_COLOSSUS,
+  BOTCLASS_SCIENTIST,
+  BOTCLASS_CHEMBOT,
+  BOTCLASS_ALLOY,
+  BOTCLASS_ZOBBY,
+  BOTCLASS_BARTER,
+  BOTCLASS_VERMIN,
+  BOTCLASS_AMBIENT,
+  BOTCLASS_KRUNK,
+  BOTCLASS_GRUNT,
+  BOTCLASS_ELITE_GUARD,
+  BOTCLASS_JUMP_TROOPER,
+  BOTCLASS_TITAN,
+  BOTCLASS_SNIPER,
+  BOTCLASS_SWARMER,
+  BOTCLASS_SWARMER_BOSS,
+  BOTCLASS_PREDATOR,
+  BOTCLASS_SITEWEAPON,
+  BOTCLASS_MORTAR,
+  BOTCLASS_CORROSIVE,
+  BOTCLASS_LOADER,
+  BOTCLASS_RAT,
+  BOTCLASS_SENTINEL,
+  BOTCLASS_PROBE,
+  BOTCLASS_SCOUT,
+  BOTCLASS_AAGUN,
+  BOTCLASS_SNARQ,
+  BOTCLASS_ZOMBIE,
+  BOTCLASS_ZOMBIE_BOSS
+} BotClass_e;
+
 const GAMEDRIVER *GAME_METALARMS = &GAMEDRIVER_INTERFACE;
+
 
 //==========================================================================
 // Purpose: return 1 if game is detected
@@ -82,22 +133,66 @@ static void METALARMS_Inject(void)
 	const uint32_t current_bot_offset = MEM_ReadUInt(PLAYER_STRUCT_ACTUAL + PLAYER_STRUCT_CURRENT_BOT_POINTER);
 	if(NOTWITHINMEMRANGE(current_bot_offset))
 		return;
-  float pitch = MEM_ReadFloat(current_bot_offset + BOT_STRUCT_PITCH_OFFSET);
-  float yaw = MEM_ReadFloat(current_bot_offset + BOT_STRUCT_YAW_OFFSET);
-
-  const float looksensitivity = (float)sensitivity / 1500.f; //Using equivalent 360 distance at my dpi for tf2
-
-  pitch += (float)(!invertpitch ? ymouse : -ymouse)/10. * looksensitivity;
-  yaw += (float)xmouse/10 * looksensitivity;
   
-  if (pitch > PITCH_UPPER_BOUND) pitch = PITCH_UPPER_BOUND;
-  if (pitch < PITCH_LOWER_BOUND) pitch = PITCH_LOWER_BOUND;
+  const float looksensitivity = (float)sensitivity / 325.f; //Using equivalent 360 distance at my dpi for tf2
+  const float mouse_modifier = 1./40.;
 
-	while(yaw <= -TAU)
-		yaw += TAU;
-	while(yaw >= TAU)
-		yaw -= TAU;
+  float pitch;
+  float yaw;
 
-  MEM_WriteFloat(current_bot_offset + BOT_STRUCT_PITCH_OFFSET, pitch);
-  MEM_WriteFloat(current_bot_offset + BOT_STRUCT_YAW_OFFSET, yaw);
+  // Get Bot Type
+  uint32_t cbotdef_offset = MEM_ReadUInt(current_bot_offset + BOT_STRUCT_CBOTDEF_OFFSET);
+  BotClass_e bot_class = MEM_ReadUInt(cbotdef_offset + CBOTDEF_STRUCT_BOT_CLASS_OFFSET);
+
+  // Check if in vehicle
+  uint32_t vehicle_offset = MEM_ReadUInt(current_bot_offset + BOT_STRUCT_VEHICLE_OFFSET);
+  // If not null must be in a vehicle
+  if (vehicle_offset) {
+    // Get Vehicle type
+    uint32_t vehicle_cbotdef_offset = MEM_ReadUInt(vehicle_offset + BOT_STRUCT_CBOTDEF_OFFSET);
+    BotClass_e vehicle_class = MEM_ReadUInt(vehicle_cbotdef_offset + CBOTDEF_STRUCT_BOT_CLASS_OFFSET);
+    //if (vehicle_class == BOTCLASS_SENTINEL) {
+      pitch = MEM_ReadFloat(vehicle_offset + VEHICLE_SENTINEL_TURRET_PITCH_OFFSET);
+      yaw = MEM_ReadFloat(vehicle_offset + VEHICLE_SENTINEL_TURRET_YAW_OFFSET);
+    
+      pitch += (float)(!invertpitch ? ymouse : -ymouse) * mouse_modifier * looksensitivity;
+      yaw += (float)xmouse * mouse_modifier * looksensitivity;
+    
+      if (pitch > SENTINEL_PITCH_UPPER_BOUND) pitch = SENTINEL_PITCH_UPPER_BOUND;
+      if (pitch < SENTINEL_PITCH_LOWER_BOUND) pitch = SENTINEL_PITCH_LOWER_BOUND;
+      while(yaw <= -PI)
+    	  yaw += TAU;
+      while(yaw >= PI)
+    	  yaw -= TAU;
+
+      MEM_WriteFloat(vehicle_offset + VEHICLE_SENTINEL_TURRET_PITCH_OFFSET, pitch);
+      MEM_WriteFloat(vehicle_offset + VEHICLE_SENTINEL_TURRET_YAW_OFFSET, yaw);
+    //}
+
+  } else {
+    pitch = MEM_ReadFloat(current_bot_offset + BOT_STRUCT_PITCH_OFFSET);
+    yaw = MEM_ReadFloat(current_bot_offset + BOT_STRUCT_YAW_OFFSET);
+
+
+    pitch += (float)(!invertpitch ? ymouse : -ymouse) * mouse_modifier * looksensitivity;
+    yaw += (float)xmouse * mouse_modifier * looksensitivity;
+    
+    if (pitch > PITCH_UPPER_BOUND) pitch = PITCH_UPPER_BOUND;
+    if (pitch < PITCH_LOWER_BOUND) pitch = PITCH_LOWER_BOUND;
+
+    while(yaw <= -PI)
+    	yaw += TAU;
+    while(yaw >= PI)
+    	yaw -= TAU;
+    float yaw_sin = sin(yaw);
+    float yaw_cos = cos(yaw);
+
+    MEM_WriteFloat(current_bot_offset + BOT_STRUCT_PITCH_OFFSET, pitch);
+    MEM_WriteFloat(current_bot_offset + BOT_STRUCT_YAW_OFFSET, yaw);
+    MEM_WriteFloat(current_bot_offset + BOT_STRUCT_YAW_SIN_OFFSET, yaw_sin);
+    MEM_WriteFloat(current_bot_offset + BOT_STRUCT_YAW_COS_OFFSET, yaw_cos);
+    MEM_WriteFloat(current_bot_offset + BOT_STRUCT_UNIT_FRONT_X_OFFSET, yaw_sin);
+    MEM_WriteFloat(current_bot_offset + BOT_STRUCT_UNIT_FRONT_Y_OFFSET, yaw_cos);
+  }
+
 }
