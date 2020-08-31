@@ -65,9 +65,26 @@
 #define ENTITY_CBOTDEF_OFFSET 0x1a8 //Also is likely the length of entity since cbotdef is the first value in bot
 #define VEHICLE_SENTINEL_TURRET_YAW_OFFSET 0x2e30
 #define VEHICLE_SENTINEL_TURRET_PITCH_OFFSET 0x2e38
+#define VEHICLE_DRIVER_OFFSET 0xd14
 
-#define VEHICLE_RAT_DRIVER_CAMERA_PITCH_OFFSET 0xcd8 // seems to be camera height idfk
+#define VEHICLE_RAT_DRIVER_CAMERA_PITCH_OFFSET 0xcd8 // seems to be camera height idfk, cc0 seems to be the x of the camera look back vector???
 #define VEHICLE_RAT_DRIVER_CAMERA_RAW_STEERING_POSITION_OFFSET 0x2e60
+#define VEHICLE_RAT_GUNNER_OFFSET 0x2d70
+
+#define VEHICLE_RAT_SITE_WEAPON_DATA_OFFSET 0x3ad0
+
+#define SITE_WEAPON_DATA_HALF_FOV 0x120
+#define SITE_WEAPON_AIMX_RIGHT_X 0x40
+#define SITE_WEAPON_AIMX_RIGHT_Y 0x44
+#define SITE_WEAPON_AIMX_RIGHT_Z 0x48
+#define SITE_WEAPON_AIMX_UP_X 0x50
+#define SITE_WEAPON_AIMX_UP_Y 0x54
+#define SITE_WEAPON_AIMX_UP_Z 0x58
+#define SITE_WEAPON_AIMX_FRONT_X 0x60
+#define SITE_WEAPON_AIMX_FRONT_Y 0x64
+#define SITE_WEAPON_AIMX_FRONT_Z 0x68
+#define SITE_WEAPON_DATA_YAW_OFFSET 0x14c
+#define SITE_WEAPON_DATA_PITCH_OFFSET 0x150
 
 #define CBOTDEF_STRUCT_BOT_RACE_OFFSET 0x0
 #define CBOTDEF_STRUCT_BOT_CLASS_OFFSET 0x4
@@ -202,27 +219,49 @@ static void METALARMS_Inject(void)
       MEM_WriteFloat(vehicle_offset + BOT_STRUCT_UNIT_FRONT_Z_OFFSET, yaw_cos);
 
     } else if (vehicle_class == BOTCLASS_RAT) {
-      // pitch doesnt work, not sure what to do
-      // pitch = MEM_ReadFloat(vehicle_offset + VEHICLE_RAT_DRIVER_CAMERA_PITCH_OFFSET);
-      yaw = MEM_ReadFloat(vehicle_offset + VEHICLE_RAT_DRIVER_CAMERA_RAW_STEERING_POSITION_OFFSET);
+      //If RAT then have to check if gunner or driver
+      const uint32_t driver_offset = MEM_ReadUInt(vehicle_offset + VEHICLE_DRIVER_OFFSET);
+      const uint32_t gunner_offset = MEM_ReadUInt(vehicle_offset + VEHICLE_RAT_GUNNER_OFFSET);
+      if (driver_offset == current_bot_offset) {
+        //We the driver yoooo
+        // pitch doesnt work, not sure what to do
+        // pitch = MEM_ReadFloat(vehicle_offset + VEHICLE_RAT_DRIVER_CAMERA_PITCH_OFFSET);
+        yaw = MEM_ReadFloat(vehicle_offset + VEHICLE_RAT_DRIVER_CAMERA_RAW_STEERING_POSITION_OFFSET);
 
-      //update_pitch(&pitch, mouse_modifier, look_sensitivity);
-      // Turning wheels seems to be bound from -1 to 1 and triple sense for feel
-      update_yaw(&yaw, mouse_modifier, look_sensitivity * 3.);
-      if (yaw > 1.) yaw = 1.;
-      if (yaw < -1.) yaw = -1.;
-      
+        //update_pitch(&pitch, mouse_modifier, look_sensitivity);
+        // Turning wheels seems to be bound from -1 to 1 and triple sense for feel
+        update_yaw(&yaw, mouse_modifier, look_sensitivity * 3.);
+        if (yaw > 1.) yaw = 1.;
+        if (yaw < -1.) yaw = -1.;
 
-      //float yaw_sin = sin(yaw);
-      //float yaw_cos = cos(yaw);
+        // Added cbotdef offset since vehicle points to entity base not bot base and cbotdef is the start of the bot offset
+        //MEM_WriteFloat(vehicle_offset + VEHICLE_RAT_DRIVER_CAMERA_PITCH_OFFSET, pitch);
+        MEM_WriteFloat(vehicle_offset + VEHICLE_RAT_DRIVER_CAMERA_RAW_STEERING_POSITION_OFFSET, yaw);
 
-      // Added cbotdef offset since vehicle points to entity base not bot base and cbotdef is the start of the bot offset
-      //MEM_WriteFloat(vehicle_offset + VEHICLE_RAT_DRIVER_CAMERA_PITCH_OFFSET, pitch);
-      MEM_WriteFloat(vehicle_offset + VEHICLE_RAT_DRIVER_CAMERA_RAW_STEERING_POSITION_OFFSET, yaw);
-      //MEM_WriteFloat(vehicle_offset + BOT_STRUCT_YAW_SIN_OFFSET, yaw_sin);
-      //MEM_WriteFloat(vehicle_offset + BOT_STRUCT_YAW_COS_OFFSET, yaw_cos);
-      //MEM_WriteFloat(vehicle_offset + BOT_STRUCT_UNIT_FRONT_X_OFFSET, yaw_sin);
-      //MEM_WriteFloat(vehicle_offset + BOT_STRUCT_UNIT_FRONT_Z_OFFSET, yaw_cos);
+      } else if (gunner_offset == current_bot_offset) {
+        const uint32_t site_weapon_data_offset = MEM_ReadUInt(vehicle_offset + VEHICLE_RAT_SITE_WEAPON_DATA_OFFSET);
+        pitch = MEM_ReadFloat(site_weapon_data_offset + SITE_WEAPON_DATA_PITCH_OFFSET);
+        yaw = MEM_ReadFloat(site_weapon_data_offset + SITE_WEAPON_DATA_YAW_OFFSET);
+        
+        update_pitch(&pitch, mouse_modifier, look_sensitivity);
+        update_yaw(&yaw, mouse_modifier, look_sensitivity);
+
+        // Gotta update camera myself i guess
+        float pitch_sin = sin(pitch);
+        float pitch_cos = cos(pitch);
+
+        MEM_WriteFloat(site_weapon_data_offset + SITE_WEAPON_DATA_PITCH_OFFSET, pitch);
+        MEM_WriteFloat(site_weapon_data_offset + SITE_WEAPON_DATA_YAW_OFFSET, yaw);
+        MEM_WriteFloat(site_weapon_data_offset + SITE_WEAPON_AIMX_UP_Z, pitch_sin);
+        MEM_WriteFloat(site_weapon_data_offset + SITE_WEAPON_AIMX_UP_Y, pitch_cos);
+        MEM_WriteFloat(site_weapon_data_offset + SITE_WEAPON_AIMX_FRONT_Y, -pitch_sin);
+        MEM_WriteFloat(site_weapon_data_offset + SITE_WEAPON_AIMX_FRONT_Z, pitch_cos);
+
+        // Gunner gang
+      } else {
+        // Something broke lol
+        // Do nothing, maybe a race condition
+      }
 
     }
 
