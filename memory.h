@@ -22,7 +22,7 @@
 
 extern uint8_t MEM_Init(void);
 extern void MEM_Quit(void);
-extern void MEM_UpdateEmuoffset(void);
+extern uint8_t MEM_FindRamOffset(void);
 extern int32_t MEM_ReadInt(const uint32_t addr);
 extern uint32_t MEM_ReadUInt(const uint32_t addr);
 extern float MEM_ReadFloat(const uint32_t addr);

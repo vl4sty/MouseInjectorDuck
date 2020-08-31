@@ -69,7 +69,6 @@ int32_t main(void)
 	INI_Load(); // load settings
 	if(!welcomed) // if not welcomed before
 		GUI_Welcome(); // show welcome message - wait for user input before continuing
-	MEM_UpdateEmuoffset(); // update emuoffset before refreshing interface
 	GUI_Update(); // update screen with options
 	atexit(quit); // set function to run when program is closed
 	while(1)
@@ -84,7 +83,7 @@ int32_t main(void)
 			}
 			else // dolphin has no game loaded or game not found, wait 100 ms and try again
 			{
-				MEM_UpdateEmuoffset();
+				MEM_FindRamOffset();
 				Sleep(100);
 			}
 		}
@@ -117,12 +116,10 @@ static void GUI_Welcome(void)
 {
 	printf("\n    Mouse Injector for %s %s\n%s\n\n   Addendum - Please Read before Use\n\n\n", DOLPHINVERSION, BUILDINFO, LINE);
 	printf("    1)  This is a unfinished alpha - expect issues and crashes\n\n");
-	printf("    2)  This only works with the included official %s build\n\n", DOLPHINVERSION);
-	printf("    3)  Please do not install over different versions of Dolphin\n\n");
-	printf("    4)  All sub-systems are unsupported - use arrow keys for sentries/cameras\n\n");
-	printf("    5)  NetPlay is unsupported - it will not synchronize memory injection\n\n");
-	printf("    6)  Press insert in the main menu to list supported games (NTSC only)\n\n");
-	printf("    7)  Read readme.txt for a quick start guide - thank you and enjoy\n\n\n");
+	printf("    2)  All sub-systems are unsupported - use arrow keys for sentries/cameras\n\n");
+	printf("    3)  NetPlay is unsupported - it will not synchronize memory injection\n\n");
+	printf("    4)  Press insert in the main menu to list supported games (NTSC only)\n\n");
+	printf("    5)  Read readme.txt for a quick start guide - thank you and enjoy\n\n\n");
 	printf("   Press CTRL+1 to confirm you've read this message...\n%s\n", LINE);
 	while(!welcomed)
 	{
