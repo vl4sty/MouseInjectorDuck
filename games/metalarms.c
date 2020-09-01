@@ -59,7 +59,11 @@
 #define BOT_STRUCT_YAW_COS_OFFSET 0x26c
 #define BOT_STRUCT_UNIT_FRONT_X_OFFSET 0x270
 #define BOT_STRUCT_UNIT_FRONT_Z_OFFSET 0x278
-#define BOT_STRUCT_VEHICLE_OFFSET 0x3F0
+#define BOT_STRUCT_VEHICLE_OFFSET 0x3f0
+#define BOT_STRUCT_MECH_OFFSET 0x56c
+
+#define BOT_AAGUN_PITCH_OFFSET 0xa78
+#define BOT_AAGUN_YAW_OFFSET 0xa74
 
 // The vehicle offset points to an entity class so CBOTDEF should be same for all, since the structure doesnt change til after vehicle
 #define ENTITY_CBOTDEF_OFFSET 0x1a8 //Also is likely the length of entity since cbotdef is the first value in bot
@@ -72,6 +76,8 @@
 #define VEHICLE_RAT_GUNNER_OFFSET 0x2d70
 
 #define VEHICLE_RAT_SITE_WEAPON_DATA_OFFSET 0x3ad0
+
+#define SITE_WEAPON_STRUCT_WEAPON_DATA_OFFSET 0xc58
 
 #define SITE_WEAPON_DATA_HALF_FOV 0x120
 #define SITE_WEAPON_AIMX_RIGHT_X 0x40
@@ -185,6 +191,8 @@ static void METALARMS_Inject(void)
 
   // Check if in vehicle
   uint32_t vehicle_offset = MEM_ReadUInt(current_bot_offset + BOT_STRUCT_VEHICLE_OFFSET);
+  // Check if in a turret
+  uint32_t mech_offset = MEM_ReadUInt(current_bot_offset + BOT_STRUCT_MECH_OFFSET);
   // If not null must be in a vehicle
   if (vehicle_offset) {
     // Get Vehicle type
@@ -262,10 +270,44 @@ static void METALARMS_Inject(void)
         // Something broke lol
         // Do nothing, maybe a race condition
       }
+    }
+  } else if (mech_offset) {
+    //Is a turret i guess
+    uint32_t mech_cbotdef_offset = MEM_ReadUInt(mech_offset + ENTITY_CBOTDEF_OFFSET);
+    BotClass_e mech_class = MEM_ReadUInt(mech_cbotdef_offset + CBOTDEF_STRUCT_BOT_CLASS_OFFSET);
+    if (mech_class == BOTCLASS_AAGUN) {
+      pitch = MEM_ReadFloat(mech_offset + BOT_AAGUN_PITCH_OFFSET);
+      yaw = MEM_ReadFloat(mech_offset + BOT_AAGUN_YAW_OFFSET);
+      
+      update_pitch(&pitch, mouse_modifier, look_sensitivity);
+      update_yaw(&yaw, mouse_modifier, look_sensitivity);
 
+
+      MEM_WriteFloat(mech_offset + BOT_AAGUN_PITCH_OFFSET, pitch);
+      MEM_WriteFloat(mech_offset + BOT_AAGUN_YAW_OFFSET, yaw);
+    } else {
+      // All other turrets seem to work the same
+      const uint32_t site_weapon_data_offset = MEM_ReadUInt(mech_offset + SITE_WEAPON_STRUCT_WEAPON_DATA_OFFSET);
+      pitch = MEM_ReadFloat(site_weapon_data_offset + SITE_WEAPON_DATA_PITCH_OFFSET);
+      yaw = MEM_ReadFloat(site_weapon_data_offset + SITE_WEAPON_DATA_YAW_OFFSET);
+      
+      update_pitch(&pitch, mouse_modifier, look_sensitivity);
+      update_yaw(&yaw, mouse_modifier, look_sensitivity);
+
+      // Gotta update camera myself i guess
+      float pitch_sin = sin(pitch);
+      float pitch_cos = cos(pitch);
+
+      MEM_WriteFloat(site_weapon_data_offset + SITE_WEAPON_DATA_PITCH_OFFSET, pitch);
+      MEM_WriteFloat(site_weapon_data_offset + SITE_WEAPON_DATA_YAW_OFFSET, yaw);
+      MEM_WriteFloat(site_weapon_data_offset + SITE_WEAPON_AIMX_UP_Z, pitch_sin);
+      MEM_WriteFloat(site_weapon_data_offset + SITE_WEAPON_AIMX_UP_Y, pitch_cos);
+      MEM_WriteFloat(site_weapon_data_offset + SITE_WEAPON_AIMX_FRONT_Y, -pitch_sin);
+      MEM_WriteFloat(site_weapon_data_offset + SITE_WEAPON_AIMX_FRONT_Z, pitch_cos);
     }
 
   } else {
+    
     pitch = MEM_ReadFloat(current_bot_offset + BOT_STRUCT_PITCH_OFFSET);
     yaw = MEM_ReadFloat(current_bot_offset + BOT_STRUCT_YAW_OFFSET);
 
