@@ -1,6 +1,6 @@
 # Mouse Injector for Dolphin 5.0 (ANY VERSION)
 
-* [MouseInjectorDolphin.exe](https://github.com/bkacjios/MouseInjectorDolphin/releases/download/v0.32/MouseInjectorDolphin.exe)
+* [MouseInjectorDolphin.exe](https://github.com/dj0wns/MouseInjectorDolphin/releases/download/MA-Release/MouseInjectorDolphin-ma-branch.1.zip)
 
 A external app that injects cursor input into game memory, with added support for any version of dolphin, both new and old.
 
