@@ -4,7 +4,7 @@
 #mingw32-make.exe -f makefile to compile
 
 #Compiler directories
-MINGWDIR = C:/MinGW64/bin/
+MINGWDIR = C:/Dev/Dev-Cpp/MinGW64/bin/
 CC = $(MINGWDIR)gcc
 WINDRES = $(MINGWDIR)windres
 
@@ -56,4 +56,4 @@ $(OBJDIR)%.o: $(GAMESDIR)%.c $(SRCDIR)main.h $(SRCDIR)memory.h $(SRCDIR)mouse.h 
 	$(CC) -c $< -o $@ $(CFLAGS) $(WFLAGS)
 
 clean:
-	rm -f $(SRCDIR)*.exe $(OBJDIR)*.o $(OBJDIR)*.res
+	rm -f $(SRCDIR)*.exe $(OBJDIR)*.o $(OBJDIR)*.res $(SRCDIR)*.ini

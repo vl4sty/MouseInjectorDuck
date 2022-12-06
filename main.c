@@ -253,6 +253,7 @@ static void GUI_ListGames(void)
 	printf("    Call of Duty 2: Big Red One\t\t GQCE52\t\t Good\n\n");
 	printf("    Die Hard: Vendetta\t\t\t GDIE7D\t\t Fair\n\n");
 	printf("    Serious Sam: Next Encounter\t\t G3BE9G\t\t Fair\n\n");
+	printf("    Trigger Man\t\t\t\t GG2E4Z\t\t Good\n\n");
 	printf("   Returning to Main Menu in 10 Seconds...\n%s\n", LINE);
 }
 //==========================================================================

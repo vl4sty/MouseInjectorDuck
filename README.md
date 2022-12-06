@@ -20,6 +20,7 @@ Follow the quick start guide in the included readme.txt file
 | Metal Arms | :heavy_check_mark: | Good | <sup>Rat driving or rat turret may not work correctly<sup> |
 | Call of Duty 2: Big Red One | :heavy_multiplication_x: | Good | <sup>None</sub> |
 | Die Hard: Vendetta | :heavy_multiplication_x: | Fair | <sup>Sentry mode not supported</sub> |
+| Trigger Man | :heavy_check_mark: | Good | <sup>None</sub> |
 
 # ManyMouse
 
