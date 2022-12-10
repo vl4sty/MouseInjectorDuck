@@ -19,6 +19,8 @@
 //==========================================================================
 #define NOTWITHINMEMRANGE(X) (X < 0x80000000 || X > 0x81800000) // if X is not within GC memory range
 #define WITHINMEMRANGE(X) (!NOTWITHINMEMRANGE(X)) // if X is within GC memory range
+#define NOTWITHINARAMRANGE(X) (X < 0x7E000000 || X > 0x7EFFFFFF)
+#define WITHINARAMRANGE(X) (!NOTWITHINARAMRANGE(X))
 
 extern uint8_t MEM_Init(void);
 extern void MEM_Quit(void);
@@ -29,3 +31,9 @@ extern float MEM_ReadFloat(const uint32_t addr);
 extern void MEM_WriteInt(const uint32_t addr, int32_t value);
 extern void MEM_WriteUInt(const uint32_t addr, uint32_t value);
 extern void MEM_WriteFloat(const uint32_t addr, float value);
+
+extern int32_t ARAM_ReadInt(const uint32_t addr);
+extern uint32_t ARAM_ReadUInt(const uint32_t addr);
+extern float ARAM_ReadFloat(const uint32_t addr);
+extern void ARAM_WriteUInt(const uint32_t addr, uint32_t value);
+extern void ARAM_WriteFloat(const uint32_t addr, float value);

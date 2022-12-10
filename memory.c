@@ -24,6 +24,7 @@
 #include "memory.h"
 
 static uint64_t emuoffset = 0;
+static uint32_t aramoffset = 0x02000000; // REQUIRES that MMU is off
 static HANDLE emuhandle = NULL;
 
 uint8_t MEM_Init(void);
@@ -36,6 +37,12 @@ void MEM_WriteInt(const uint32_t addr, int32_t value);
 void MEM_WriteUInt(const uint32_t addr, uint32_t value);
 void MEM_WriteFloat(const uint32_t addr, float value);
 static void MEM_ByteSwap32(uint32_t *input);
+
+int32_t ARAM_ReadInt(const uint32_t addr);
+uint32_t ARAM_ReadUInt(const uint32_t addr);
+float ARAM_ReadFloat(const uint32_t addr);
+void ARAM_WriteUInt(const uint32_t addr, uint32_t value);
+void ARAM_WriteFloat(const uint32_t addr, float value);
 
 //==========================================================================
 // Purpose: initialize dolphin handle and setup for memory injection
@@ -179,4 +186,67 @@ static void MEM_ByteSwap32(uint32_t *input)
 {
 	const uint8_t *inputarray = ((uint8_t *)input); // set byte array to input
 	*input = (uint32_t)((inputarray[0] << 24) | (inputarray[1] << 16) | (inputarray[2] << 8) | (inputarray[3])); // reassign input to swapped value
+}
+
+//==========================================================================
+// Purpose: read int from ARAM ***REQUIRES MMU TO BE DISABLED IN DOLPHIN***
+// Parameter: address location
+//==========================================================================
+int32_t ARAM_ReadInt(const uint32_t addr)
+{
+	if(!emuoffset || NOTWITHINARAMRANGE(addr)) // if gamecube memory has not been init by dolphin or reading from outside of memory range
+		return 0;
+	int32_t output; // temp var used for output of function
+	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + aramoffset + (addr - 0x7E000000)), &output, sizeof(output), NULL);
+	MEM_ByteSwap32((uint32_t *)&output); // byteswap
+	return output;
+}
+//==========================================================================
+// Purpose: read unsigned int from ARAM ***REQUIRES MMU TO BE DISABLED IN DOLPHIN***
+// Parameter: address location
+//==========================================================================
+uint32_t ARAM_ReadUInt(const uint32_t addr)
+{
+	if(!emuoffset || NOTWITHINARAMRANGE(addr)) // if gamecube memory has not been init by dolphin or reading from outside of memory range
+		return 0;
+	uint32_t output; // temp var used for output of function
+	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + aramoffset + (addr - 0x7E000000)), &output, sizeof(output), NULL);
+	MEM_ByteSwap32(&output); // byteswap
+	return output;
+}
+//==========================================================================
+// Purpose: read float from ARAM ***REQUIRES MMU TO BE DISABLED IN DOLPHIN***
+// Parameter: address location
+//==========================================================================
+float ARAM_ReadFloat(const uint32_t addr)
+{
+	if(!emuoffset || NOTWITHINARAMRANGE(addr)) // if gamecube memory has not been init by dolphin or reading from outside of memory range
+		return 0;
+	float output; // temp var used for output of function
+	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + aramoffset + (addr - 0x7E000000)), &output, sizeof(output), NULL);
+	MEM_ByteSwap32((uint32_t *)&output); // byteswap
+	return output;
+}
+//==========================================================================
+// Purpose: write unsigned int to ARAM ***REQUIRES MMU TO BE DISABLED IN DOLPHIN***
+// Parameter: address location and value
+//==========================================================================
+void ARAM_WriteUInt(const uint32_t addr, uint32_t value)
+{
+	if(!emuoffset || NOTWITHINARAMRANGE(addr)) // if gamecube memory has not been init by dolphin or writing to outside of memory range
+		return;
+	MEM_ByteSwap32(&value); // byteswap
+	WriteProcessMemory(emuhandle, (LPVOID)(emuoffset + aramoffset + (addr - 0x7E000000)), &value, sizeof(value), NULL);
+}
+//==========================================================================
+// Purpose: write float to ARAM ***REQUIRES MMU TO BE DISABLED IN DOLPHIN***
+// Parameter: address location and value
+//==========================================================================
+void ARAM_WriteFloat(const uint32_t addr, float value)
+{
+	if(!emuoffset || NOTWITHINARAMRANGE(addr)) // if gamecube memory has not been init by dolphin or writing to outside of memory range
+		return;
+	MEM_ByteSwap32((uint32_t *)&value); // byteswap
+	// ARAM offset = 0x02000000
+	WriteProcessMemory(emuhandle, (LPVOID)(emuoffset + aramoffset + (addr - 0x7E000000)), &value, sizeof(value), NULL);
 }
