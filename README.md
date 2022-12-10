@@ -21,7 +21,7 @@ Follow the quick start guide in the included readme.txt file
 | Call of Duty 2: Big Red One | :heavy_multiplication_x: | Good | <sup>None</sub> |
 | Die Hard: Vendetta | :heavy_multiplication_x: | Fair | <sup>Sentry mode not supported</sub> |
 | Trigger Man | :heavy_check_mark: | Good | <sup>None</sub> |
-| Geist :heavy_check_mark: | Fair | <sup>Aim assist on in singleplayer, camera broken on elevators</sub> |
+| Geist | :heavy_check_mark: | Fair | <sup>Aim assist on in singleplayer, camera broken on elevators</sub> |
 
 # ManyMouse
 
