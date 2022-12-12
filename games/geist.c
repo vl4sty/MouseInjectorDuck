@@ -25,14 +25,20 @@
 
 #define TAU 6.2831853f // 0x40C90FDB
 // G ADDRESSES - OFFSET ADDRESSES BELOW (REQUIRES PLAYERBASE TO USE)
+// ALSO REQUIRES THAT MMU IS OFF IN DOLPHIN, WHICH RESETS IF GAME IS CLOSED THEN REOPENED. MUST RESTART DOLPHIN.
 // 0x7E517020 - playerbase in 1-1
 // 0x7E6054A0 - playerbase in level 2, science facility
+// 0x7E5EA600 - playerbase level 3
 #define G_camy 0x7E517050 - 0x7E517020
 #define G_camy_up_trigger 0x7E51716C - 0x7E517020 // 0x00000000 - off | 0x00000002 - on
 #define G_cstick_y 0x7E51707C - 0x7E517020
 #define G_camx 0x7E5174F0 - 0x7E517020
 #define G_auto_center_timer 0x7E5170AC - 0x7E517020
 #define G_player_not_in_conversation 0x7E6067E8 - 0x7E6054A0
+#define G_aim_assist_target 0x7E5EC1EC - 0x7E5EA600
+#define G_aim_assist_var 0x7E5EC1F0 - 0x7E5EA600
+#define G_context_zoom 0x7E5EA7DC - 0x7E5EA600
+#define G_truck_sentry_camx 0x7E483D00
 // STATIC ADDRESSES BELOW
 #define G_playerbase 0x8045C868 // random stack address, commonly holds player pointer - requires sanity checks before using!
 #define G_fovbase 0x8045C7A4
@@ -47,7 +53,7 @@ static const GAMEDRIVER GAMEDRIVER_INTERFACE =
 	G_Status,
 	G_Inject,
 	1, // 1000 Hz tickrate
-	1 // crosshair sway supported for driver
+	0 // crosshair sway supported for driver
 };
 
 // const GAMEDRIVER *GAME_TRIGGERMAN = &GAMEDRIVER_INTERFACE;
@@ -82,16 +88,28 @@ static uint8_t G_DetectPlayer(void)
 //==========================================================================
 static void G_Inject(void)
 {
-	// TODO: turn off aim assist
+	// TODO:
 	// fix camx on elevators/platforms
+	// fix camx on sentry truck during motorcycle level
+	// prevent mouse movement while possessing certain bodies that can't move with controller
 
 	if(!G_DetectPlayer()) // if player pointer was not found
 		return;
 
 	ARAM_WriteFloat(playerbase + G_auto_center_timer, 0.0f); // disable auto y centering
-	const uint32_t playerNotInConversation = ARAM_ReadUInt(playerbase + G_player_not_in_conversation);
-	if(!playerNotInConversation) // don't move camera if player is talking to NPC
+
+	// =========================================================================================================================
+	// Doesn't completely disable aim assist but only adds a fraction of a degree when it tries to lock onto
+	//	certain enemies sometimes. I assume it's due to the values constantly trying to reset and a small value sneaks through
+	// =========================================================================================================================
+	ARAM_WriteUInt(playerbase + G_aim_assist_target, 0x00000000); // disable aim assist
+	ARAM_WriteUInt(playerbase + G_aim_assist_var, 0x00000000); // disable aim assist
+
+	if (ARAM_ReadUInt(playerbase + G_context_zoom) == 0x00000000) // player zoomed in for conversation or rivet gun minigame, requires testing
 		return;
+	// const uint32_t playerNotInConversation = ARAM_ReadUInt(playerbase + G_player_not_in_conversation);
+	// if(!playerNotInConversation) // don't move camera if player is talking to NPC
+	// 	return;
 
 	if(xmouse == 0 && ymouse == 0) // if mouse is idle
 		return;
