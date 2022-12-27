@@ -6,7 +6,7 @@ DuckStation support tested and working with version 0.1-5422
 # How to Use
 Follow the quick start guide in the included readme.txt file
 
-# Supported Titles (NTSC Only)
+# Supported Dolphin Titles (NTSC Only)
 | Game Title | Input Profile | Mouse Support | Issues |
 | --- | :---: | :---: | ----------- |
 | TimeSplitters 2 | :heavy_check_mark: | Fair | <sup>Camera/sentry modes not supported</sub> |
@@ -22,10 +22,10 @@ Follow the quick start guide in the included readme.txt file
 | Trigger Man | :heavy_check_mark: | Good | <sup>None</sub> |
 | Geist | :heavy_check_mark: | Fair | <sup> ** *Requires MMU be disabled for game in Dolphin* ** <br />Camera broken on elevators, truck sentry on motorcycle level broken</sub> |
 
-# DuckStation Titles
+# Supported DuckStation Titles
 | Game Title | Input Profile | Mouse Support | Issues |
 | --- | :---: | :---: | ----------- |
-| Men in Black: The Series - Crashdown | :heavy_check_mark: | Good | <sup>None</sub> |
+| Men in Black: The Series - Crashdown (NTSC) | :heavy_check_mark: | Good | <sup>None</sub> |
 
 # ManyMouse
 
