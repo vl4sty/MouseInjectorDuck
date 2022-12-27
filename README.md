@@ -1,6 +1,7 @@
-# Mouse Injector for Dolphin 5.0 (ANY VERSION)
+# Mouse Injector for Dolphin 5.0 (ANY VERSION) and DuckStation
 
 A external app that injects cursor input into game memory, with added support for any version of dolphin, both new and old.
+DuckStation support tested and working with version 0.1-5422
 
 # How to Use
 Follow the quick start guide in the included readme.txt file
@@ -20,6 +21,11 @@ Follow the quick start guide in the included readme.txt file
 | Die Hard: Vendetta | :heavy_multiplication_x: | Fair | <sup>Sentry mode not supported</sub> |
 | Trigger Man | :heavy_check_mark: | Good | <sup>None</sub> |
 | Geist | :heavy_check_mark: | Fair | <sup> ** *Requires MMU be disabled for game in Dolphin* ** <br />Camera broken on elevators, truck sentry on motorcycle level broken</sub> |
+
+# DuckStation Titles
+| Game Title | Input Profile | Mouse Support | Issues |
+| --- | :---: | :---: | ----------- |
+| Men in Black: The Series - Crashdown | :heavy_check_mark: | Good | <sup>None</sub> |
 
 # ManyMouse
 

@@ -26,6 +26,7 @@
 static uint64_t emuoffset = 0;
 static uint32_t aramoffset = 0x02000000; // REQUIRES that MMU is off
 static HANDLE emuhandle = NULL;
+static int isPS1handle = 0;
 
 uint8_t MEM_Init(void);
 void MEM_Quit(void);
@@ -44,6 +45,11 @@ float ARAM_ReadFloat(const uint32_t addr);
 void ARAM_WriteUInt(const uint32_t addr, uint32_t value);
 void ARAM_WriteFloat(const uint32_t addr, float value);
 
+uint32_t PS1_MEM_ReadWord(const uint32_t addr);
+uint16_t PS1_MEM_ReadHalfword(const uint32_t addr);
+void PS1_MEM_WriteWord(const uint32_t addr, uint32_t value);
+void PS1_MEM_WriteHalfword(const uint32_t addr, uint16_t value);
+
 //==========================================================================
 // Purpose: initialize dolphin handle and setup for memory injection
 // Changed Globals: emuhandle
@@ -60,6 +66,12 @@ uint8_t MEM_Init(void)
 	{
 		if(strcmp(pe32.szExeFile, "Dolphin.exe") == 0) // if dolphin was found
 		{
+			emuhandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_QUERY_INFORMATION, FALSE, pe32.th32ProcessID);
+			break;
+		}
+		if(strcmp(pe32.szExeFile, "duckstation-qt-x64-ReleaseLTCG.exe") == 0) // if DuckStation was found
+		{
+			isPS1handle = 1;
 			emuhandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_QUERY_INFORMATION, FALSE, pe32.th32ProcessID);
 			break;
 		}
@@ -93,13 +105,21 @@ uint8_t MEM_FindRamOffset(void)
 	{
 		gamecube_ptr = info.BaseAddress + info.RegionSize; // update address to next region of memory for loop
 
-		if (info.RegionSize == 0x2000000 && info.Type == MEM_MAPPED) { // check if the mapped memory region is the size of the maximum gamecube ram address
+		uint32_t emuRegionSize = 0x2000000;
+		if (isPS1handle == 1){
+			emuRegionSize = 0x200000;
+		}
+
+		// if (info.RegionSize == 0x2000000 && info.Type == MEM_MAPPED) { // check if the mapped memory region is the size of the maximum gamecube ram address
+		if (info.RegionSize == emuRegionSize && info.Type == MEM_MAPPED) { // check if the mapped memory region is the size of the maximum gamecube ram address
 			PSAPI_WORKING_SET_EX_INFORMATION wsinfo;
 			wsinfo.VirtualAddress = info.BaseAddress;
 
 			if (QueryWorkingSetEx(emuhandle, &wsinfo, sizeof(wsinfo))) { // query extended info about the memory page at the current virtual address space
 				if (wsinfo.VirtualAttributes.Valid) { // check if the address space is valid
 					memcpy(&emuoffset, &(info.BaseAddress), sizeof(info.BaseAddress)); // copy the base address location to our emuoffset pointer
+
+					// if (MEM_ReadUInt(0x80000000) == 0x30000000U) // quick dirty check
 					return (emuoffset != 0x0);
 				}
 			}
@@ -249,4 +269,38 @@ void ARAM_WriteFloat(const uint32_t addr, float value)
 	MEM_ByteSwap32((uint32_t *)&value); // byteswap
 	// ARAM offset = 0x02000000
 	WriteProcessMemory(emuhandle, (LPVOID)(emuoffset + aramoffset + (addr - 0x7E000000)), &value, sizeof(value), NULL);
+}
+
+uint32_t PS1_MEM_ReadWord(const uint32_t addr)
+{
+	if(!emuoffset || PS1NOTWITHINMEMRANGE(addr))
+		return;
+	uint32_t output;
+	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &output, sizeof(output), NULL);
+	MEM_ByteSwap32(&output); // byteswap
+	return output;
+}
+
+uint16_t PS1_MEM_ReadHalfword(const uint32_t addr)
+{
+	if(!emuoffset || PS1NOTWITHINMEMRANGE(addr))
+		return;
+	// read only 2 bytes
+	uint16_t output;
+	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &output, sizeof(output), NULL);
+	return output;
+}
+
+void PS1_MEM_WriteWord(const uint32_t addr, uint32_t value)
+{
+	if(!emuoffset || PS1NOTWITHINMEMRANGE(addr))
+		return;
+	WriteProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &value, sizeof(value), NULL);
+}
+
+void PS1_MEM_WriteHalfword(const uint32_t addr, uint16_t value)
+{
+	if(!emuoffset || PS1NOTWITHINMEMRANGE(addr))
+		return;
+	WriteProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &value, sizeof(value), NULL);
 }

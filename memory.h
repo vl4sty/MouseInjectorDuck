@@ -21,6 +21,8 @@
 #define WITHINMEMRANGE(X) (!NOTWITHINMEMRANGE(X)) // if X is within GC memory range
 #define NOTWITHINARAMRANGE(X) (X < 0x7E000000 || X > 0x7EFFFFFF)
 #define WITHINARAMRANGE(X) (!NOTWITHINARAMRANGE(X))
+#define PS1WITHINMEMRANGE(X) (!PS1NOTWITHINMEMRANGE(X))
+#define PS1NOTWITHINMEMRANGE(X) (X < 0x0 || X > 0x1FFFFF)
 
 extern uint8_t MEM_Init(void);
 extern void MEM_Quit(void);
@@ -37,3 +39,8 @@ extern uint32_t ARAM_ReadUInt(const uint32_t addr);
 extern float ARAM_ReadFloat(const uint32_t addr);
 extern void ARAM_WriteUInt(const uint32_t addr, uint32_t value);
 extern void ARAM_WriteFloat(const uint32_t addr, float value);
+
+extern uint32_t PS1_MEM_ReadWord(const uint32_t addr);
+extern uint16_t PS1_MEM_ReadHalfword(const uint32_t addr);
+extern void PS1_MEM_WriteHalfword(const uint32_t addr, uint16_t value);
+extern void PS1_MEM_WriteWord(const uint32_t addr, uint32_t value);
