@@ -274,7 +274,7 @@ void ARAM_WriteFloat(const uint32_t addr, float value)
 uint32_t PS1_MEM_ReadWord(const uint32_t addr)
 {
 	if(!emuoffset || PS1NOTWITHINMEMRANGE(addr))
-		return;
+		return 0;
 	uint32_t output;
 	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &output, sizeof(output), NULL);
 	MEM_ByteSwap32(&output); // byteswap
@@ -284,7 +284,7 @@ uint32_t PS1_MEM_ReadWord(const uint32_t addr)
 uint16_t PS1_MEM_ReadHalfword(const uint32_t addr)
 {
 	if(!emuoffset || PS1NOTWITHINMEMRANGE(addr))
-		return;
+		return 0;
 	// read only 2 bytes
 	uint16_t output;
 	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &output, sizeof(output), NULL);

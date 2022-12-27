@@ -53,9 +53,9 @@ static void INI_Save(const uint8_t showerror);
 int32_t main(void)
 {
 	GUI_Init();
-	if(!MEM_Init()) // close if dolphin was not detected
+	if(!MEM_Init()) // close if dolphin or duckstation was not detected
 	{
-		printf("\n Mouse Injector for %s %s\n%s\n\n   Dolphin not detected. Closing...", DOLPHINVERSION, BUILDINFO, LINE);
+		printf("\n Mouse Injector for %s %s\n%s\n\n   Dolphin or DuckStation not detected. Closing...", DOLPHINVERSION, BUILDINFO, LINE);
 		Sleep(3000);
 		return 0;
 	}
