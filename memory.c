@@ -45,10 +45,14 @@ float ARAM_ReadFloat(const uint32_t addr);
 void ARAM_WriteUInt(const uint32_t addr, uint32_t value);
 void ARAM_WriteFloat(const uint32_t addr, float value);
 
+uint32_t PS1_MEM_ReadPointer(const uint32_t addr);
 uint32_t PS1_MEM_ReadWord(const uint32_t addr);
 uint16_t PS1_MEM_ReadHalfword(const uint32_t addr);
+uint8_t PS1_MEM_ReadByte(const uint32_t addr);
 void PS1_MEM_WriteWord(const uint32_t addr, uint32_t value);
 void PS1_MEM_WriteHalfword(const uint32_t addr, uint16_t value);
+void PS1_MEM_WriteByte(const uint32_t addr, uint8_t value);
+// static void MEM_ByteSwap16(uint16_t *input);
 
 //==========================================================================
 // Purpose: initialize dolphin handle and setup for memory injection
@@ -271,6 +275,16 @@ void ARAM_WriteFloat(const uint32_t addr, float value)
 	WriteProcessMemory(emuhandle, (LPVOID)(emuoffset + aramoffset + (addr - 0x7E000000)), &value, sizeof(value), NULL);
 }
 
+uint32_t PS1_MEM_ReadPointer(const uint32_t addr)
+{
+	// assumes the address of a ps1 pointer in the form 0x80BBAAAA - BB = Bank, AAAA = Address in bank
+	if(!emuoffset || PS1NOTWITHINMEMRANGE(addr))
+		return 0;
+	uint32_t output;
+	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &output, sizeof(output), NULL);
+	return (output - 0x80000000); // return address minus the 0x8 on the front
+}
+
 uint32_t PS1_MEM_ReadWord(const uint32_t addr)
 {
 	if(!emuoffset || PS1NOTWITHINMEMRANGE(addr))
@@ -291,6 +305,15 @@ uint16_t PS1_MEM_ReadHalfword(const uint32_t addr)
 	return output;
 }
 
+uint8_t PS1_MEM_ReadByte(const uint32_t addr)
+{
+	if(!emuoffset || PS1NOTWITHINMEMRANGE(addr))
+		return 0;
+	uint8_t output;
+	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &output, sizeof(output), NULL);
+	return output;
+}
+
 void PS1_MEM_WriteWord(const uint32_t addr, uint32_t value)
 {
 	if(!emuoffset || PS1NOTWITHINMEMRANGE(addr))
@@ -299,6 +322,13 @@ void PS1_MEM_WriteWord(const uint32_t addr, uint32_t value)
 }
 
 void PS1_MEM_WriteHalfword(const uint32_t addr, uint16_t value)
+{
+	if(!emuoffset || PS1NOTWITHINMEMRANGE(addr))
+		return;
+	WriteProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &value, sizeof(value), NULL);
+}
+
+void PS1_MEM_WriteByte(const uint32_t addr, uint8_t value)
 {
 	if(!emuoffset || PS1NOTWITHINMEMRANGE(addr))
 		return;

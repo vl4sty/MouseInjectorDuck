@@ -18,46 +18,48 @@
 // along with this program; if not, visit http://www.gnu.org/licenses/gpl-2.0.html
 //==========================================================================
 #include <stdint.h>
+#include <stdio.h>
 #include "../main.h"
 #include "../memory.h"
 #include "../mouse.h"
 #include "game.h"
 
-#define MIBC_camx 0x000EFF32
-#define MIBC_camy 0x00EFFBC
-#define MIBC_lookahead 0x000EFFB8
-#define MIBC_playerbase 0x000EF9F0
-#define MIBC_playerbase_sanity 0x000008E5 // stable value at playerbase
+// OFFSET addresses, requires cam_base to use
+#define TENKA_camx_offset 0x00176AAA - 0x00176A84
+#define TENKA_camy_offset 0x00176B50 - 0x00176A84
+// STATIC addresses
+#define TENKA_cam_base 0x000565F4
+#define TENKA_cam_sanity 0x000565A0
+#define TENKA_controlsbyte 0x00019EFC // 1 byte, first half of controller button pressed bit flags (0000 0000) ([] X O ^ R1 L1 R2 L2)
 
-static uint8_t PS1_MIBC_Status(void);
-static uint8_t PS1_MIBC_DetectPlayer(void);
-static void PS1_MIBC_Inject(void);
+static uint8_t PS1_TENKA_Status(void);
+static uint8_t PS1_TENKA_CameraExists(void);
+static void PS1_TENKA_Inject(void);
 
 static const GAMEDRIVER GAMEDRIVER_INTERFACE =
 {
-	"PS1 Men in Black - The Series - Crashdown",
-	PS1_MIBC_Status,
-	PS1_MIBC_Inject,
+	"PS1 Codename: Tenka",
+	PS1_TENKA_Status,
+	PS1_TENKA_Inject,
 	1, // 1000 Hz tickrate
 	0 // crosshair sway supported for driver
 };
 
-const GAMEDRIVER *GAME_PS1_MENINBLACKCRASHDOWN = &GAMEDRIVER_INTERFACE;
+const GAMEDRIVER *GAME_PS1_CODENAMETENKA = &GAMEDRIVER_INTERFACE;
 
 //==========================================================================
 // Purpose: return 1 if game is detected
 //==========================================================================
-static uint8_t PS1_MIBC_Status(void)
+static uint8_t PS1_TENKA_Status(void)
 {
-	return (PS1_MEM_ReadWord(0x9304) == 0x534C5553U && PS1_MEM_ReadWord(0x9308) == 0x5F303133U && PS1_MEM_ReadWord(0x930C) == 0x2E38373BU); // SLUS_013.87;
+	return (PS1_MEM_ReadWord(0x925C) == 0x53435553U && PS1_MEM_ReadWord(0x9260) == 0x5F393434U && PS1_MEM_ReadWord(0x9264) == 0x2E30393BU); // SCUS_944.09;
 }
 //==========================================================================
-// Purpose: detects player pointer from stack address
-// Changed Globals: fovbase, playerbase
+// Purpose: determines if there is a camera
 //==========================================================================
-static uint8_t PS1_MIBC_DetectPlayer(void)
+static uint8_t PS1_TENKA_CameraExists(void)
 {
-	if(PS1_MEM_ReadWord(MIBC_playerbase) == MIBC_playerbase_sanity)
+	if(PS1_MEM_ReadWord(TENKA_cam_sanity) == 0xE6001800) // value near static camera pointer that is unchanging while a camera exists
 		return 1;
 
 	return 0;
@@ -65,28 +67,33 @@ static uint8_t PS1_MIBC_DetectPlayer(void)
 //==========================================================================
 // Purpose: calculate mouse look and inject into current game
 //==========================================================================
-static void PS1_MIBC_Inject(void)
+static void PS1_TENKA_Inject(void)
 {
-	if(!PS1_MIBC_DetectPlayer())
+	if(!PS1_TENKA_CameraExists())
 		return;
 
-	// disable look ahead
-	PS1_MEM_WriteWord(MIBC_lookahead, 0);
+	// read in controls byte
+	uint8_t controlflags = PS1_MEM_ReadByte(TENKA_controlsbyte);
+	// set R2 bit always on to strafe
+	controlflags |= 1UL << 1;
+	// toggle strafe always on (R2 would normally need to be held to strafe)
+	PS1_MEM_WriteByte(TENKA_controlsbyte, controlflags);
 
-	// PS1 camx is stored in a Halfword (uint16_t)
-	uint16_t camx = PS1_MEM_ReadHalfword(MIBC_camx);
-	uint16_t camy = PS1_MEM_ReadHalfword(MIBC_camy);
+	const uint32_t cam_base = PS1_MEM_ReadPointer(TENKA_cam_base);
+
+	uint16_t camx = PS1_MEM_ReadHalfword(cam_base + TENKA_camx_offset);
+	uint16_t camy = PS1_MEM_ReadHalfword(cam_base + TENKA_camy_offset);
 
 	const float looksensitivity = (float)sensitivity / 40.f;
 
-	camx += (float)xmouse * looksensitivity;
-	while(camx >= 4096)
-		camx -= 4096;
+	camx -= (float)xmouse * looksensitivity;
+	// while(camx >= 4096)
+	// 	camx -= 4096;
 	
-	camy -= (float)ymouse * looksensitivity;
+	camy += (float)ymouse * looksensitivity;
 	// if(camy < 0)
 	// 	camy += 4096;
 
-	PS1_MEM_WriteHalfword(MIBC_camx, (uint16_t)camx);
-	PS1_MEM_WriteHalfword(MIBC_camy, (uint16_t)camy);
+	PS1_MEM_WriteHalfword(cam_base + TENKA_camx_offset, (uint16_t)camx);
+	PS1_MEM_WriteHalfword(cam_base + TENKA_camy_offset, (uint16_t)camy);
 }

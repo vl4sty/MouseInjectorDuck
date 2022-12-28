@@ -26,6 +26,7 @@ Follow the quick start guide in the included readme.txt file
 | Game Title | Input Profile | Mouse Support | Issues |
 | --- | :---: | :---: | ----------- |
 | Men in Black: The Series - Crashdown (NTSC) | :heavy_check_mark: | Good | <sup>None</sub> |
+| Codename: Tenka (NTSC) | :heavy_check_mark: | Fair | <sup>None</sub> |
 
 # ManyMouse
 
