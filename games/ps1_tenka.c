@@ -71,8 +71,6 @@ static void PS1_TENKA_Inject(void)
 {
 	if(!PS1_TENKA_CameraExists())
 		return;
-	if(xmouse == 0 && ymouse == 0) // if mouse is idle
-		return;
 
 	// read in controls byte
 	uint8_t controlflags = PS1_MEM_ReadByte(TENKA_controlsbyte);
@@ -80,6 +78,9 @@ static void PS1_TENKA_Inject(void)
 	controlflags |= 1UL << 1;
 	// toggle strafe always on (R2 would normally need to be held to strafe)
 	PS1_MEM_WriteByte(TENKA_controlsbyte, controlflags);
+
+	if(xmouse == 0 && ymouse == 0) // if mouse is idle
+		return;
 
 	const uint32_t cam_base = PS1_MEM_ReadPointer(TENKA_cam_base);
 
