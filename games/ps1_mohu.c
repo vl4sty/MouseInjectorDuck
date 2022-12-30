@@ -24,16 +24,15 @@
 #include "../mouse.h"
 #include "game.h"
 
-
 //TODO: find fov to make zoomed sniper sens lower
 
-// OFFSET addresses, requires cam_base to use
+// OFFSET addresses, requires a base address to use
 #define MOHU_camx 0x000F116E - 0x000F0BE0
 #define MOHU_camy 0x000F1162 - 0x000F0BE0
 #define MOHU_on_sentry_flag 0x000E6D2E - 0x000E6D20 // 2 = on sentry, 0 = not on sentry?
 #define MOHU_machinegun_camx 0x242
 #define MOHU_machinegun_sanity_address 0xC // -C from machinegun base
-#define MOHU_machinegun_sanity_value 0xE003F900
+#define MOHU_machinegun_sanity_value 0xE003F900 // value expected at offset
 // STATIC addresses
 #define MOHU_playerbase 0x000AA1A8
 #define MOHU_playerbase_sanity 0x14
