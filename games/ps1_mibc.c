@@ -69,6 +69,8 @@ static void PS1_MIBC_Inject(void)
 {
 	if(!PS1_MIBC_DetectPlayer())
 		return;
+	if(xmouse == 0 && ymouse == 0) // if mouse is idle
+		return;
 
 	// disable look ahead
 	PS1_MEM_WriteWord(MIBC_lookahead, 0);

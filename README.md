@@ -4,7 +4,8 @@ A external app that injects cursor input into game memory, with added support fo
 DuckStation support tested and working with version 0.1-5422
 
 # How to Use
-Follow the quick start guide in the included readme.txt file
+Start emulator, Dolphin (Dolphin.exe) or DuckStation (duckstation-qt-x64-ReleaseLTCG.exe)
+Start MouseInjector and follow on screen instructions. PS1 games will not hook until after PS1 startup sequence.
 
 # Supported Dolphin Titles (NTSC Only)
 | Game Title | Input Profile | Mouse Support | Issues |
@@ -23,10 +24,11 @@ Follow the quick start guide in the included readme.txt file
 | Geist | :heavy_check_mark: | Fair | <sup> ** *Requires MMU be disabled for game in Dolphin* ** <br />Camera broken on elevators, truck sentry on motorcycle level broken</sub> |
 
 # Supported DuckStation Titles
-| Game Title | Input Profile | Mouse Support | Issues |
-| --- | :---: | :---: | ----------- |
-| Men in Black: The Series - Crashdown (NTSC) | :heavy_check_mark: | Good | <sup>None</sub> |
-| Codename: Tenka (NTSC) | :heavy_check_mark: | Fair | <sup>None</sub> |
+| Game Title | Mouse Support | Issues |
+| --- | :---: | ----------- |
+| Men in Black: The Series - Crashdown (NTSC) | Good | <sup>None</sub> |
+| Codename: Tenka (NTSC) | Fair | <sup>None</sub> |
+| Medal of Honor: Underground | Fair | <sup>Machine Gun sentry doesn't always work (depends on objects in line of sight)</sub> |
 
 # ManyMouse
 

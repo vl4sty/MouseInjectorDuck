@@ -277,7 +277,8 @@ void ARAM_WriteFloat(const uint32_t addr, float value)
 
 uint32_t PS1_MEM_ReadPointer(const uint32_t addr)
 {
-	// assumes the address of a ps1 pointer in the form 0x80BBAAAA - BB = Bank, AAAA = Address in bank
+	// assumes the address of a ps1 pointer in the form 0x80BbA1A2 - Bb = Bank, A1A2 = Address in bank
+	// PS1 pointer stored in little endian (A2A1Bb80), ReadProcessMemory reads it in reverse resulting in 80BbA1A2
 	if(!emuoffset || PS1NOTWITHINMEMRANGE(addr))
 		return 0;
 	uint32_t output;

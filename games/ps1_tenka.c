@@ -71,6 +71,8 @@ static void PS1_TENKA_Inject(void)
 {
 	if(!PS1_TENKA_CameraExists())
 		return;
+	if(xmouse == 0 && ymouse == 0) // if mouse is idle
+		return;
 
 	// read in controls byte
 	uint8_t controlflags = PS1_MEM_ReadByte(TENKA_controlsbyte);
