@@ -28,7 +28,7 @@ start MouseInjector and follow on screen instructions. PS1 games will not hook u
 | --- | :---: | ----------- |
 | Men in Black: The Series - Crashdown (NTSC) | Good | <sup>None</sub> |
 | Codename: Tenka (NTSC) | Fair | <sup>Strafe/Lean must be set to R2 in-game for strafe to work without holding the button</sub> |
-| Medal of Honor: Underground (NTSC) | Fair | <sup>Machine Gun sentry doesn't always work (depends on objects in line of sight)</sub> |
+| Medal of Honor: Underground (NTSC) | Fair | <sup>Machine Gun sentry doesn't always work (depends on objects in line of sight). Sidecar gun in 6-3 not supported.</sub> |
 
 # ManyMouse
 

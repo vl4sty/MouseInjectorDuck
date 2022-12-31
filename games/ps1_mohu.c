@@ -24,21 +24,27 @@
 #include "../mouse.h"
 #include "game.h"
 
-//TODO: find fov to make zoomed sniper sens lower
+// TODO: check if machinegun sentry cam and hold L2 manual aim use same values, they feel similar and left stick only does up and down just like machinegun
+//	 try freezing fov above 400, the camera moves independent of gun
 
 // OFFSET addresses, requires a base address to use
 #define MOHU_camx 0x000F116E - 0x000F0BE0
 #define MOHU_camy 0x000F1162 - 0x000F0BE0
 #define MOHU_on_sentry_flag 0x000E6D2E - 0x000E6D20 // 2 = on sentry, 0 = not on sentry?
+#define MOHU_fov 0x000DEA58 - 0x000DE5B0
 #define MOHU_machinegun_camx 0x242
 #define MOHU_machinegun_sanity_address 0xC // -C from machinegun base
 #define MOHU_machinegun_sanity_value 0xE003F900 // value expected at offset
+#define MOHU_bikegun_camx 0x000D63A0 - 0x000D6160
+#define MOHU_bikegun_sanity_offset 0x15
+#define MOHU_bikegun_sanity_value 0x42
 // STATIC addresses
 #define MOHU_playerbase 0x000AA1A8
 #define MOHU_playerbase_sanity 0x14
 #define MOHU_rightstick_x 0x000CB840 // 1 byte, 00 left - 80 middle - FF right
 #define MOHU_rightstick_y 0x000CB841 // 1 byte, 00 top - 80 middle - FF bottom
 #define MOHU_machinegunbase 0x001FFDB4
+#define MOHU_bikegunbase 0x000AA388
 
 static uint8_t PS1_MOHU_Status(void);
 static uint8_t PS1_MOHU_DetectPlayer(void);
@@ -97,8 +103,15 @@ static void PS1_MOHU_Inject(void)
 
 	const float looksensitivity = (float)sensitivity / 20.f;
 
-	if (PS1_MEM_ReadByte(playerbase + MOHU_on_sentry_flag)) // on mounted machinegun
-	{
+	// if (PS1_MEM_ReadByte(playerbase + MOHU_bikegun_sanity_offset) == MOHU_bikegun_sanity_value) { // on bike gun
+	// 	uint16_t gunbikebase = PS1_MEM_ReadPointer(MOHU_bikegunbase);
+	// 	uint16_t bg_camx = PS1_MEM_ReadHalfword(gunbikebase + MOHU_bikegun_camx);
+
+	// 	bg_camx += (float)xmouse * looksensitivity;
+
+	// 	PS1_MEM_WriteHalfword(gunbikebase + MOHU_bikegun_camx, (uint16_t)bg_camx);
+	// }
+	if (PS1_MEM_ReadByte(playerbase + MOHU_on_sentry_flag)) { // on mounted machinegun
 		if (machinegunbase == 0)
 		{
 			// return if not a pointer
@@ -133,12 +146,15 @@ static void PS1_MOHU_Inject(void)
 	else { // on foot
 		machinegunbase = 0;
 
+		uint16_t fov = PS1_MEM_ReadHalfword(playerbase + MOHU_fov);
 		uint16_t camx = PS1_MEM_ReadHalfword(playerbase + MOHU_camx);
 		uint16_t camy = PS1_MEM_ReadHalfword(playerbase + MOHU_camy);
 
-		camx += (float)xmouse * looksensitivity;
+		fov /= 400;
 
-		camy -= (float)ymouse * looksensitivity;
+		camx += (float)xmouse * looksensitivity / fov;
+
+		camy -= (float)ymouse * looksensitivity / fov;
 		// clamp camy
 		if (camy > 60000 && camy < 64754)
 			camy = 64754U;
