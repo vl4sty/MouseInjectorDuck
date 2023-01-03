@@ -1,13 +1,30 @@
-# Mouse Injector for Dolphin 5.0 (ANY VERSION) and DuckStation
+# Mouse Injector for Dolphin 5.0, DuckStation, and Mupen64Plus (RetroArch/BizHawk 2.8)
 
-A external app that injects cursor input into game memory, with added support for any version of dolphin, both new and old.
-DuckStation support tested and working with version 0.1-5422
+A external app that injects cursor input into game memory.
+## Supported Emulators
+| Emulator/Frontend | Version | Executable name (case sensitive) |
+| --- | :---: | :---: |
+| Dolphin | 5.0 and up | dolphin.exe |
+| DuckStation | 0.1-5437 | duckstation-qt-x64-ReleaseLTCG.exe |
+| RetroArch (Mupen64Plus-Next core) | 1.14.0 (2.4-Vulkan bc24153)| retroarch.exe |
+| BizHawk (N64, Mupen64Plus) | 2.8 | EmuHawk.exe |
 
-# How to Use
-Start emulator, Dolphin (Dolphin.exe) or DuckStation (duckstation-qt-x64-ReleaseLTCG.exe) then
-start MouseInjector and follow on screen instructions. PS1 games will not hook until after PS1 startup sequence.
+## How to Use
+1. Start emulator first
+2. Start MouseInjector, read initial information then press ctrl+1
+3. Make sure game is running and press '4' to hook into the process
+    1. If game is supported then the mouse will be captured at the position it was at when hooked
+        * You will be <b><u>unable</u></b> to use the mouse elsewhere while it is hooked, press 4 to unhook
+        * Some games depend on post startup values/addresses so hook may not happen immediately
+            * DuckStation games usually will not hook until after the startup sequence
+    2. Unsupported/broken games will not hook and mouse won't be captured
+4. Adjust options with numbers 4-7 while in-game, ctrl+0 will lock the settings
+* NOTE: The cursor still moves but gets moved back to it's initial hook position so windowed mode may not
+work very well if you have also mapped the mouse buttons as you may click off the window. Fullscreen is
+recommended and with dual-monitors it is recommended to put the cursor in the corner before hooking to
+avoid clicking off the window.
 
-# Supported Dolphin Titles (NTSC Only)
+## Supported Dolphin Titles (NTSC Only)
 | Game Title | Input Profile | Mouse Support | Issues |
 | --- | :---: | :---: | ----------- |
 | TimeSplitters 2 | :heavy_check_mark: | Fair | <sup>Camera/sentry modes not supported</sub> |
@@ -23,7 +40,7 @@ start MouseInjector and follow on screen instructions. PS1 games will not hook u
 | Trigger Man | :heavy_check_mark: | Good | <sup>None</sub> |
 | Geist | :heavy_check_mark: | Fair | <sup> ** *Requires MMU be disabled for game in Dolphin* ** <br />Camera broken on elevators, truck sentry on motorcycle level broken</sub> |
 
-# Supported DuckStation Titles
+## Supported DuckStation Titles
 | Game Title | Mouse Support | Issues |
 | --- | :---: | ----------- |
 | Men in Black: The Series - Crashdown (NTSC) | Good | <sup>None</sub> |
@@ -31,7 +48,7 @@ start MouseInjector and follow on screen instructions. PS1 games will not hook u
 | Medal of Honor: Underground (NTSC) | Fair | <sup>Machine Gun sentry doesn't always work (depends on objects in line of sight). Sidecar gun in 6-3 not supported.</sub> |
 | Revolution X (NTSC) | Good | <sup>None</sub> |
 
-# Supported Mupen64Plus(RetroArch)/BizHawk 2.8 Titles
+## Supported Mupen64Plus(RetroArch)/BizHawk 2.8 Titles
 | Game Title | Mouse Support | Issues |
 | --- | :---: | ----------- |
 | GoldenEye: 007 (NTSC) | Fair | <sup>None</sub> |
