@@ -53,7 +53,7 @@ static const GAMEDRIVER GAMEDRIVER_INTERFACE =
 	TM_Status,
 	TM_Inject,
 	1, // 1000 Hz tickrate
-	1 // crosshair sway supported for driver
+	0 // crosshair sway not supported for driver
 };
 
 const GAMEDRIVER *GAME_TRIGGERMAN = &GAMEDRIVER_INTERFACE;

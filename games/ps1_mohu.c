@@ -24,7 +24,8 @@
 #include "../mouse.h"
 #include "game.h"
 
-// TODO: check if machinegun sentry cam and hold L2 manual aim use same values, they feel similar and left stick only does up and down just like machinegun
+// TODO: fix bike gun
+// check if machinegun sentry cam and hold L2 manual aim use same values, they feel similar and left stick only does up and down just like machinegun
 //	 try freezing fov above 400, the camera moves independent of gun
 
 // OFFSET addresses, requires a base address to use
@@ -56,7 +57,7 @@ static const GAMEDRIVER GAMEDRIVER_INTERFACE =
 	PS1_MOHU_Status,
 	PS1_MOHU_Inject,
 	1, // 1000 Hz tickrate
-	0 // crosshair sway supported for driver
+	0 // crosshair sway not supported for driver
 };
 
 const GAMEDRIVER *GAME_PS1_MOHUNDERGROUND = &GAMEDRIVER_INTERFACE;

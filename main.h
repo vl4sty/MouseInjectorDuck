@@ -46,6 +46,12 @@ inline int32_t ClampInt(const int32_t value, const int32_t min, const int32_t ma
 	return test > max ? max : test;
 }
 
+inline uint16_t ClampHalfword(const uint16_t value, const uint16_t min, const uint16_t max)
+{
+	const int16_t test = value < min ? min : value;
+	return test > max ? max : test;
+}
+
 extern uint8_t sensitivity;
 extern uint8_t crosshair;
 extern uint8_t invertpitch;

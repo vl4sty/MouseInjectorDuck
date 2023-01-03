@@ -42,7 +42,7 @@ static const GAMEDRIVER GAMEDRIVER_INTERFACE =
 	PS1_TENKA_Status,
 	PS1_TENKA_Inject,
 	1, // 1000 Hz tickrate
-	0 // crosshair sway supported for driver
+	0 // crosshair sway not supported for driver
 };
 
 const GAMEDRIVER *GAME_PS1_CODENAMETENKA = &GAMEDRIVER_INTERFACE;

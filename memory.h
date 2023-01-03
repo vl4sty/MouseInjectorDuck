@@ -23,6 +23,8 @@
 #define WITHINARAMRANGE(X) (!NOTWITHINARAMRANGE(X))
 #define PS1WITHINMEMRANGE(X) (!PS1NOTWITHINMEMRANGE(X))
 #define PS1NOTWITHINMEMRANGE(X) (X > 0x1FFFFF)
+#define N64NOTWITHINMEMRANGE(X) (X < 0x80000000 || X > 0x807FFFFF)
+#define N64WITHINMEMRANGE(X) (!N64NOTWITHINMEMRANGE(X))
 
 extern uint8_t MEM_Init(void);
 extern void MEM_Quit(void);
@@ -47,3 +49,8 @@ extern uint8_t PS1_MEM_ReadByte(const uint32_t addr);
 extern void PS1_MEM_WriteHalfword(const uint32_t addr, uint16_t value);
 extern void PS1_MEM_WriteWord(const uint32_t addr, uint32_t value);
 extern void PS1_MEM_WriteByte(const uint32_t addr, uint8_t value);
+
+extern uint32_t N64_MEM_ReadUInt(const uint32_t addr);
+extern float N64_MEM_ReadFloat(const uint32_t addr);
+extern void N64_MEM_WriteUInt(const uint32_t addr, uint32_t value);
+extern void N64_MEM_WriteFloat(const uint32_t addr, float value);

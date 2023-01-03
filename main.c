@@ -35,9 +35,11 @@ static uint8_t welcomed = 0;
 uint8_t sensitivity = 20;
 uint8_t crosshair = 3;
 uint8_t invertpitch = 0;
+int isHooked = 0;
 
 int32_t main(void);
 static void quit(void);
+static void GUI_TitleSetHookStatus(int hooked);
 static void GUI_Init(void);
 static void GUI_Welcome(void);
 static void GUI_Interact(void);
@@ -52,6 +54,7 @@ static void INI_Save(const uint8_t showerror);
 //==========================================================================
 int32_t main(void)
 {
+	// TODO: Warn if multiple valid emulators are running
 	GUI_Init();
 	if(!MEM_Init()) // close if dolphin or duckstation was not detected
 	{
@@ -74,19 +77,23 @@ int32_t main(void)
 	while(1)
 	{
 		GUI_Interact(); // check hotkey input
+		int hooked = 0;
 		if(mousetoggle)
 		{
 			if(GAME_Status()) // if supported game has been detected
 			{
 				MOUSE_Update(GAME_Tickrate()); // update xmouse and ymouse vars so injection use latest mouse input
 				GAME_Inject(); // inject mouselook to game
+				hooked = 1;
 			}
 			else // dolphin has no game loaded or game not found, wait 100 ms and try again
 			{
+				hooked = 0;
 				MEM_FindRamOffset();
 				Sleep(100);
 			}
 		}
+		GUI_TitleSetHookStatus(hooked);
 		Sleep(GAME_Tickrate());
 	}
 	return 0;
@@ -99,6 +106,16 @@ static void quit(void)
 	INI_Save(0);
 	MOUSE_Quit();
 	MEM_Quit();
+}
+static void GUI_TitleSetHookStatus(int hooked)
+{
+	if (hooked == isHooked)
+		return;
+	if (hooked)
+		SetConsoleTitle("Mouse Injector | Hooked");
+	else
+		SetConsoleTitle("Mouse Injector | Unhooked");
+	isHooked = hooked;
 }
 //==========================================================================
 // Purpose: initialize console

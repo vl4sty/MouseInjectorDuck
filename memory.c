@@ -17,6 +17,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, visit http://www.gnu.org/licenses/gpl-2.0.html
 //==========================================================================
+#include <stdio.h> // for text file debug output
 #include <stdint.h>
 #include <windows.h>
 #include <tlhelp32.h>
@@ -27,6 +28,8 @@ static uint64_t emuoffset = 0;
 static uint32_t aramoffset = 0x02000000; // REQUIRES that MMU is off
 static HANDLE emuhandle = NULL;
 static int isPS1handle = 0;
+static int isN64handle = 0;
+static int isMupenhandle = 0;
 
 uint8_t MEM_Init(void);
 void MEM_Quit(void);
@@ -54,6 +57,13 @@ void PS1_MEM_WriteHalfword(const uint32_t addr, uint16_t value);
 void PS1_MEM_WriteByte(const uint32_t addr, uint8_t value);
 // static void MEM_ByteSwap16(uint16_t *input);
 
+uint32_t N64_MEM_ReadUInt(const uint32_t addr);
+float N64_MEM_ReadFloat(const uint32_t addr);
+void N64_MEM_WriteFloat(const uint32_t addr, float value);
+void N64_MEM_WriteUInt(const uint32_t addr, uint32_t value);
+
+void printdebug(uint32_t val);
+
 //==========================================================================
 // Purpose: initialize dolphin handle and setup for memory injection
 // Changed Globals: emuhandle
@@ -76,6 +86,33 @@ uint8_t MEM_Init(void)
 		if(strcmp(pe32.szExeFile, "duckstation-qt-x64-ReleaseLTCG.exe") == 0) // if DuckStation was found
 		{
 			isPS1handle = 1;
+			emuhandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_QUERY_INFORMATION, FALSE, pe32.th32ProcessID);
+			break;
+		}
+		if(strcmp(pe32.szExeFile, "EmuHawk.exe") == 0) // if EmuHawk was found, 2.8 oldest tested working - 2.9 not supported
+		{
+			isN64handle = 1;
+			emuhandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_QUERY_INFORMATION, FALSE, pe32.th32ProcessID);
+			break;
+		}
+		if(strcmp(pe32.szExeFile, "RMG.exe") == 0) // if simple64 was found
+		{
+			isN64handle = 1;
+			isMupenhandle = 1;
+			emuhandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_QUERY_INFORMATION, FALSE, pe32.th32ProcessID);
+			break;
+		}
+		if(strcmp(pe32.szExeFile, "simple64-gui.exe") == 0) // if simple64 was found
+		{
+			isN64handle = 1;
+			isMupenhandle = 1;
+			emuhandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_QUERY_INFORMATION, FALSE, pe32.th32ProcessID);
+			break;
+		}
+		if(strcmp(pe32.szExeFile, "retroarch.exe") == 0) // if retroarch was found, for N64 games using Mupen64Plus-Next 2.4-Vulkan core
+		{
+			isN64handle = 1;
+			isMupenhandle = 1;
 			emuhandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_QUERY_INFORMATION, FALSE, pe32.th32ProcessID);
 			break;
 		}
@@ -109,13 +146,24 @@ uint8_t MEM_FindRamOffset(void)
 	{
 		gamecube_ptr = info.BaseAddress + info.RegionSize; // update address to next region of memory for loop
 
-		uint32_t emuRegionSize = 0x2000000;
+		uint32_t emuRegionSize = 0x2000000; // Dolphin
 		if (isPS1handle == 1){
-			emuRegionSize = 0x200000;
+			emuRegionSize = 0x200000; 		// DuckStation
+		} else if (isN64handle == 1) {
+			if (isMupenhandle)
+				emuRegionSize = 0x20011000; // RetroArch(Mupen64Plus core)/simple64/RMG
+			else
+				emuRegionSize = 0x22D0000; 	// BizHawk 2.8 (Mupen64Plus)
 		}
 
-		// if (info.RegionSize == 0x2000000 && info.Type == MEM_MAPPED) { // check if the mapped memory region is the size of the maximum gamecube ram address
-		if (info.RegionSize == emuRegionSize && info.Type == MEM_MAPPED) { // check if the mapped memory region is the size of the maximum gamecube ram address
+		// printdebug(info.Type);
+
+		DWORD regionType = MEM_MAPPED; // Dolphin and DuckStation regions are type MEM_MAPPED
+		if (isN64handle == 1)
+			regionType = MEM_PRIVATE;  // All N64 emulator regions are type MEM_PRIVATE
+
+		// check if region is the size of region where console memory is located
+		if (info.RegionSize == emuRegionSize && (info.Type == regionType || isN64handle)) {
 			PSAPI_WORKING_SET_EX_INFORMATION wsinfo;
 			wsinfo.VirtualAddress = info.BaseAddress;
 
@@ -123,7 +171,22 @@ uint8_t MEM_FindRamOffset(void)
 				if (wsinfo.VirtualAttributes.Valid) { // check if the address space is valid
 					memcpy(&emuoffset, &(info.BaseAddress), sizeof(info.BaseAddress)); // copy the base address location to our emuoffset pointer
 
-					// if (MEM_ReadUInt(0x80000000) == 0x30000000U) // quick dirty check
+
+					if (isN64handle == 1)
+					{
+						if (isMupenhandle) { // RetroArch/simple64/RMG (mupen64plus GUIs)
+							// simple64/RMG/retroarch: determine buffer size before RDRAM as it changes every startup
+							emuoffset += 0x1000;
+							// while (PS1_MEM_ReadWord(0x0) == 0) // look for non-zero bytes at first address to signify the start of RDRAM
+							while (MEM_ReadUInt(0x80000000) == 0) // look for non-zero bytes at first address to signify the start of RDRAM
+								emuoffset += 0x1000; // RDRAM always begins at a multiple 0x1000 away from the initial emuhandle offset
+						}
+						else {
+							// BizHawk has small offset before N64 RDRAM
+							emuoffset += 0x8E0;
+						}
+					}
+
 					return (emuoffset != 0x0);
 				}
 			}
@@ -334,4 +397,51 @@ void PS1_MEM_WriteByte(const uint32_t addr, uint8_t value)
 	if(!emuoffset || PS1NOTWITHINMEMRANGE(addr))
 		return;
 	WriteProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &value, sizeof(value), NULL);
+}
+
+//==========================================================================
+// N64 addresses should not be byteswapped since they are stored little endian in emulator memory
+//==========================================================================
+uint32_t N64_MEM_ReadUInt(const uint32_t addr)
+{
+	if(!emuoffset || N64NOTWITHINMEMRANGE(addr)) // if n64 memory has not been init by emulator or reading from outside of memory range
+		return 0;
+	uint32_t output; // temp var used for output of function
+	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + (addr - 0x80000000)), &output, sizeof(output), NULL);
+	return output;
+}
+
+float N64_MEM_ReadFloat(const uint32_t addr)
+{
+	if(!emuoffset || N64NOTWITHINMEMRANGE(addr)) // if n64 memory has not been init by emulator or reading from outside of memory range
+		return 0;
+	float output; // temp var used for output of function
+	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + (addr - 0x80000000)), &output, sizeof(output), NULL);
+	return output;
+}
+
+void N64_MEM_WriteUInt(const uint32_t addr, uint32_t value)
+{
+	if(!emuoffset || N64NOTWITHINMEMRANGE(addr)) // if n64 memory has not been init by emulator or writing to outside of memory range
+		return;
+	WriteProcessMemory(emuhandle, (LPVOID)(emuoffset + (addr - 0x80000000)), &value, sizeof(value), NULL);
+}
+
+void N64_MEM_WriteFloat(const uint32_t addr, float value)
+{
+	if(!emuoffset || N64NOTWITHINMEMRANGE(addr)) // if n64 memory has not been init by emulator or writing to outside of memory range
+		return;
+	WriteProcessMemory(emuhandle, (LPVOID)(emuoffset + (addr - 0x80000000)), &value, sizeof(value), NULL);
+}
+
+void printdebug(uint32_t val)
+{
+	FILE *fp;
+
+	fp = fopen("test.txt", "w");
+	char output[255];
+	sprintf(output, "%u", val);
+	fprintf(fp, output);
+	
+	fclose(fp);
 }
