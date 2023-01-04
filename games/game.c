@@ -40,6 +40,8 @@ extern const GAMEDRIVER *GAME_PS1_MOHUNDERGROUND;
 extern const GAMEDRIVER *GAME_PS1_REVOLUTIONX;
 extern const GAMEDRIVER *GAME_N64_GOLDENEYE;
 extern const GAMEDRIVER *GAME_N64_SINPUNISHMENT;
+extern const GAMEDRIVER *GAME_SNES_PACMAN2;
+extern const GAMEDRIVER *GAME_SNES_TIMONANDPUMBAA;
 
 static const GAMEDRIVER **GAMELIST[] =
 {
@@ -60,7 +62,9 @@ static const GAMEDRIVER **GAMELIST[] =
 	&GAME_PS1_MOHUNDERGROUND,
 	&GAME_PS1_REVOLUTIONX,
 	&GAME_N64_GOLDENEYE,
-	&GAME_N64_SINPUNISHMENT
+	&GAME_N64_SINPUNISHMENT,
+	&GAME_SNES_PACMAN2,
+	&GAME_SNES_TIMONANDPUMBAA
 };
 
 static const GAMEDRIVER *CURRENT_GAME = NULL;
@@ -105,7 +109,8 @@ const char *GAME_Name(void)
 {
 	if(CURRENT_GAME != NULL)
 		return CURRENT_GAME->Name;
-	return DOLPHINVERSION; // if no driver active, return dolphin name
+	// return DOLPHINVERSION; // if no driver active, return dolphin name
+	return "No game loaded"; // if no driver active, return dolphin name
 }
 //==========================================================================
 // Purpose: return game driver's required tickrate

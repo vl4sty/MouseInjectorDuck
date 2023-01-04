@@ -30,6 +30,9 @@ static HANDLE emuhandle = NULL;
 static int isPS1handle = 0;
 static int isN64handle = 0;
 static int isMupenhandle = 0;
+static int isBizHawkhandle = 0;
+static int isBSNEShandle = 0;
+char hookedEmulatorName[80];
 
 uint8_t MEM_Init(void);
 void MEM_Quit(void);
@@ -62,6 +65,9 @@ float N64_MEM_ReadFloat(const uint32_t addr);
 void N64_MEM_WriteFloat(const uint32_t addr, float value);
 void N64_MEM_WriteUInt(const uint32_t addr, uint32_t value);
 
+uint16_t SNES_MEM_ReadWord(const uint32_t addr);
+void SNES_MEM_WriteWord(const uint32_t addr, uint16_t value);
+
 void printdebug(uint32_t val);
 
 //==========================================================================
@@ -80,23 +86,28 @@ uint8_t MEM_Init(void)
 	{
 		if(strcmp(pe32.szExeFile, "Dolphin.exe") == 0) // if dolphin was found
 		{
+			strcpy(hookedEmulatorName, "Dolphin");
 			emuhandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_QUERY_INFORMATION, FALSE, pe32.th32ProcessID);
 			break;
 		}
 		if(strcmp(pe32.szExeFile, "duckstation-qt-x64-ReleaseLTCG.exe") == 0) // if DuckStation was found
 		{
+			strcpy(hookedEmulatorName, "DuckStation");
 			isPS1handle = 1;
 			emuhandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_QUERY_INFORMATION, FALSE, pe32.th32ProcessID);
 			break;
 		}
 		if(strcmp(pe32.szExeFile, "EmuHawk.exe") == 0) // if EmuHawk was found, 2.8 oldest tested working - 2.9 not supported
 		{
+			strcpy(hookedEmulatorName, "BizHawk N64");
 			isN64handle = 1;
+			isBizHawkhandle = 1;
 			emuhandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_QUERY_INFORMATION, FALSE, pe32.th32ProcessID);
 			break;
 		}
 		if(strcmp(pe32.szExeFile, "RMG.exe") == 0) // if simple64 was found
 		{
+			strcpy(hookedEmulatorName, "Rosalie's Mupen GUI");
 			isN64handle = 1;
 			isMupenhandle = 1;
 			emuhandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_QUERY_INFORMATION, FALSE, pe32.th32ProcessID);
@@ -104,15 +115,24 @@ uint8_t MEM_Init(void)
 		}
 		if(strcmp(pe32.szExeFile, "simple64-gui.exe") == 0) // if simple64 was found
 		{
+			strcpy(hookedEmulatorName, "simple64");
 			isN64handle = 1;
 			isMupenhandle = 1;
 			emuhandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_QUERY_INFORMATION, FALSE, pe32.th32ProcessID);
 			break;
 		}
-		if(strcmp(pe32.szExeFile, "retroarch.exe") == 0) // if retroarch was found, for N64 games using Mupen64Plus-Next 2.4-Vulkan core
+		if(strcmp(pe32.szExeFile, "retroarch.exe") == 0) // if retroarch was found, for N64 games using Mupen64Plus-Next
 		{
+			strcpy(hookedEmulatorName, "RetroArch Mupen64Plus-Next");
 			isN64handle = 1;
 			isMupenhandle = 1;
+			emuhandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_QUERY_INFORMATION, FALSE, pe32.th32ProcessID);
+			break;
+		}
+		if(strcmp(pe32.szExeFile, "bsnes.exe") == 0) // if retroarch was found, for N64 games using Mupen64Plus-Next
+		{
+			strcpy(hookedEmulatorName, "BSNES");
+			isBSNEShandle = 1;
 			emuhandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_QUERY_INFORMATION, FALSE, pe32.th32ProcessID);
 			break;
 		}
@@ -146,6 +166,7 @@ uint8_t MEM_FindRamOffset(void)
 	{
 		gamecube_ptr = info.BaseAddress + info.RegionSize; // update address to next region of memory for loop
 
+		// set region size to look for based on the emulator detected
 		uint32_t emuRegionSize = 0x2000000; // Dolphin
 		if (isPS1handle == 1){
 			emuRegionSize = 0x200000; 		// DuckStation
@@ -154,23 +175,26 @@ uint8_t MEM_FindRamOffset(void)
 				emuRegionSize = 0x20011000; // RetroArch(Mupen64Plus core)/simple64/RMG
 			else
 				emuRegionSize = 0x22D0000; 	// BizHawk 2.8 (Mupen64Plus)
+		} else if (isBSNEShandle = 1) {
+			emuRegionSize = 0x34000;
 		}
-
-		// printdebug(info.Type);
 
 		DWORD regionType = MEM_MAPPED; // Dolphin and DuckStation regions are type MEM_MAPPED
 		if (isN64handle == 1)
 			regionType = MEM_PRIVATE;  // All N64 emulator regions are type MEM_PRIVATE
+		if (isBSNEShandle == 1)
+			regionType = MEM_IMAGE;
 
 		// check if region is the size of region where console memory is located
-		if (info.RegionSize == emuRegionSize && (info.Type == regionType || isN64handle)) {
+		if (info.RegionSize == emuRegionSize && (info.Type == regionType || isN64handle)) { // why '|| isN64handle'? one N64 emulator is not MEM_PRIVATE?
+		// if (info.RegionSize == emuRegionSize) {
+			// printdebug(info.Type); // debug
 			PSAPI_WORKING_SET_EX_INFORMATION wsinfo;
 			wsinfo.VirtualAddress = info.BaseAddress;
 
 			if (QueryWorkingSetEx(emuhandle, &wsinfo, sizeof(wsinfo))) { // query extended info about the memory page at the current virtual address space
 				if (wsinfo.VirtualAttributes.Valid) { // check if the address space is valid
 					memcpy(&emuoffset, &(info.BaseAddress), sizeof(info.BaseAddress)); // copy the base address location to our emuoffset pointer
-
 
 					if (isN64handle == 1)
 					{
@@ -185,6 +209,8 @@ uint8_t MEM_FindRamOffset(void)
 							// BizHawk has small offset before N64 RDRAM
 							emuoffset += 0x8E0;
 						}
+					} else if (isBSNEShandle == 1) {
+						emuoffset += 0x2D7C; // WRAM always here? 0xB14000 + 0x2D7C, but region size is not fixed
 					}
 
 					return (emuoffset != 0x0);
@@ -432,6 +458,22 @@ void N64_MEM_WriteFloat(const uint32_t addr, float value)
 	if(!emuoffset || N64NOTWITHINMEMRANGE(addr)) // if n64 memory has not been init by emulator or writing to outside of memory range
 		return;
 	WriteProcessMemory(emuhandle, (LPVOID)(emuoffset + (addr - 0x80000000)), &value, sizeof(value), NULL);
+}
+
+uint16_t SNES_MEM_ReadWord(const uint32_t addr) // 16bit word
+{
+	if(!emuoffset || SNESNOTWITHINMEMRANGE(addr)) // if snes memory has not been init by emulator or reading from outside of memory range
+		return 0;
+	uint16_t output; // temp var used for output of function
+	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &output, sizeof(output), NULL);
+	return output;
+}
+
+void SNES_MEM_WriteWord(const uint32_t addr, uint16_t value) // 16bit word
+{
+	if(!emuoffset || SNESNOTWITHINMEMRANGE(addr)) // if snes memory has not been init by emulator or writing to outside of memory range
+		return;
+	WriteProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &value, sizeof(value), NULL);
 }
 
 void printdebug(uint32_t val)

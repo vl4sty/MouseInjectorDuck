@@ -39,7 +39,7 @@ int isHooked = 0;
 
 int32_t main(void);
 static void quit(void);
-static void GUI_TitleSetHookStatus(int hooked);
+static void GUI_TitleShowHookStatus(int hooked);
 static void GUI_Init(void);
 static void GUI_Welcome(void);
 static void GUI_Interact(void);
@@ -55,6 +55,7 @@ static void INI_Save(const uint8_t showerror);
 int32_t main(void)
 {
 	// TODO: Warn if multiple valid emulators are running
+	// Hide mouse when hooked to emulator and supported game is running
 	GUI_Init();
 	if(!MEM_Init()) // close if dolphin or duckstation was not detected
 	{
@@ -74,6 +75,7 @@ int32_t main(void)
 		GUI_Welcome(); // show welcome message - wait for user input before continuing
 	GUI_Update(); // update screen with options
 	atexit(quit); // set function to run when program is closed
+	int initialHookOccurred = 0;
 	while(1)
 	{
 		GUI_Interact(); // check hotkey input
@@ -84,17 +86,23 @@ int32_t main(void)
 			{
 				MOUSE_Update(GAME_Tickrate()); // update xmouse and ymouse vars so injection use latest mouse input
 				GAME_Inject(); // inject mouselook to game
+				if (initialHookOccurred == 0) // update GUI on initial hook
+				{
+					GUI_Update();
+					initialHookOccurred = 1;
+				}
 				hooked = 1;
 			}
 			else // dolphin has no game loaded or game not found, wait 100 ms and try again
 			{
 				hooked = 0;
+				initialHookOccurred = 0;
 				MEM_FindRamOffset();
 				Sleep(100);
 			}
 		}
-		GUI_TitleSetHookStatus(hooked);
 		Sleep(GAME_Tickrate());
+		GUI_TitleShowHookStatus(hooked);
 	}
 	return 0;
 }
@@ -107,7 +115,11 @@ static void quit(void)
 	MOUSE_Quit();
 	MEM_Quit();
 }
-static void GUI_TitleSetHookStatus(int hooked)
+//==========================================================================
+// Purpose: display in the title whether an emulator is hooked and
+//			supported game is running
+//==========================================================================
+static void GUI_TitleShowHookStatus(int hooked)
 {
 	if (hooked == isHooked)
 		return;
@@ -216,7 +228,8 @@ static void GUI_Update(void)
 {
 	GUI_Clear();
 	GAME_Status(); // refresh driver for title
-	printf("\n Mouse Injector for %s %s\n", GAME_Name(), BUILDINFO); // title
+	// printf("\n Mouse Injector for %s %s - %s\n", GAME_Name(), BUILDINFO, hookedEmulatorName); // title
+	printf("\n Mouse Injector for %s - %s\n", hookedEmulatorName, GAME_Name()); // title
 	printf("%s\n\n   Main Menu - Press [#] to Use Menu\n\n\n", LINE);
 	printf(mousetoggle ? "   [4] - [ON] Mouse Injection\n\n" : "   [4] - [OFF] Mouse Injection\n\n");
 	if(!locksettings)

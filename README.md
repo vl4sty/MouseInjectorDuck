@@ -1,4 +1,4 @@
-# Mouse Injector for Dolphin 5.0, DuckStation, and Mupen64Plus (RetroArch/BizHawk 2.8)
+# Mouse Injector for Dolphin 5.0, DuckStation, Mupen64Plus (RetroArch/BizHawk 2.8), BSNES
 
 A external app that injects cursor input into game memory.
 ## Supported Emulators
@@ -8,6 +8,7 @@ A external app that injects cursor input into game memory.
 | DuckStation | 0.1-5437 | duckstation-qt-x64-ReleaseLTCG.exe |
 | RetroArch (Mupen64Plus-Next core) | 1.14.0 (2.4-Vulkan bc24153)| retroarch.exe |
 | BizHawk (N64, Mupen64Plus) | 2.8 | EmuHawk.exe |
+| BSNES | v115 | bsnes.exe |
 
 ## How to Use
 1. Start emulator first
@@ -53,6 +54,13 @@ avoid clicking off the window.
 | --- | :---: | ----------- |
 | GoldenEye: 007 (NTSC) | Fair | <sup>None</sub> |
 | Sin and Punishment (J) | Good | <sup>Not fully tested</sub> |
+
+## Supported BSNES Tiles
+| Game Title | Mouse Support | Issues |
+| --- | :---: | ----------- |
+| Pac-Man 2: The New Adventures | Good | <sup>Not fully tested</sub> |
+| Timon & Pumbaa's Jungle Games | Good | <sup>None</sub> |
+* BSNES TIP: Press F12 to toggle mouse capture and it will hide the cursor.
 
 # ManyMouse
 
