@@ -53,6 +53,7 @@ void ARAM_WriteFloat(const uint32_t addr, float value);
 
 uint32_t PS1_MEM_ReadPointer(const uint32_t addr);
 uint32_t PS1_MEM_ReadWord(const uint32_t addr);
+uint32_t PS1_MEM_ReadUInt(const uint32_t addr);
 uint16_t PS1_MEM_ReadHalfword(const uint32_t addr);
 uint8_t PS1_MEM_ReadByte(const uint32_t addr);
 void PS1_MEM_WriteWord(const uint32_t addr, uint32_t value);
@@ -65,7 +66,9 @@ float N64_MEM_ReadFloat(const uint32_t addr);
 void N64_MEM_WriteFloat(const uint32_t addr, float value);
 void N64_MEM_WriteUInt(const uint32_t addr, uint32_t value);
 
+uint8_t SNES_MEM_ReadByte(const uint32_t addr);
 uint16_t SNES_MEM_ReadWord(const uint32_t addr);
+void SNES_MEM_WriteByte(const uint32_t addr, uint8_t value);
 void SNES_MEM_WriteWord(const uint32_t addr, uint16_t value);
 
 void printdebug(uint32_t val);
@@ -385,6 +388,15 @@ uint32_t PS1_MEM_ReadWord(const uint32_t addr)
 	return output;
 }
 
+uint32_t PS1_MEM_ReadUInt(const uint32_t addr)
+{
+	if(!emuoffset || PS1NOTWITHINMEMRANGE(addr))
+		return 0;
+	uint32_t output;
+	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &output, sizeof(output), NULL);
+	return output;
+}
+
 uint16_t PS1_MEM_ReadHalfword(const uint32_t addr)
 {
 	if(!emuoffset || PS1NOTWITHINMEMRANGE(addr))
@@ -460,6 +472,15 @@ void N64_MEM_WriteFloat(const uint32_t addr, float value)
 	WriteProcessMemory(emuhandle, (LPVOID)(emuoffset + (addr - 0x80000000)), &value, sizeof(value), NULL);
 }
 
+uint8_t SNES_MEM_ReadByte(const uint32_t addr)
+{
+	if(!emuoffset || SNESNOTWITHINMEMRANGE(addr)) // if snes memory has not been init by emulator or reading from outside of memory range
+		return 0;
+	uint8_t output; // temp var used for output of function
+	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &output, sizeof(output), NULL);
+	return output;
+}
+
 uint16_t SNES_MEM_ReadWord(const uint32_t addr) // 16bit word
 {
 	if(!emuoffset || SNESNOTWITHINMEMRANGE(addr)) // if snes memory has not been init by emulator or reading from outside of memory range
@@ -467,6 +488,13 @@ uint16_t SNES_MEM_ReadWord(const uint32_t addr) // 16bit word
 	uint16_t output; // temp var used for output of function
 	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &output, sizeof(output), NULL);
 	return output;
+}
+
+void SNES_MEM_WriteByte(const uint32_t addr, uint8_t value)
+{
+	if(!emuoffset || SNESNOTWITHINMEMRANGE(addr)) // if snes memory has not been init by emulator or writing to outside of memory range
+		return;
+	WriteProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &value, sizeof(value), NULL);
 }
 
 void SNES_MEM_WriteWord(const uint32_t addr, uint16_t value) // 16bit word

@@ -1,0 +1,115 @@
+//===========================================================
+// Mouse Injector for Dolphin
+//==========================================================================
+// Copyright (C) 2019-2020 Carnivorous
+// All rights reserved.
+//
+// Mouse Injector is free software; you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the Free
+// Software Foundation; either version 2 of the License, or (at your option)
+// any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+// or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+// for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, visit http://www.gnu.org/licenses/gpl-2.0.html
+//==========================================================================
+#include <stdint.h>
+#include <stdio.h>
+#include "../main.h"
+#include "../memory.h"
+#include "../mouse.h"
+#include "game.h"
+
+#define TAU 6.2831853f // 0x40C90FDB
+
+#define UT_MISSION1CAMYLOW 0x18
+#define UT_MISSION1CAMYHIGH 0x8C
+// #define UT_MISSION3CAMYLOW 0x18
+#define UT_MISSION3CAMYHIGH 0xC0
+#define UT_MISSION5CAMYHIGH 0xC8
+
+// STATIC addresses
+#define UT_cursorx 0x001AD1 // range: 768-61184
+#define UT_cursory 0x001AD3 // range: 768-52736
+#define UT_screenleft 0x000065
+#define UT_currentlevel 0x00184B // 0=lvl1, 1=lvl2, 2=lvl3, 3=lvl4, 4=lvl5(?), 5=mainmenu
+#define UT_wallaction 0x0000F0
+#define UT_currentsection 0x0000C4 // 0=section 1, 1 = section 2, ...
+
+static uint8_t SNES_UT_Status(void);
+static void SNES_UT_Inject(void);
+
+static const GAMEDRIVER GAMEDRIVER_INTERFACE =
+{
+	"The Untouchables",
+	SNES_UT_Status,
+	SNES_UT_Inject,
+	1, // 1000 Hz tickrate
+	0 // crosshair sway not supported for driver
+};
+
+const GAMEDRIVER *GAME_SNES_UNTOUCHABLES = &GAMEDRIVER_INTERFACE;
+
+//==========================================================================
+// Purpose: return 1 if game is detected
+//==========================================================================
+static uint8_t SNES_UT_Status(void)
+{
+	return (SNES_MEM_ReadWord(0xD0) == 0xBB00 && SNES_MEM_ReadWord(0xD2) == 0x1882);
+}
+//==========================================================================
+// Purpose: calculate mouse look and inject into current game
+//==========================================================================
+static void SNES_UT_Inject(void)
+{
+	if(xmouse == 0 && ymouse == 0) // if mouse is idle
+		return;
+
+	uint16_t currentlevel = SNES_MEM_ReadWord(UT_currentlevel);
+	uint8_t currentsection = SNES_MEM_ReadByte(UT_currentsection);
+
+	// if ((currentlevel != 0) && (currentlevel != 1) && (currentlevel != 2) && (currentlevel != 4))
+	if (currentlevel == 3) // return if in mission 4, no shooting section
+		return;
+
+	if ((currentlevel == 1) && (currentsection != 6)) // return if not at the shooting section of mission 2
+		return;
+
+	if ((currentlevel == 4) && (SNES_MEM_ReadWord(UT_wallaction) != 0xE000)) // return if not peaking out from wall on mission 5
+		return;
+
+	uint16_t camylow = UT_MISSION1CAMYLOW;
+	uint16_t camyhigh = UT_MISSION1CAMYHIGH;
+	if (currentlevel == 0x2)
+		camyhigh = UT_MISSION3CAMYHIGH;
+	else if (currentlevel == 0x4)
+		camyhigh = UT_MISSION5CAMYHIGH;
+
+
+	uint16_t cursorx = SNES_MEM_ReadWord(UT_cursorx);
+	uint16_t cursory = SNES_MEM_ReadWord(UT_cursory);
+	uint16_t lastX = cursorx;
+	uint16_t lastY = cursory;
+
+	const float looksensitivity = (float)sensitivity / 80.f;
+	cursorx += ((float)xmouse + 1) * looksensitivity;
+	cursory += ((float)ymouse + 1) * looksensitivity;
+
+	uint16_t screenleft = SNES_MEM_ReadWord(UT_screenleft);
+	// // prevent wrapping
+
+	if (lastX >= screenleft && lastX < screenleft + 100 && cursorx > screenleft + 200)
+		cursorx = 0.f;
+	if (lastY > 0 && lastY < 80 && cursory > 140)
+		cursory = 0.f;
+
+	cursorx = ClampFloat(cursorx, (float)screenleft, (float)screenleft + 255.f);
+	cursory = ClampFloat(cursory, camylow, camyhigh);
+
+	SNES_MEM_WriteWord(UT_cursorx, (uint16_t)cursorx);
+	SNES_MEM_WriteWord(UT_cursory, (uint16_t)cursory);
+}

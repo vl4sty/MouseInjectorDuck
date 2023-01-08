@@ -48,6 +48,7 @@ avoid clicking off the window.
 | Codename: Tenka (NTSC) | Fair | <sup>Strafe/Lean must be set to R2 in-game for strafe to work without holding the button</sub> |
 | Medal of Honor: Underground (NTSC) | Fair | <sup>Machine Gun sentry doesn't always work (depends on objects in line of sight). Sidecar gun in 6-3 not supported.</sub> |
 | Revolution X (NTSC) | Good | <sup>None</sub> |
+| Armorines: Project S.W.A.R.M. | Fair | <sup>None</sub> |
 
 ## Supported Mupen64Plus(RetroArch)/BizHawk 2.8 Titles
 | Game Title | Mouse Support | Issues |
@@ -60,7 +61,10 @@ avoid clicking off the window.
 | --- | :---: | ----------- |
 | Pac-Man 2: The New Adventures | Good | <sup>Not fully tested</sub> |
 | Timon & Pumbaa's Jungle Games | Good | <sup>None</sub> |
+| The Untouchables | Good | <sup>Crosshair shooting sections only</sub> |
+| R-Type III: The Third Lightning | Good | <sup>Not fully tested</sub> |
 * BSNES TIP: Press F12 to toggle mouse capture and it will hide the cursor.
+* NOTE: At the moment BSNES may unhook after minimizing, menuing, pausing emulation, or loading/saving savestates. Requires restarting BSNES and MouseInjector.
 
 # ManyMouse
 

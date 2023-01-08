@@ -46,6 +46,7 @@ extern void ARAM_WriteFloat(const uint32_t addr, float value);
 
 extern uint32_t PS1_MEM_ReadPointer(const uint32_t addr);
 extern uint32_t PS1_MEM_ReadWord(const uint32_t addr);
+extern uint32_t PS1_MEM_ReadUInt(const uint32_t addr);
 extern uint16_t PS1_MEM_ReadHalfword(const uint32_t addr);
 extern uint8_t PS1_MEM_ReadByte(const uint32_t addr);
 extern void PS1_MEM_WriteHalfword(const uint32_t addr, uint16_t value);
@@ -57,7 +58,9 @@ extern float N64_MEM_ReadFloat(const uint32_t addr);
 extern void N64_MEM_WriteUInt(const uint32_t addr, uint32_t value);
 extern void N64_MEM_WriteFloat(const uint32_t addr, float value);
 
+extern uint8_t SNES_MEM_ReadByte(const uint32_t addr);
 extern uint16_t SNES_MEM_ReadWord(const uint32_t addr);
+extern void SNES_MEM_WriteByte(const uint32_t addr, uint8_t value);
 extern void SNES_MEM_WriteWord(const uint32_t addr, uint16_t value);
 
 extern char hookedEmulatorName[80];
