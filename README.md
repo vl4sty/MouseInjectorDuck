@@ -48,7 +48,7 @@ avoid clicking off the window.
 | Codename: Tenka (NTSC) | Fair | <sup>Strafe/Lean must be set to R2 in-game for strafe to work without holding the button</sub> |
 | Medal of Honor: Underground (NTSC) | Fair | <sup>Machine Gun sentry doesn't always work (depends on objects in line of sight). Sidecar gun in 6-3 not supported.</sub> |
 | Revolution X (NTSC) | Good | <sup>None</sub> |
-| Armorines: Project S.W.A.R.M. | Fair | <sup>None</sub> |
+| Armorines: Project S.W.A.R.M. | Fair | <sup>Not fully tested</sub> |
 
 ## Supported Mupen64Plus(RetroArch)/BizHawk 2.8 Titles
 | Game Title | Mouse Support | Issues |
