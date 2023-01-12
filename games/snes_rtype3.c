@@ -33,14 +33,6 @@
 #define RT3_inMenu 0x000080
 #define RT3_isDead 0x00007E
 
-#define TAP_slingshootercursorx 0x0029A2 // 0-255
-#define TAP_slingshootercursory 0x0029A6 // 0-223
-#define TAP_hubcursorx 0x002A6E // 0-243
-#define TAP_hubcursory 0x002A72 // 0-211
-#define TAP_screen 0x000096 // 0=hub, 3=slingshooter
-#define TAP_screen_hub 0x0
-#define TAP_screen_slingshooter 0x3
-
 static uint8_t SNES_RT3_Status(void);
 static void SNES_RT3_Inject(void);
 
@@ -126,38 +118,16 @@ static void SNES_RT3_Inject(void)
 	}
 
 	if(xmouse == 0 && ymouse == 0) // if mouse is idle
-	{
-		// uint8_t nextFrame = 0;
-		// if (upFrames > 0)
-		// {
-		// 	nextFrame = 129;
-		// 	// SNES_MEM_WriteByte(RT3_animframe, 129);
-		// 	upFrames -= 1;
-		// }
-		// else
-		// {
-		// 	nextFrame = 128;
-		// 	// SNES_MEM_WriteByte(RT3_animframe, 128);
-		// 	upFrames = 0;
-		// }
-
-		// SNES_MEM_WriteByte(RT3_animframe, nextFrame);
 		return;
-	}
 	
 
-	// uint8_t animframe = SNES_MEM_ReadByte(RT3_animframe);
-
-	const float looksensitivity = (float)sensitivity / 60.f;
-
+	const float looksensitivity = (float)sensitivity / 30.f;
 	uint8_t shipx = SNES_MEM_ReadByte(RT3_shipx);
 	uint8_t shipy = SNES_MEM_ReadByte(RT3_shipy);
 	shipx = (float)shipx;
 	shipy = (float)shipy;
 
 	// count how many frames you've been doing in one direction
-
-	// SNES_MEM_WriteByte(RT3_animframe, 128);
 	if (ymouse < 0 && lastY > shipy)
 	{
 		downFrames = 0;
@@ -189,17 +159,6 @@ static void SNES_RT3_Inject(void)
 
 	lastX = shipx;
 	lastY = shipy;
-
-	// shipx += ((float)xmouse + 1) * looksensitivity;
-	// shipy += ((float)ymouse + 1) * looksensitivity;
-
-	// float diff = 0;
-	// diff = ((float) xmouse + 1) * looksensitivity;
-	// diff = ClampFloat(diff, -MAXDIFF, MAXDIFF);
-	// shipx += diff;
-	// diff = ((float) ymouse + 1) * looksensitivity;
-	// diff = ClampFloat(diff, -MAXDIFF, MAXDIFF);
-	// shipy += diff;
 
 	int8_t diff = 0;
 	diff = xmouse * looksensitivity;

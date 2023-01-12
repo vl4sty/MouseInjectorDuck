@@ -27,6 +27,8 @@
 #define N64WITHINMEMRANGE(X) (!N64NOTWITHINMEMRANGE(X))
 #define SNESNOTWITHINMEMRANGE(X) (X > 0x1FFFF)
 #define SNESWITHINMEMRANGE(X) (!SNESNOTWITHINMEMRANGE(X))
+#define PS2NOTWITHINMEMRANGE(X) (X > 0x1FFFFFF)
+#define PS2WITHINMEMRANGE(X) (!PS2NOTWITHINMEMRANGE(X))
 
 extern uint8_t MEM_Init(void);
 extern void MEM_Quit(void);
@@ -62,5 +64,10 @@ extern uint8_t SNES_MEM_ReadByte(const uint32_t addr);
 extern uint16_t SNES_MEM_ReadWord(const uint32_t addr);
 extern void SNES_MEM_WriteByte(const uint32_t addr, uint8_t value);
 extern void SNES_MEM_WriteWord(const uint32_t addr, uint16_t value);
+
+extern uint32_t PS2_MEM_ReadPointer(const uint32_t addr);
+extern uint32_t PS2_MEM_ReadUInt(const uint32_t addr);
+extern float PS2_MEM_ReadFloat(const uint32_t addr);
+extern void PS2_MEM_WriteFloat(const uint32_t addr, float value);
 
 extern char hookedEmulatorName[80];

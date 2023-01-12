@@ -32,6 +32,7 @@ static int isN64handle = 0;
 static int isMupenhandle = 0;
 static int isBizHawkhandle = 0;
 static int isBSNEShandle = 0;
+static int isPcsx2handle = 0;
 char hookedEmulatorName[80];
 
 uint8_t MEM_Init(void);
@@ -70,6 +71,11 @@ uint8_t SNES_MEM_ReadByte(const uint32_t addr);
 uint16_t SNES_MEM_ReadWord(const uint32_t addr);
 void SNES_MEM_WriteByte(const uint32_t addr, uint8_t value);
 void SNES_MEM_WriteWord(const uint32_t addr, uint16_t value);
+
+uint32_t PS2_MEM_ReadPointer(const uint32_t addr);
+uint32_t PS2_MEM_ReadUInt(const uint32_t addr);
+float PS2_MEM_ReadFloat(const uint32_t addr);
+void PS2_MEM_WriteFloat(const uint32_t addr, float value);
 
 void printdebug(uint32_t val);
 
@@ -132,10 +138,17 @@ uint8_t MEM_Init(void)
 			emuhandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_QUERY_INFORMATION, FALSE, pe32.th32ProcessID);
 			break;
 		}
-		if(strcmp(pe32.szExeFile, "bsnes.exe") == 0) // if retroarch was found, for N64 games using Mupen64Plus-Next
+		if(strcmp(pe32.szExeFile, "bsnes.exe") == 0) // if BSNES was found
 		{
 			strcpy(hookedEmulatorName, "BSNES");
 			isBSNEShandle = 1;
+			emuhandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_QUERY_INFORMATION, FALSE, pe32.th32ProcessID);
+			break;
+		}
+		if(strcmp(pe32.szExeFile, "pcsx2-qtx64-avx2.exe") == 0) // if pcsx2 was found
+		{
+			strcpy(hookedEmulatorName, "pcsx2-qtx64-avx2");
+			isPcsx2handle = 1;
 			emuhandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_QUERY_INFORMATION, FALSE, pe32.th32ProcessID);
 			break;
 		}
@@ -165,6 +178,11 @@ uint8_t MEM_FindRamOffset(void)
 
 	PVOID gamecube_ptr = NULL;
 
+	uint32_t lastRegionSize = 0;
+	uint32_t lastlastRegionSize = 0;
+	uint32_t lastlastlastRegionSize = 0;
+	uint32_t lastlastlastlastRegionSize = 0;
+
 	while (VirtualQueryEx(emuhandle, gamecube_ptr, &info, sizeof(info))) // loop continues until we reach the last possible memory region
 	{
 		gamecube_ptr = info.BaseAddress + info.RegionSize; // update address to next region of memory for loop
@@ -178,8 +196,15 @@ uint8_t MEM_FindRamOffset(void)
 				emuRegionSize = 0x20011000; // RetroArch(Mupen64Plus core)/simple64/RMG
 			else
 				emuRegionSize = 0x22D0000; 	// BizHawk 2.8 (Mupen64Plus)
-		} else if (isBSNEShandle = 1) {
+		} else if (isBSNEShandle == 1) {
 			emuRegionSize = 0x34000;
+		} else if (isPcsx2handle == 1) {
+			// emuRegionSize = 0x80000;
+			emuRegionSize = 0x1000;
+			// emuRegionSize = 0xE000;
+			// emuRegionSize = 0x97000;
+			// emuRegionSize = 0x3AA000;
+			// emuRegionSize = 0xF004000;
 		}
 
 		DWORD regionType = MEM_MAPPED; // Dolphin and DuckStation regions are type MEM_MAPPED
@@ -187,9 +212,19 @@ uint8_t MEM_FindRamOffset(void)
 			regionType = MEM_PRIVATE;  // All N64 emulator regions are type MEM_PRIVATE
 		if (isBSNEShandle == 1)
 			regionType = MEM_IMAGE;
+		if (isPcsx2handle == 1)
+		{
+			// regionType = MEM_IMAGE;
+			// regionType = MEM_PRIVATE;
+			regionType = MEM_MAPPED;
+		}
 
 		// check if region is the size of region where console memory is located
-		if (info.RegionSize == emuRegionSize && (info.Type == regionType || isN64handle)) { // why '|| isN64handle'? one N64 emulator is not MEM_PRIVATE?
+		uint8_t regionFound = 0;
+		if (info.RegionSize == emuRegionSize && ((info.Type == regionType) || isN64handle))
+			regionFound = 1;
+
+		if (regionFound == 1) { // why '|| isN64handle'? one N64 emulator is not MEM_PRIVATE?
 		// if (info.RegionSize == emuRegionSize) {
 			// printdebug(info.Type); // debug
 			PSAPI_WORKING_SET_EX_INFORMATION wsinfo;
@@ -214,12 +249,78 @@ uint8_t MEM_FindRamOffset(void)
 						}
 					} else if (isBSNEShandle == 1) {
 						emuoffset += 0x2D7C; // WRAM always here? 0xB14000 + 0x2D7C, but region size is not fixed
+					} else if (isPcsx2handle == 1) {
+						// emuoffset += 0x881000 + 0x1000 + 0xE000;
+						// emuoffset += 0x881000 + 0x1000 + 0xE000;
+						// emuoffset += 0x46F000;
+						// emuoffset -= 0x2000000U;
+						// emuoffset += 0x885000;
+						// emuoffset += 0x884000;
+						// emuoffset += 0x98000;
+						// if (lastRegionSize != 0x1000)
+						// 	continue;
+						// TODO: check if region before 0x80000 has a size in a range, 0x1000 <= regionsize <= 0xF000
+						if (lastRegionSize != 0x80000 || lastlastRegionSize != 0x1000)
+						// if (lastlastlastlastRegionSize != 0x7000 || lastlastlastRegionSize != 0x80000 || lastlastRegionSize != 0x1000 || lastRegionSize != 0x1000)
+							continue;
+						
+						// emuoffset -= 0x2000U;
 					}
+
+					// printdebug(lastRegionSize); // debug
 
 					return (emuoffset != 0x0);
 				}
 			}
 		}
+
+		// // check if region is the size of region where console memory is located
+		// if (info.RegionSize == emuRegionSize && (info.Type == regionType || isN64handle)) { // why '|| isN64handle'? one N64 emulator is not MEM_PRIVATE?
+		// // if (info.RegionSize == emuRegionSize) {
+		// 	// printdebug(info.Type); // debug
+		// 	PSAPI_WORKING_SET_EX_INFORMATION wsinfo;
+		// 	wsinfo.VirtualAddress = info.BaseAddress;
+
+		// 	if (QueryWorkingSetEx(emuhandle, &wsinfo, sizeof(wsinfo))) { // query extended info about the memory page at the current virtual address space
+		// 		if (wsinfo.VirtualAttributes.Valid) { // check if the address space is valid
+		// 			memcpy(&emuoffset, &(info.BaseAddress), sizeof(info.BaseAddress)); // copy the base address location to our emuoffset pointer
+
+		// 			if (isN64handle == 1)
+		// 			{
+		// 				if (isMupenhandle) { // RetroArch/simple64/RMG (mupen64plus GUIs)
+		// 					// simple64/RMG/retroarch: determine buffer size before RDRAM as it changes every startup
+		// 					emuoffset += 0x1000;
+		// 					// while (PS1_MEM_ReadWord(0x0) == 0) // look for non-zero bytes at first address to signify the start of RDRAM
+		// 					while (MEM_ReadUInt(0x80000000) == 0) // look for non-zero bytes at first address to signify the start of RDRAM
+		// 						emuoffset += 0x1000; // RDRAM always begins at a multiple 0x1000 away from the initial emuhandle offset
+		// 				}
+		// 				else {
+		// 					// BizHawk has small offset before N64 RDRAM
+		// 					emuoffset += 0x8E0;
+		// 				}
+		// 			} else if (isBSNEShandle == 1) {
+		// 				emuoffset += 0x2D7C; // WRAM always here? 0xB14000 + 0x2D7C, but region size is not fixed
+		// 			} else if (isPcsx2handle == 1) {
+		// 				// emuoffset += 0x881000 + 0x1000 + 0xE000;
+		// 				// emuoffset += 0x881000 + 0x1000 + 0xE000;
+		// 				// emuoffset += 0x46F000;
+		// 				// emuoffset -= 0x2000000U;
+		// 				// emuoffset += 0x885000;
+		// 				// emuoffset += 0x884000;
+		// 				emuoffset += 0x98000;
+		// 			}
+
+		// 			// printdebug(emuRegionSize); // debug
+
+		// 			return (emuoffset != 0x0);
+		// 		}
+		// 	}
+		// }
+
+		lastlastlastlastRegionSize = lastlastlastRegionSize;
+		lastlastlastRegionSize = lastlastRegionSize;
+		lastlastRegionSize = lastRegionSize;
+		lastRegionSize = info.RegionSize;
 	}
 }
 //==========================================================================
@@ -502,6 +603,46 @@ void SNES_MEM_WriteWord(const uint32_t addr, uint16_t value) // 16bit word
 	if(!emuoffset || SNESNOTWITHINMEMRANGE(addr)) // if snes memory has not been init by emulator or writing to outside of memory range
 		return;
 	WriteProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &value, sizeof(value), NULL);
+}
+
+uint32_t PS2_MEM_ReadPointer(const uint32_t addr)
+{
+	if(!emuoffset || PS2NOTWITHINMEMRANGE(addr)) // if ps2 memory has not been init by emulator or reading from outside of memory range
+		return 0;
+	uint32_t output; // temp var used for output of function
+	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + (addr - 0x80000)), &output, sizeof(output), NULL);
+	// printdebug(1); // debug
+	// MEM_ByteSwap32(&output); // byteswap
+	return output;
+}
+
+uint32_t PS2_MEM_ReadUInt(const uint32_t addr)
+{
+	if(!emuoffset || PS2NOTWITHINMEMRANGE(addr)) // if ps2 memory has not been init by emulator or reading from outside of memory range
+		return 0;
+	uint32_t output; // temp var used for output of function
+	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + (addr - 0x80000)), &output, sizeof(output), NULL);
+	// printdebug(1); // debug
+	MEM_ByteSwap32(&output); // byteswap
+	return output;
+}
+
+float PS2_MEM_ReadFloat(const uint32_t addr)
+{
+	if(!emuoffset || PS2NOTWITHINMEMRANGE(addr)) // if gamecube memory has not been init by dolphin or reading from outside of memory range
+		return 0;
+	float output; // temp var used for output of function
+	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + (addr - 0x80000)), &output, sizeof(output), NULL);
+	// MEM_ByteSwap32((uint32_t *)&output); // byteswap
+	return output;
+}
+
+void PS2_MEM_WriteFloat(const uint32_t addr, float value)
+{
+	if(!emuoffset || PS2NOTWITHINMEMRANGE(addr)) // if gamecube memory has not been init by dolphin or writing to outside of memory range
+		return;
+	// MEM_ByteSwap32((uint32_t *)&value); // byteswap
+	WriteProcessMemory(emuhandle, (LPVOID)(emuoffset + (addr - 0x80000)), &value, sizeof(value), NULL);
 }
 
 void printdebug(uint32_t val)

@@ -26,20 +26,20 @@ recommended and with dual-monitors it is recommended to put the cursor in the co
 avoid clicking off the window.
 
 ## Supported Dolphin Titles (NTSC Only)
-| Game Title | Input Profile | Mouse Support | Issues |
-| --- | :---: | :---: | ----------- |
-| TimeSplitters 2 | :heavy_check_mark: | Fair | <sup>Camera/sentry modes not supported</sub> |
-| TimeSplitters: Future Perfect | :heavy_check_mark: | Poor | <sup>All non-first person modes are not supported</sub> |
-| 007: NightFire | :heavy_check_mark: | Poor | <sup>Vehicle mode is semi-functional - last level is broken</sub> |
-| Serious Sam: Next Encounter | :heavy_check_mark: | Fair | <sup>Vehicle/submarine interfaces are not supported</sub> |
-| Medal of Honor: Frontline | :heavy_multiplication_x: | Fair | <sup>Minecart level is broken</sub> |
-| Medal of Honor: European Assault | :heavy_multiplication_x: | Good | <sup>None</sub> |
-| Medal of Honor: Rising Sun | :heavy_multiplication_x: | Poor | <sup>Looking down scope while in turret mode is broken</sub> |
-| Metal Arms | :heavy_check_mark: | Good | <sup>Rat driving or rat turret may not work correctly<sup> |
-| Call of Duty 2: Big Red One | :heavy_multiplication_x: | Good | <sup>None</sub> |
-| Die Hard: Vendetta | :heavy_multiplication_x: | Fair | <sup>Sentry mode not supported</sub> |
-| Trigger Man | :heavy_check_mark: | Good | <sup>None</sub> |
-| Geist | :heavy_check_mark: | Fair | <sup> ** *Requires MMU be disabled for game in Dolphin* ** <br />Camera broken on elevators, truck sentry on motorcycle level broken</sub> |
+| Game Title | Mouse Support | Issues |
+| --- | :---: | ----------- |
+| TimeSplitters 2 | Fair | <sup>Camera/sentry modes not supported</sub> |
+| TimeSplitters: Future Perfect | Poor | <sup>All non-first person modes are not supported</sub> |
+| 007: NightFire | Poor | <sup>Vehicle mode is semi-functional - last level is broken</sub> |
+| Serious Sam: Next Encounter | Fair | <sup>Vehicle/submarine interfaces are not supported</sub> |
+| Medal of Honor: Frontline | Fair | <sup>Minecart level is broken</sub> |
+| Medal of Honor: European Assault | Good | <sup>None</sub> |
+| Medal of Honor: Rising Sun | Poor | <sup>Looking down scope while in turret mode is broken</sub> |
+| Metal Arms | Good | <sup>Rat driving or rat turret may not work correctly<sup> |
+| Call of Duty 2: Big Red One | Good | <sup>None</sub> |
+| Die Hard: Vendetta | Fair | <sup>Sentry mode not supported</sub> |
+| Trigger Man | Good | <sup>None</sub> |
+| Geist | Fair | <sup> ** *Requires MMU be disabled for game in Dolphin* ** <br />Camera broken on elevators, truck sentry on motorcycle level broken</sub> |
 
 ## Supported DuckStation Titles
 | Game Title | Mouse Support | Issues |
