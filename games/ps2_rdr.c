@@ -23,8 +23,6 @@
 #include "../mouse.h"
 #include "game.h"
 
-#define TAU 6.2831853f // 0x40C90FDB
-
 #define RDR_camy 0x19B0AEC 
 #define RDR_camx 0x1A25714
 
@@ -34,9 +32,35 @@
 #define RDR_camSanity 0x4F0180BF
 #define RDR_camSanityOffset 0x38
 
-#define RDR_onLevel6MachineGunFlag 0x13E7C48 // may require finding a ptr to the current level as this may not be static, refer to someLevelPointer
-#define RDR_level6MachineGunCamX 0x181E82C
-#define RDR_level6MachineGunCamY 0x181E830
+// #define RDR_onLevel6MachineGunFlag 0x13E7C48 
+// #define RDR_level6MachineGunCamX 0x181E82C
+// #define RDR_level6MachineGunCamY 0x181E830
+
+#define RDR_ch6GatlingX 0x181E82C
+#define RDR_ch6GatlingY 0x181E830
+#define RDR_ch6GatlingSanity 0x50548A01
+#define RDR_ch6GatlingFlag 0x13E7C48 // may require finding a ptr to the current level as this may not be static, refer to someLevelPointer
+
+#define RDR_ch20GatlingX 0x19E17CC
+#define RDR_ch20GatlingY 0x19E17D0
+#define RDR_ch20GatlingSanity 0x4049A901
+#define RDR_ch20GatlingFlag 0x14667A8 
+
+#define RDR_ch21GatlingX 0x1A099FC
+#define RDR_ch21GatlingY 0x1A09A00
+#define RDR_ch21GatlingSanity 0xA03CA601
+#define RDR_ch21GatlingFlag 0x14B1D58 
+#define RDR_ch21Gatling2Flag 0x14B3648
+
+#define RDR_ch22GatlingX 0x165270C
+#define RDR_ch22GatlingY 0x1652710
+#define RDR_ch22GatlingSanity 0x70E77001
+#define RDR_ch22GatlingFlag 0x1381A68
+
+#define RDR_playerDueling 0x73CC88
+#define RDR_duelingBase 0x751330
+#define RDR_duelX 0x2E8
+#define RDR_duelY 0x2E4
 
 #define RDR_camy_base 0x73C170
 #define RDR_cambase 0x7A00CC
@@ -44,30 +68,19 @@
 #define RDR_someLevelPointer 0x55CFF8
 #define RDR_canMoveCameraFlag 0x4F71F0
 
-#define AUF_camy 0x005064D0
-#define AUF_camx 0x005064D4
-#define AUF_car_camx 0x003CD6C0
-#define AUF_car_camy 0x003CD858
-#define AUF_health_lvl2 0x010C1C84
+#define RDR_currentLevel 0x552B68
+#define RDR_ch26rooftopcamx 0x17B8814
+#define RDR_ch26rooftopcamy 0x17C682C
+#define RDR_ch26rooftopCoverAiming 0x17A7D64
 
-#define CAMYPLUS 0.6999999988f // 0x3FAB1DD6
-#define CAMYMINUS -0.9973310232f // 0xBF7F5116
-#define SNIPERCAMYPLUS 1.396263392f
-#define SNIPERCAMYMINUS -0.8726648532f
-// TM ADDRESSES - OFFSET ADDRESSES BELOW (REQUIRES PLAYERBASE TO USE)
-// 6 cameras or angles get cycled through
-#define TM_camx_enum_gap 0x8014E3F4 - 0x8014E244 // gap between each camera 1B0
-#define TM_camy 0x8100D260 - 0x8100B980
-#define TM_sanity 0x8100B982 - 0x8100B980 // value in player object that is always the same
-#define TM_health 0x8100B9BC - 0x8100B980
-#define TM_weaponInstancePointerOffset 0x8100BF88 - 0x8100B980
-#define TM_weaponClassPointerOffset 0x811C3514 - 0x811C3500
-// STATIC ADDRESSES BELOW
-#define TM_playerbase 0x802178D4 // random stack address, commonly holds player pointer - requires sanity checks before using!
-#define TM_sniperY 0x80173480
-#define TM_sniperX 0x80173490
-#define TM_camx 0x8014E244 // first camx
-#define TM_currentCam 0x804763D4 // current enumerated camera
+// #define RDR_aimLockTarget1 0x1B85B60
+// #define RDR_aimLockTarget2 0x1B85B90
+// #define RDR_aimLockFlag 0x1B85B94
+
+#define RDR_aimLockBase 0x7608F0
+#define RDR_aimLockTarget1 0x690
+#define RDR_aimLockTarget2 0x6C0
+#define RDR_aimLockFlag 0x6C4
 
 static uint8_t PS2_RDR_Status(void);
 static uint8_t PS2_RDR_DetectCamera(void);
@@ -86,10 +99,7 @@ const GAMEDRIVER *GAME_PS2_REDDEADREVOLVER = &GAMEDRIVER_INTERFACE;
 
 static uint32_t playerbase = 0;
 static uint32_t cambase = 0;
-static uint32_t camXOffsets[] = {0x26C, 0x1BC, -0x17234};
-		//	0x26C
-		//	0x1BC
-		//	-0x17234
+static uint32_t camXOffsets[] = {0x278, 0x26C, 0x1BC, -0x17234};
 
 //==========================================================================
 // Purpose: return 1 if game is detected
@@ -118,19 +128,6 @@ static uint8_t PS2_RDR_DetectCamera(void)
 	}
 
 	return 0;
-
-	// const uint32_t tempplayerbase = MEM_ReadUInt(TM_playerbase);
-	// if(WITHINMEMRANGE(tempplayerbase) && tempplayerbase != playerbase) // if pointer is valid, sanity check pointer
-	// {
-	// 	const uint32_t tempsanity = MEM_ReadUInt(tempplayerbase + TM_sanity);
-	// 	const uint32_t temphealth = MEM_ReadUInt(tempplayerbase + TM_health);
-	// 	if(temphealth > 0 && temphealth <= 0x43C80000 && tempsanity == 0x41000080U) // if player base is valid, use player pointer for level
-	// 	{
-	// 		playerbase = tempplayerbase;
-	// 		return 1;
-	// 	}
-	// }
-	// return WITHINMEMRANGE(playerbase);
 }
 //==========================================================================
 // Purpose: calculate mouse look and inject into current game
@@ -139,24 +136,30 @@ static void PS2_RDR_Inject(void)
 {
 	// PS2_MEM_WriteFloat(AUF_health_lvl2, 2000.f);
 
-	// TODO: *DONE* sanity check when getting cam bases and early termination if not found
-	// TODO: *DONE* handle different camxbase on lvl 4 (train)
-	// TODO: *DONE* prevent mouse input in shops, menu, etc...
 	// TODO: prevent mousey on chat train
-	// TODO: *DONE* turret machine gun, lvl 5
 	// TODO: camy max and min to prevent warping at extremes
 	// TODO: prevent mouse when dead
-	// TODO: *DONE* cover camx/y
-	// TODO: *DONE* zoom camx/y
 	// TODO: duel cursor? and draw with mouse? (down then up motion)
 	// TODO: prevent mouse on pause menu
-	// TODO: *DONE* camera not working on chapter 16 jailbreak
-	// TODO: fix: widescreen breaks it
 	// TODO: disable aim lock?
-	// TODO: *DONE* find fov
-	// TODO: machinegun in alamo lvl
+	// TODO: prevent mouse during in-game cutscenes
+	// TODO: find a less brute force solution for gatling
+	// TODO: prevent mouse in shops
+
+	// disable aim lock
+	uint32_t aimLockBase = PS2_MEM_ReadPointer(RDR_aimLockBase);
+	if (PS2_MEM_ReadUInt(aimLockBase) == 0x68945000)
+	{
+		PS2_MEM_WriteUInt(aimLockBase + RDR_aimLockTarget1, 0x0);
+		PS2_MEM_WriteUInt(aimLockBase + RDR_aimLockTarget2, 0x0);
+		PS2_MEM_WriteUInt(aimLockBase + RDR_aimLockFlag, 0x0);
+	}
 
 	if(xmouse == 0 && ymouse == 0) // if mouse is idle
+		return;
+
+	uint32_t currentLevel = PS2_MEM_ReadUInt(RDR_currentLevel);
+	if (currentLevel == 0x13000000 || currentLevel == 0x00000000 || currentLevel == 0x03000000) // on main menu or loading
 		return;
 
 	if (!PS2_RDR_DetectCamera())
@@ -166,144 +169,170 @@ static void PS2_RDR_Inject(void)
 	// if (PS2_MEM_ReadUInt(RDR_canMoveCameraFlag) == 0x01010000U) // return if in an interior where camera movement is disabled
 	// 	return;
 
+	// uint8_t preventCamY = 0;
+	// if (currentLevel == 0x15000000) // Ch.4 The Traincar, talk and duel
+	// 	preventCamY = 1;
+
 	// 1.631041288, FOV while walking
 	float fov = PS2_MEM_ReadFloat(cambase + RDR_camFov);
-	float looksensitivity = (float)sensitivity / 180.f / 40.f / (fov / 1.6f);
-
-	// float camx = PS2_MEM_ReadFloat(AUF_car_camx);
-	// float pre = camx;
-	// camx -= (float)xmouse * looksensitivity / 20.f; // normal calculation method for X
-	// float camx = PS2_MEM_ReadFloat(RDR_camx);
-	// camx -= (float)xmouse * looksensitivity; // normal calculation method for X
-
-	// float camy = PS2_MEM_ReadFloat(RDR_camy);
-	// camy += (float)ymouse * looksensitivity / 360.f; // normal calculation method for X
-	// float camy = PS2_MEM_ReadFloat(RDR_camy);
-	// camy += (float)ymouse * looksensitivity; // normal calculation method for X
-
+	float looksensitivity = (float)sensitivity / 12000.f / (fov / 1.6f) / 1.4f;
 
 	uint32_t camxOffset = 0;
 	uint32_t camxbase = 0;
+	uint8_t camXSet = 0;
 
+	// cambase + someOffset gets a pointer to (&camX + 0x25C), &camX is the pointer - 0x25C
 	int i;
-	for (i = 0; i < 3; i++) // loop through the known camXOffsets from cambase
+	for (i = 0; i < 4; i++) // loop through the known camXOffsets from cambase
 	{
 		camxOffset = camXOffsets[i];
+		if (currentLevel == 0x1D000000)
+			camxOffset = 0x280;
 		camxbase = PS2_MEM_ReadPointer(cambase + camxOffset);
 
 		if (PS2_MEM_ReadUInt(camxbase - 0x250) == 0xC8145100) // check that pointer points to a camx object
+		{
+			camXSet = 1; // a proper camx was found
 			break;
+		}
 	}
 
+	float gatlingX = 0;
+	float gatlingY = 0;
+	uint32_t gatlingSanity = 0;
+	uint32_t gatlingFlag = 0;
+	uint8_t onGatling = 0;
 
-	if (PS2_MEM_ReadUInt(RDR_onLevel6MachineGunFlag) == 0x01000000U && PS2_MEM_ReadUInt(RDR_onLevel6MachineGunFlag + 0x4) == 0x50548A01U) // onMachineGun and sanity check
+	// check for a level with a gatling gun
+	switch(currentLevel) {
+		case 0x39000000 : // chapter 6, Carnival Life
+			gatlingX = RDR_ch6GatlingX;
+			gatlingY = RDR_ch6GatlingY;
+			gatlingSanity = RDR_ch6GatlingSanity;
+			gatlingFlag = RDR_ch6GatlingFlag;
+			onGatling = 1;
+			break;
+		case 0x70000000 : // chapter 20, Fort Diego
+			gatlingX = RDR_ch20GatlingX;
+			gatlingY = RDR_ch20GatlingY;
+			gatlingSanity = RDR_ch20GatlingSanity;
+			gatlingFlag = RDR_ch20GatlingFlag;
+			onGatling = 1;
+			break;
+		case 0x68000000 : // chapter 21, End of the Line
+			gatlingX = RDR_ch21GatlingX;
+			gatlingY = RDR_ch21GatlingY;
+			gatlingSanity = RDR_ch21GatlingSanity;
+			gatlingFlag = RDR_ch21GatlingFlag;
+			onGatling = 1;
+			break;
+		case 0x66000000 : // chapter 21, End of the Line
+			gatlingX = RDR_ch21GatlingX;
+			gatlingY = RDR_ch21GatlingY;
+			gatlingSanity = RDR_ch21GatlingSanity;
+			gatlingFlag = RDR_ch21Gatling2Flag;
+			onGatling = 1;
+			break;
+		case 0x40000000 : // chapter 22, Angels and Devils
+			gatlingX = RDR_ch22GatlingX;
+			gatlingY = RDR_ch22GatlingY;
+			gatlingSanity = RDR_ch22GatlingSanity;
+			gatlingFlag = RDR_ch22GatlingFlag;
+			onGatling = 1;
+			break;
+	}	
+
+	if (PS2_MEM_ReadUInt(RDR_playerDueling) == 0x40020000)	
 	{
-		// machine gun
-		float camx = PS2_MEM_ReadFloat(RDR_level6MachineGunCamX);
-		camx -= (float)xmouse * looksensitivity; // normal calculation method for X
+		uint32_t duelBase = PS2_MEM_ReadPointer(RDR_duelingBase);
+		float duelX = PS2_MEM_ReadFloat(duelBase - RDR_duelX);
+		duelX += (float)xmouse * looksensitivity / 2.f;
 
-		float camy = PS2_MEM_ReadFloat(RDR_level6MachineGunCamY);
-		camy -= (float)ymouse * looksensitivity; // normal calculation method for X
+		float duelY = PS2_MEM_ReadFloat(duelBase - RDR_duelY);
+		duelY -= (float)(invertpitch ? -ymouse : ymouse) * looksensitivity / 2.f;
 
-		PS2_MEM_WriteFloat(RDR_level6MachineGunCamX, camx);
-		PS2_MEM_WriteFloat(RDR_level6MachineGunCamY, camy);
+		PS2_MEM_WriteFloat(duelBase - RDR_duelX, duelX);
+		PS2_MEM_WriteFloat(duelBase - RDR_duelY, duelY);
+	}
+	// if (currentLevel == 0x39000000 && PS2_MEM_ReadUInt(RDR_onLevel6MachineGunFlag) == 0x01000000U && PS2_MEM_ReadUInt(RDR_onLevel6MachineGunFlag + 0x4) == 0x50548A01U) // onMachineGun and sanity check
+	else if (onGatling == 1 && PS2_MEM_ReadUInt(gatlingFlag) == 0x01000000 && PS2_MEM_ReadUInt(gatlingFlag + 0x4) == gatlingSanity)
+	{
+		// on gatling gun
+		float camx = PS2_MEM_ReadFloat(gatlingX);
+		camx -= (float)xmouse * looksensitivity;
+
+		float camy = PS2_MEM_ReadFloat(gatlingY);
+		camy -= (float)(invertpitch ? -ymouse : ymouse) * looksensitivity;
+
+		PS2_MEM_WriteFloat(gatlingX, camx);
+		PS2_MEM_WriteFloat(gatlingY, camy);
+
 	} 
-	else if (PS2_MEM_ReadUInt(camxbase - 0x25C + 0xCE0) == 0x00000000) // aiming from cover
+	else if (camXSet == 1 && PS2_MEM_ReadUInt(camxbase - 0x25C + 0xCE0) == 0x00000000) // aiming from cover
 	{
 		// &camx + 0xCE0 = isCoverAiming
 		uint32_t coverbase = camxbase - 0x25C - 0x124;
 
 		float coverX = PS2_MEM_ReadFloat(coverbase + 0x4);
-		coverX -= (float)xmouse * looksensitivity; // normal calculation method for X
+		coverX -= (float)xmouse * looksensitivity;
 		PS2_MEM_WriteFloat(coverbase + 0x4, coverX);
 
 		float coverY = PS2_MEM_ReadFloat(coverbase + 0x24);
-		coverY -= (float)ymouse * looksensitivity; // normal calculation method for X
+		coverY -= (float)(invertpitch ? -ymouse : ymouse) * looksensitivity;
 		PS2_MEM_WriteFloat(coverbase + 0x24, coverY);
 	}
-	else {
-		// uint32_t camybase = PS2_MEM_ReadPointer(RDR_camy_base) - 0xB4;
+	else if (currentLevel == 0x1D000000) // chapter 26, final rooftop scene has different cam offsets?
+	{
+		if (PS2_MEM_ReadUInt(RDR_ch26rooftopCoverAiming) == 0x00000000) // if aiming from cover
+		{
+			uint32_t coverbase = RDR_ch26rooftopcamx - 0x124;
+
+			float coverX = PS2_MEM_ReadFloat(coverbase + 0x4);
+			coverX -= (float)xmouse * looksensitivity;
+			PS2_MEM_WriteFloat(coverbase + 0x4, coverX);
+
+			float coverY = PS2_MEM_ReadFloat(coverbase + 0x24);
+			coverY -= (float)(invertpitch ? -ymouse : ymouse) * looksensitivity;
+			PS2_MEM_WriteFloat(coverbase + 0x24, coverY);
+		}
+		else  // regular aiming
+		{
+			// uint32_t camYBase = PS2_MEM_ReadPointer(PS2_MEM_ReadPointer(RDR_camy_base) + 0x30);
+			// float camy = PS2_MEM_ReadFloat(camYBase + 0x1C);
+			// camy += (float)(invertpitch ? -ymouse : ymouse) * looksensitivity;
+			// PS2_MEM_WriteFloat(camYBase + 0x1C, camy);
+
+			uint32_t cameraBase = PS2_MEM_ReadPointer(RDR_camy_base);
+			uint32_t camYAddress = PS2_MEM_ReadPointer(cameraBase + 0x30) + 0x1C;
+			float camy = PS2_MEM_ReadFloat(camYAddress);
+			camy += (float)(invertpitch ? -ymouse : ymouse) * looksensitivity;
+			PS2_MEM_WriteFloat(camYAddress, (float)camy);
+
+			// float camy = PS2_MEM_ReadFloat(RDR_ch26rooftopcamy);
+			// camy += (float)(invertpitch ? -ymouse : ymouse) * looksensitivity;
+			// PS2_MEM_WriteFloat(RDR_ch26rooftopcamy, camy);
+
+			// float camx = PS2_MEM_ReadFloat(RDR_ch26rooftopcamx);
+			// camx -= (float)xmouse * looksensitivity;
+			// PS2_MEM_WriteFloat(RDR_ch26rooftopcamx, camx);
+
+			float camx = PS2_MEM_ReadFloat(camxbase + 0x1A4);
+			camx -= (float)xmouse * looksensitivity;
+			PS2_MEM_WriteFloat(camxbase + 0x1A4, (float)camx);
+		}
+	}
+	else
+	{
+
 		uint32_t cameraBase = PS2_MEM_ReadPointer(RDR_camy_base);
 		uint32_t camYAddress = PS2_MEM_ReadPointer(cameraBase + 0x30) + 0x1C;
-		// uint32_t camybase = PS2_MEM_ReadPointer(PS2_MEM_ReadPointer(RDR_camy_base) + 0x30) + 0x1C;
 		float camy = PS2_MEM_ReadFloat(camYAddress);
-		camy += (float)ymouse * looksensitivity; // normal calculation method for X
-		PS2_MEM_WriteFloat(camYAddress, camy);
-
-		// uint32_t ptr = PS2_MEM_ReadPointer(cameraBase + 0x30);	
-		// ptr = PS2_MEM_ReadPointer(ptr + 0x50);
-		// ptr = PS2_MEM_ReadPointer(ptr + 0x9C);
-		// ptr = PS2_MEM_ReadPointer(ptr + 0x20);
-		// uint32_t camXAddress = ptr + 0x1A4;
-		// float camx = PS2_MEM_ReadFloat(camXAddress);
-		// camx -= (float)xmouse * looksensitivity; // normal calculation method for X
-		// PS2_MEM_WriteFloat(camXAddress, camx);
-
-
-		// possible cam x offsets
-		//	0x26C
-		//	0x1BC
-		//	-0x17234
-
-		// uint32_t camxOffset = 0;
-		// uint32_t camxbase = 0;
-
-		// int i;
-		// for (i = 0; i < 3; i++) // loop through the known camXOffsets from cambase
-		// {
-		// 	camxOffset = camXOffsets[i];
-		// 	camxbase = PS2_MEM_ReadPointer(cambase + camxOffset);
-
-		// 	if (PS2_MEM_ReadUInt(camxbase - 0x250) == 0xC8145100) // check that pointer points to a camx object
-		// 		break;
-		// }
+		camy += (float)(invertpitch ? -ymouse : ymouse) * looksensitivity;
+		PS2_MEM_WriteFloat(camYAddress, (float)camy);
 
 		float camx = PS2_MEM_ReadFloat(camxbase - 0x25C);
-		camx -= (float)xmouse * looksensitivity; // normal calculation method for X
-		PS2_MEM_WriteFloat(camxbase - 0x25C, camx);
-
-
-		// only do if covered
-		// uint32_t coverbase = camxbase - 0x25C - 0x124;
-
-		// float coverX = PS2_MEM_ReadFloat(coverbase + 0x4);
-		// coverX -= (float)xmouse * looksensitivity; // normal calculation method for X
-		// PS2_MEM_WriteFloat(coverbase + 0x4, coverX);
-
-		// float coverY = PS2_MEM_ReadFloat(coverbase + 0x24);
-		// coverY -= (float)ymouse * looksensitivity; // normal calculation method for X
-		// PS2_MEM_WriteFloat(coverbase + 0x24, coverY);
-
-		// // uint32_t cambase = PS2_MEM_ReadPointer(RDR_cambase);
-		// uint32_t camxOffset = 0x26C;
-		// // levels with different camxOffset
-		// // ch.16 jailbreak, 0x1BC
-		// // train level, 0x1BC
-		// // 0x13A47E0U needs 0x1BC offset in beginning of ch17 and 0x26C on final fight against Ted and Tony
-		// //   value remained til next level so maybe not an indicator on current level
-		// 	//  PS2_MEM_ReadPointer(RDR_someLevelPointer) == 0x1400DA0U) // && PS2_MEM_ReadUInt(RDR_someLevelPointer - 0x8) == 6 ) // train action level has different camxOffset
-		// if ((PS2_MEM_ReadPointer(RDR_someLevelPointer) == 0x1385C00U && PS2_MEM_ReadUInt(RDR_someLevelPointer - 0x8) == 0) ||
-		// 	 PS2_MEM_ReadPointer(RDR_someLevelPointer) == 0x1400DA0U) // || PS2_MEM_ReadPointer(RDR_someLevelPointer) == 0x13A47E0U) // both pointers to same level on different boots, need a different solution
-		// {
-		// 	camxOffset = 0x1BC;
-		// // } else if (PS2_MEM_ReadPointer(RDR_someLevelPointer) == 0x13A47E0) // 0x14060D0U) // ch.18 buffalo soldier section 2, changes from section 1
-		// } else if (PS2_MEM_ReadPointer(RDR_someLevelPointer) == 0x14060D0U)
-		// {
-		// 	camxOffset = -0x17234;
-		// }
-		// // uint32_t camxbase = PS2_MEM_ReadPointer(cambase + 0x26C);
-		// uint32_t camxbase = PS2_MEM_ReadPointer(cambase + camxOffset);
-		// // if level == train level, camxbase = cambase + 0x1BC
-		// float camx = PS2_MEM_ReadFloat(camxbase - 0x25C);
-		// camx -= (float)xmouse * looksensitivity; // normal calculation method for X
-
-		// // PS2_MEM_WriteFloat(AUF_car_camx, camx);
-		// // PS2_MEM_WriteFloat(AUF_car_camy, camy);
-		// // PS2_MEM_WriteFloat(RDR_camx, camx);
-		// PS2_MEM_WriteFloat(camxbase - 0x25C, camx);
-		// // PS2_MEM_WriteFloat(RDR_camy, camy);
-		// PS2_MEM_WriteFloat(camYAddress, camy);
-		// PS2_MEM_WriteFloat(AUF_camx, 0.f);
+		camx -= (float)xmouse * looksensitivity;
+		PS2_MEM_WriteFloat(camxbase - 0x25C, (float)camx);
 	}
 
 }

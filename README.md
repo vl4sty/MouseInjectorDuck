@@ -9,6 +9,8 @@ A external app that injects cursor input into game memory.
 | RetroArch (Mupen64Plus-Next core) | 1.14.0 (2.4-Vulkan bc24153)| retroarch.exe |
 | BizHawk (N64, Mupen64Plus) | 2.8 | EmuHawk.exe |
 | BSNES | v115 | bsnes.exe |
+| PCSX2 Nightly | 1.7.3898 | pcsx2-qtx64-avx2.exe |
+* NOTE: Versions given are the latest that have been tested working, may work with newer
 
 ## How to Use
 1. Start emulator first
@@ -65,6 +67,12 @@ avoid clicking off the window.
 | R-Type III: The Third Lightning | Good | <sup>Not fully tested</sub> |
 * BSNES TIP: Press F12 to toggle mouse capture and it will hide the cursor.
 * NOTE: At the moment BSNES may unhook after minimizing, menuing, pausing emulation, or loading/saving savestates. Requires restarting BSNES and MouseInjector.
+
+## Supported PCSX2 Tiles
+| Game Title | Mouse Support | Issues |
+| --- | :---: | ----------- |
+| Red Dead Revolver | Fair | <sup>Gatling guns and final scene may break if game is loaded from memory card after a shutdown.  **Fix below*</sub> |
+* RDR Gatling/Final Scene Fix: Start a new game on a new name. When in-game, pause and quit back to menu. Reload your main save.
 
 # ManyMouse
 
