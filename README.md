@@ -1,4 +1,4 @@
-# Mouse Injector for Dolphin 5.0, DuckStation, Mupen64Plus (RetroArch/BizHawk 2.8), BSNES
+# Mouse Injector for Dolphin 5.0, DuckStation, Mupen64Plus (RetroArch/BizHawk 2.8), BSNES, PCSX2
 
 A external app that injects cursor input into game memory.
 ## Supported Emulators
