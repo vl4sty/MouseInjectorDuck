@@ -58,7 +58,7 @@ avoid clicking off the window.
 | GoldenEye: 007 (NTSC) | Fair | <sup>None</sub> |
 | Sin and Punishment (J) | Good | <sup>Not fully tested</sub> |
 
-## Supported BSNES Tiles
+## Supported BSNES Titles
 | Game Title | Mouse Support | Issues |
 | --- | :---: | ----------- |
 | Pac-Man 2: The New Adventures | Good | <sup>Not fully tested</sub> |
@@ -68,7 +68,7 @@ avoid clicking off the window.
 * BSNES TIP: Press F12 to toggle mouse capture and it will hide the cursor.
 * NOTE: At the moment BSNES may unhook after minimizing, menuing, pausing emulation, or loading/saving savestates. Requires restarting BSNES and MouseInjector.
 
-## Supported PCSX2 Tiles
+## Supported PCSX2 Titles
 | Game Title | Mouse Support | Issues |
 | --- | :---: | ----------- |
 | Red Dead Revolver (NTSC-U) | Fair | <sup>Gatling guns and final scene may break if game is loaded from memory card after a shutdown.  **Fix below*</sub> |
