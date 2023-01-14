@@ -71,7 +71,7 @@ avoid clicking off the window.
 ## Supported PCSX2 Tiles
 | Game Title | Mouse Support | Issues |
 | --- | :---: | ----------- |
-| Red Dead Revolver | Fair | <sup>Gatling guns and final scene may break if game is loaded from memory card after a shutdown.  **Fix below*</sub> |
+| Red Dead Revolver (NTSC-U) | Fair | <sup>Gatling guns and final scene may break if game is loaded from memory card after a shutdown.  **Fix below*</sub> |
 * RDR Gatling/Final Scene Fix: Start a new game on a new name. When in-game, pause and quit back to menu. Reload your main save.
 
 # ManyMouse
