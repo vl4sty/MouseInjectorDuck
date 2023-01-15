@@ -24,11 +24,6 @@
 #include "../mouse.h"
 #include "game.h"
 
-// TODO: check if machinegun sentry cam and hold L2 manual aim use same values, they feel similar and left stick only does up and down just like machinegun
-//	 try freezing fov above 400, the camera moves independent of gun
-
-#define TAU 6.2831853f // 0x40C90FDB
-
 // OFFSET addresses, requires a base address to use
 #define SIN_cursorx 0x8010BA88 - 0x8010BA60
 #define SIN_cursory 0x8010BA8C - 0x8010BA60

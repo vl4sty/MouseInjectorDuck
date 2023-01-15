@@ -73,9 +73,9 @@ static uint32_t playerbase = 0;
 static uint8_t PS2_AUF_Status(void)
 {
 	// return (MEM_ReadUInt(0x80000000) == 0x47473245U && MEM_ReadUInt(0x80000004) == 0x345A0000U); // check game header to see if it matches Trigger Man (GG2E4Z)
-	// return (PS2_MEM_ReadUInt(0x00093390) == 0x534C5553U);
-	return (PS2_MEM_ReadUInt(0x00093390) == 0x534C5553U && PS2_MEM_ReadUInt(0x00093394) == 0x5F323032U) &&
-			PS2_MEM_ReadUInt(0x00093398) == 0x2E36353BU;
+	// return (PS2_MEM_ReadWord(0x00093390) == 0x534C5553U);
+	return (PS2_MEM_ReadWord(0x00093390) == 0x534C5553U && PS2_MEM_ReadWord(0x00093394) == 0x5F323032U) &&
+			PS2_MEM_ReadWord(0x00093398) == 0x2E36353BU;
 }
 //==========================================================================
 // Purpose: detects player pointer from stack address

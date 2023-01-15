@@ -73,8 +73,10 @@ void SNES_MEM_WriteByte(const uint32_t addr, uint8_t value);
 void SNES_MEM_WriteWord(const uint32_t addr, uint16_t value);
 
 uint32_t PS2_MEM_ReadPointer(const uint32_t addr);
+uint32_t PS2_MEM_ReadWord(const uint32_t addr);
 uint32_t PS2_MEM_ReadUInt(const uint32_t addr);
 float PS2_MEM_ReadFloat(const uint32_t addr);
+void PS2_MEM_WriteWord(const uint32_t addr, uint32_t value);
 void PS2_MEM_WriteUInt(const uint32_t addr, uint32_t value);
 void PS2_MEM_WriteFloat(const uint32_t addr, float value);
 
@@ -555,7 +557,7 @@ uint32_t PS2_MEM_ReadPointer(const uint32_t addr)
 	return output;
 }
 
-uint32_t PS2_MEM_ReadUInt(const uint32_t addr)
+uint32_t PS2_MEM_ReadWord(const uint32_t addr)
 {
 	if(!emuoffset || PS2NOTWITHINMEMRANGE(addr)) // if ps2 memory has not been init by emulator or reading from outside of memory range
 		return 0;
@@ -563,6 +565,17 @@ uint32_t PS2_MEM_ReadUInt(const uint32_t addr)
 	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + (addr - 0x80000)), &output, sizeof(output), NULL);
 	// printdebug(1); // debug
 	MEM_ByteSwap32(&output); // byteswap
+	return output;
+}
+
+uint32_t PS2_MEM_ReadUInt(const uint32_t addr)
+{
+	if(!emuoffset || PS2NOTWITHINMEMRANGE(addr)) // if ps2 memory has not been init by emulator or reading from outside of memory range
+		return 0;
+	uint32_t output; // temp var used for output of function
+	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + (addr - 0x80000)), &output, sizeof(output), NULL);
+	// printdebug(1); // debug
+	// MEM_ByteSwap32(&output); // byteswap
 	return output;
 }
 
@@ -574,6 +587,14 @@ float PS2_MEM_ReadFloat(const uint32_t addr)
 	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + (addr - 0x80000)), &output, sizeof(output), NULL);
 	// MEM_ByteSwap32((uint32_t *)&output); // byteswap
 	return output;
+}
+
+void PS2_MEM_WriteWord(const uint32_t addr, uint32_t value)
+{
+	if(!emuoffset || PS2NOTWITHINMEMRANGE(addr))
+		return;
+	MEM_ByteSwap32(&value); // byteswap
+	WriteProcessMemory(emuhandle, (LPVOID)(emuoffset + (addr - 0x80000)), &value, sizeof(value), NULL);
 }
 
 void PS2_MEM_WriteUInt(const uint32_t addr, uint32_t value)

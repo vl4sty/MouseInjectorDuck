@@ -107,9 +107,9 @@ static uint32_t camXOffsets[] = {0x278, 0x26C, 0x1BC, -0x17234};
 static uint8_t PS2_RDR_Status(void)
 {
 	// return (MEM_ReadUInt(0x80000000) == 0x47473245U && MEM_ReadUInt(0x80000004) == 0x345A0000U); // check game header to see if it matches Trigger Man (GG2E4Z)
-	// return (PS2_MEM_ReadUInt(0x00093390) == 0x534C5553U);
-	return (PS2_MEM_ReadUInt(0x00093390) == 0x534C5553U && PS2_MEM_ReadUInt(0x00093394) == 0x5F323035U) &&
-			PS2_MEM_ReadUInt(0x00093398) == 0x2E30303BU;
+	// return (PS2_MEM_ReadWord(0x00093390) == 0x534C5553U);
+	return (PS2_MEM_ReadWord(0x00093390) == 0x534C5553U && PS2_MEM_ReadWord(0x00093394) == 0x5F323035U) &&
+			PS2_MEM_ReadWord(0x00093398) == 0x2E30303BU;
 }
 //==========================================================================
 // Purpose: detects player pointer from stack address
@@ -120,7 +120,7 @@ static uint8_t PS2_RDR_DetectCamera(void)
 	uint32_t tempcambase = PS2_MEM_ReadPointer(RDR_cambase);
 	if (PS2WITHINMEMRANGE(tempcambase))
 	{
-		if (PS2_MEM_ReadUInt(tempcambase + RDR_camSanityOffset) == RDR_camSanity)
+		if (PS2_MEM_ReadWord(tempcambase + RDR_camSanityOffset) == RDR_camSanity)
 		{
 			cambase = tempcambase;
 			return 1;
@@ -148,17 +148,17 @@ static void PS2_RDR_Inject(void)
 
 	// disable aim lock
 	uint32_t aimLockBase = PS2_MEM_ReadPointer(RDR_aimLockBase);
-	if (PS2_MEM_ReadUInt(aimLockBase) == 0x68945000)
+	if (PS2_MEM_ReadWord(aimLockBase) == 0x68945000)
 	{
-		PS2_MEM_WriteUInt(aimLockBase + RDR_aimLockTarget1, 0x0);
-		PS2_MEM_WriteUInt(aimLockBase + RDR_aimLockTarget2, 0x0);
-		PS2_MEM_WriteUInt(aimLockBase + RDR_aimLockFlag, 0x0);
+		PS2_MEM_WriteWord(aimLockBase + RDR_aimLockTarget1, 0x0);
+		PS2_MEM_WriteWord(aimLockBase + RDR_aimLockTarget2, 0x0);
+		PS2_MEM_WriteWord(aimLockBase + RDR_aimLockFlag, 0x0);
 	}
 
 	if(xmouse == 0 && ymouse == 0) // if mouse is idle
 		return;
 
-	uint32_t currentLevel = PS2_MEM_ReadUInt(RDR_currentLevel);
+	uint32_t currentLevel = PS2_MEM_ReadWord(RDR_currentLevel);
 	if (currentLevel == 0x13000000 || currentLevel == 0x00000000 || currentLevel == 0x03000000) // on main menu or loading
 		return;
 
@@ -166,7 +166,7 @@ static void PS2_RDR_Inject(void)
 		return;
 	
 	// TODO: check if in town as just this flag breaks ch.16 jailbreak
-	// if (PS2_MEM_ReadUInt(RDR_canMoveCameraFlag) == 0x01010000U) // return if in an interior where camera movement is disabled
+	// if (PS2_MEM_ReadWord(RDR_canMoveCameraFlag) == 0x01010000U) // return if in an interior where camera movement is disabled
 	// 	return;
 
 	// uint8_t preventCamY = 0;
@@ -190,7 +190,7 @@ static void PS2_RDR_Inject(void)
 			camxOffset = 0x280;
 		camxbase = PS2_MEM_ReadPointer(cambase + camxOffset);
 
-		if (PS2_MEM_ReadUInt(camxbase - 0x250) == 0xC8145100) // check that pointer points to a camx object
+		if (PS2_MEM_ReadWord(camxbase - 0x250) == 0xC8145100) // check that pointer points to a camx object
 		{
 			camXSet = 1; // a proper camx was found
 			break;
@@ -242,7 +242,7 @@ static void PS2_RDR_Inject(void)
 			break;
 	}	
 
-	if (PS2_MEM_ReadUInt(RDR_playerDueling) == 0x40020000)	
+	if (PS2_MEM_ReadWord(RDR_playerDueling) == 0x40020000)	
 	{
 		uint32_t duelBase = PS2_MEM_ReadPointer(RDR_duelingBase);
 		float duelX = PS2_MEM_ReadFloat(duelBase - RDR_duelX);
@@ -254,8 +254,8 @@ static void PS2_RDR_Inject(void)
 		PS2_MEM_WriteFloat(duelBase - RDR_duelX, duelX);
 		PS2_MEM_WriteFloat(duelBase - RDR_duelY, duelY);
 	}
-	// if (currentLevel == 0x39000000 && PS2_MEM_ReadUInt(RDR_onLevel6MachineGunFlag) == 0x01000000U && PS2_MEM_ReadUInt(RDR_onLevel6MachineGunFlag + 0x4) == 0x50548A01U) // onMachineGun and sanity check
-	else if (onGatling == 1 && PS2_MEM_ReadUInt(gatlingFlag) == 0x01000000 && PS2_MEM_ReadUInt(gatlingFlag + 0x4) == gatlingSanity)
+	// if (currentLevel == 0x39000000 && PS2_MEM_ReadWord(RDR_onLevel6MachineGunFlag) == 0x01000000U && PS2_MEM_ReadWord(RDR_onLevel6MachineGunFlag + 0x4) == 0x50548A01U) // onMachineGun and sanity check
+	else if (onGatling == 1 && PS2_MEM_ReadWord(gatlingFlag) == 0x01000000 && PS2_MEM_ReadWord(gatlingFlag + 0x4) == gatlingSanity)
 	{
 		// on gatling gun
 		float camx = PS2_MEM_ReadFloat(gatlingX);
@@ -268,7 +268,7 @@ static void PS2_RDR_Inject(void)
 		PS2_MEM_WriteFloat(gatlingY, camy);
 
 	} 
-	else if (camXSet == 1 && PS2_MEM_ReadUInt(camxbase - 0x25C + 0xCE0) == 0x00000000) // aiming from cover
+	else if (camXSet == 1 && PS2_MEM_ReadWord(camxbase - 0x25C + 0xCE0) == 0x00000000) // aiming from cover
 	{
 		// &camx + 0xCE0 = isCoverAiming
 		uint32_t coverbase = camxbase - 0x25C - 0x124;
@@ -283,7 +283,7 @@ static void PS2_RDR_Inject(void)
 	}
 	else if (currentLevel == 0x1D000000) // chapter 26, final rooftop scene has different cam offsets?
 	{
-		if (PS2_MEM_ReadUInt(RDR_ch26rooftopCoverAiming) == 0x00000000) // if aiming from cover
+		if (PS2_MEM_ReadWord(RDR_ch26rooftopCoverAiming) == 0x00000000) // if aiming from cover
 		{
 			uint32_t coverbase = RDR_ch26rooftopcamx - 0x124;
 
