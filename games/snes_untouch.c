@@ -19,6 +19,7 @@
 //==========================================================================
 #include <stdint.h>
 #include <stdio.h>
+#include <math.h>
 #include "../main.h"
 #include "../memory.h"
 #include "../mouse.h"
@@ -33,8 +34,8 @@
 #define UT_MISSION5CAMYHIGH 0xC8
 
 // STATIC addresses
-#define UT_cursorx 0x001AD1 // range: 768-61184
-#define UT_cursory 0x001AD3 // range: 768-52736
+#define UT_cursorx 0x001AD1
+#define UT_cursory 0x001AD3
 #define UT_screenleft 0x000065
 #define UT_currentlevel 0x00184B // 0=lvl1, 1=lvl2, 2=lvl3, 3=lvl4, 4=lvl5(?), 5=mainmenu
 #define UT_wallaction 0x0000F0
@@ -53,6 +54,9 @@ static const GAMEDRIVER GAMEDRIVER_INTERFACE =
 };
 
 const GAMEDRIVER *GAME_SNES_UNTOUCHABLES = &GAMEDRIVER_INTERFACE;
+
+static float xAccumulator = 0.;
+static float yAccumulator = 0.;
 
 //==========================================================================
 // Purpose: return 1 if game is detected
@@ -89,27 +93,62 @@ static void SNES_UT_Inject(void)
 	else if (currentlevel == 0x4)
 		camyhigh = UT_MISSION5CAMYHIGH;
 
+	const float looksensitivity = (float)sensitivity / 40.f;
 
-	uint16_t cursorx = SNES_MEM_ReadWord(UT_cursorx);
-	uint16_t cursory = SNES_MEM_ReadWord(UT_cursory);
-	uint16_t lastX = cursorx;
-	uint16_t lastY = cursory;
+	uint16_t cursorXInt = SNES_MEM_ReadWord(UT_cursorx);
+	uint16_t cursorYInt = SNES_MEM_ReadWord(UT_cursory);
+	float cursorX = (float)cursorXInt;
+	float cursorY = (float)cursorYInt;
 
-	const float looksensitivity = (float)sensitivity / 80.f;
-	cursorx += ((float)xmouse + 1) * looksensitivity;
-	cursory += ((float)ymouse + 1) * looksensitivity;
+	if (xmouse != 0)
+	{
+		float dx = (float)xmouse * looksensitivity;
+		if (xmouse < 0)
+			cursorX += ceil(dx);
+		else
+			cursorX += (uint16_t)dx;
+
+		float r = fmod(dx, 1.f);
+
+		if (abs(r + xAccumulator) >= 1)
+		{
+			if (xmouse > 0)
+				cursorX += 1;
+			else
+				cursorX -= 1;
+		}
+	
+		xAccumulator = fmod(r + xAccumulator, 1.f);
+	}
+
+	if (ymouse != 0)
+	{
+		int ym = (invertpitch ? -ymouse : ymouse);
+		float dy = (float)ym * looksensitivity;
+		// if (ymouse < 0)
+		if (ym < 0)
+			cursorY += ceil(dy);
+		else
+			cursorY += (uint16_t)dy;
+
+		float r = fmod(dy, 1.f);
+
+		if (abs(r + yAccumulator) >= 1)
+		{
+			if (ym > 0)
+				cursorY += 1;
+			else
+				cursorY -= 1;
+		}
+		
+		yAccumulator = fmod(r + yAccumulator, 1.f);
+	}
 
 	uint16_t screenleft = SNES_MEM_ReadWord(UT_screenleft);
-	// // prevent wrapping
 
-	if (lastX >= screenleft && lastX < screenleft + 100 && cursorx > screenleft + 200)
-		cursorx = 0.f;
-	if (lastY > 0 && lastY < 80 && cursory > 140)
-		cursory = 0.f;
+	cursorX = ClampFloat(cursorX, (float)screenleft, (float)screenleft + 255.f);
+	cursorY = ClampFloat(cursorY, camylow, camyhigh);
 
-	cursorx = ClampFloat(cursorx, (float)screenleft, (float)screenleft + 255.f);
-	cursory = ClampFloat(cursory, camylow, camyhigh);
-
-	SNES_MEM_WriteWord(UT_cursorx, (uint16_t)cursorx);
-	SNES_MEM_WriteWord(UT_cursory, (uint16_t)cursory);
+	SNES_MEM_WriteWord(UT_cursorx, (uint16_t)cursorX);
+	SNES_MEM_WriteWord(UT_cursory, (uint16_t)cursorY);
 }

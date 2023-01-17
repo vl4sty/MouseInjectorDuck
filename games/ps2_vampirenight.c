@@ -25,46 +25,51 @@
 #include "../mouse.h"
 #include "game.h"
 
-#define TC2_cursorx 0x3AD240
-#define TC2_cursory 0x3AD244
+#define VN_cursorx 0x492E78
+#define VN_cursory 0x492E7A
 
-static uint8_t PS2_TC2_Status(void);
-static void PS2_TC2_Inject(void);
+static uint8_t PS2_VN_Status(void);
+static void PS2_VN_Inject(void);
 
 static const GAMEDRIVER GAMEDRIVER_INTERFACE =
 {
-	"PS2 Time Crisis II",
-	PS2_TC2_Status,
-	PS2_TC2_Inject,
+	"PS2 Vampire Night",
+	PS2_VN_Status,
+	PS2_VN_Inject,
 	1, // 1000 Hz tickrate
 	0 // crosshair sway not supported for driver
 };
 
-const GAMEDRIVER *GAME_PS2_TIMECRISIS2 = &GAMEDRIVER_INTERFACE;
+const GAMEDRIVER *GAME_PS2_VAMPIRENIGHT = &GAMEDRIVER_INTERFACE;
 
+static float xRemainder = 0.;
+static float yRemainder = 0.;
+static int lastXDir = 0;
+static int lastYDir = 0;
 static float xAccumulator = 0.;
 static float yAccumulator = 0.;
 
 //==========================================================================
 // Purpose: return 1 if game is detected
 //==========================================================================
-static uint8_t PS2_TC2_Status(void)
+static uint8_t PS2_VN_Status(void)
 {
 	return (PS2_MEM_ReadWord(0x00093390) == 0x534C5553U && PS2_MEM_ReadWord(0x00093394) == 0x5F323032U &&
-			PS2_MEM_ReadWord(0x00093398) == 0x2E31393BU);
+			PS2_MEM_ReadWord(0x00093398) == 0x2E32313BU);
 }
 //==========================================================================
 // Purpose: calculate mouse look and inject into current game
 //==========================================================================
-static void PS2_TC2_Inject(void)
+static void PS2_VN_Inject(void)
 {
 	if(xmouse == 0 && ymouse == 0) // if mouse is idle
 		return;
 
 	const float looksensitivity = (float)sensitivity / 40.f;
 
-	float cursorXInt = PS2_MEM_ReadUInt(TC2_cursorx);
-	float cursorYInt = PS2_MEM_ReadUInt(TC2_cursory);
+
+	uint16_t cursorXInt = PS2_MEM_ReadUInt16(VN_cursorx);
+	uint16_t cursorYInt = PS2_MEM_ReadUInt16(VN_cursory);
 	float cursorX = (float)cursorXInt;
 	float cursorY = (float)cursorYInt;
 
@@ -86,7 +91,7 @@ static void PS2_TC2_Inject(void)
 	
 	xAccumulator = fmod(r + xAccumulator, 1.f);
 
-	int ym = (invertpitch ? -ymouse : ymouse);
+	int ym = (invertpitch ? ymouse : -ymouse);
 	float dy = (float)ym * looksensitivity;
 	// if (ymouse < 0)
 	if (ym < 0)
@@ -106,9 +111,76 @@ static void PS2_TC2_Inject(void)
 	
 	yAccumulator = fmod(r + yAccumulator, 1.f);
 
-	// cursorX += (float)xmouse * looksensitivity;
-	// cursorY += (float)(invertpitch ? -ymouse : ymouse) * looksensitivity;
+	// uint16_t cursorXInt = PS2_MEM_ReadUInt16(VN_cursorx);
+	// uint16_t cursorYInt = PS2_MEM_ReadUInt16(VN_cursory);
+	// float cursorX = (float)cursorXInt;
+	// float cursorY = (float)cursorYInt;
 
-	PS2_MEM_WriteUInt(TC2_cursorx, (uint32_t)cursorX);
-	PS2_MEM_WriteUInt(TC2_cursory, (uint32_t)cursorY);
+	// // save up remainder from float and add on the next frame?
+	// // 10.4 -> 10
+	// // save the .4
+	// // next frame 10.7 -> 10 but add .4 to get 11.1, save the .1 and so on
+	// // use for all games that write int values
+
+	// // if (xmouse < 4 && xmouse > -4)
+	// 	// cursorX += xmouse / sens;
+	// // else
+	// if (xmouse != 0)
+	// {
+	// 	int xDir = 0;
+	// 	if (xmouse > 0)
+	// 		xDir = 1;
+	// 	else
+	// 		xDir = -1;
+		
+	// 	if (xDir != lastXDir)
+	// 		xRemainder = 0;
+		
+	// 	lastXDir = xDir;
+
+	// 	cursorX += ((float)xmouse * looksensitivity) + xRemainder;
+	// 	xRemainder = (float)fmod(cursorX, 1.f);
+
+	// 	if (xmouse < 0)
+	// 	{
+	// 		cursorX = (float)ceil(cursorX);
+	// 		xRemainder = -abs(xRemainder);
+	// 	}
+	// 	else
+	// 		xRemainder = abs(xRemainder);
+	// }
+
+	// // if (ymouse < 4 && ymouse > -4)
+	// 	// cursorY -= (invertpitch ? -ymouse : ymouse) / sens;
+	// // else
+	// if (ymouse != 0)
+	// {
+	// 	int yDir = 0;
+	// 	if (ymouse > 0)
+	// 		yDir = 1;
+	// 	else
+	// 		yDir = -1;
+		
+	// 	if (yDir != lastYDir)
+	// 		yRemainder = 0;
+		
+	// 	lastYDir = yDir;
+
+	// 	cursorY += ((float)(invertpitch ? ymouse : -ymouse) * looksensitivity) + yRemainder;
+	// 	yRemainder = (float)fmod(cursorY, 1.f);
+
+	// 	if (ymouse < 0)
+	// 	{
+	// 		cursorY = (float)ceil(cursorY);
+	// 		yRemainder = -abs(yRemainder);
+	// 	}
+	// 	else
+	// 		yRemainder = abs(yRemainder);
+	// }
+
+
+
+
+	PS2_MEM_WriteUInt16(VN_cursorx, (uint16_t)cursorX);
+	PS2_MEM_WriteUInt16(VN_cursory, (uint16_t)cursorY);
 }

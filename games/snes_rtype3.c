@@ -54,6 +54,9 @@ static float MAXDIFF = 10.f;
 
 const GAMEDRIVER *GAME_SNES_RTYPE3 = &GAMEDRIVER_INTERFACE;
 
+static float xAccumulator = 0;
+static float yAccumulator = 0;
+
 //==========================================================================
 // Purpose: return 1 if game is detected
 //==========================================================================
@@ -121,14 +124,21 @@ static void SNES_RT3_Inject(void)
 		return;
 	
 
-	const float looksensitivity = (float)sensitivity / 30.f;
-	uint8_t shipx = SNES_MEM_ReadByte(RT3_shipx);
-	uint8_t shipy = SNES_MEM_ReadByte(RT3_shipy);
-	shipx = (float)shipx;
-	shipy = (float)shipy;
+	// const float looksensitivity = (float)sensitivity / 30.f;
+	// uint8_t shipx = SNES_MEM_ReadByte(RT3_shipx);
+	// uint8_t shipy = SNES_MEM_ReadByte(RT3_shipy);
+	// shipx = (float)shipx;
+	// shipy = (float)shipy;
 
-	// count how many frames you've been doing in one direction
-	if (ymouse < 0 && lastY > shipy)
+	const float looksensitivity = (float)sensitivity / 40.f;
+
+	uint8_t shipXInt = SNES_MEM_ReadByte(RT3_shipx);
+	uint8_t shipYInt = SNES_MEM_ReadByte(RT3_shipy);
+	float shipX = (float)shipXInt;
+	float shipY = (float)shipYInt;
+
+	// // count how many frames you've been doing in one direction
+	if (ymouse < 0 && lastY > shipY)
 	{
 		downFrames = 0;
 		if (ymouse > -12.f && ymouse < -6.f)
@@ -142,7 +152,7 @@ static void SNES_RT3_Inject(void)
 			upFrames = 14;
 		}
 	}
-	else if (ymouse > 0 && lastY < shipy)
+	else if (ymouse > 0 && lastY < shipY)
 	{
 		upFrames = 0;
 		if (ymouse > 6.f && ymouse < 12.f)
@@ -157,26 +167,76 @@ static void SNES_RT3_Inject(void)
 		}
 	}
 
-	lastX = shipx;
-	lastY = shipy;
+	lastX = shipX;
+	lastY = shipY;
 
-	int8_t diff = 0;
-	diff = xmouse * looksensitivity;
-	diff = ClampInt(diff, -MAXDIFF, MAXDIFF);
-	shipx += diff;
-	diff = ymouse * looksensitivity;
-	diff = ClampInt(diff, -MAXDIFF, MAXDIFF);
-	shipy += diff;
+	// int8_t diff = 0;
+	// diff = xmouse * looksensitivity;
+	// diff = ClampInt(diff, -MAXDIFF, MAXDIFF);
+	// shipx += diff;
+	// diff = ymouse * looksensitivity;
+	// diff = ClampInt(diff, -MAXDIFF, MAXDIFF);
+	// shipy += diff;
 
-	// prevent wrapping
-	if (lastX > 0 && lastX < 100 && shipx > 200)
-		shipx = 0.f;
-	if (lastY > 0 && lastY < 100 && shipy > 150)
-		shipy = 0.f;
+	// // prevent wrapping
+	// if (lastX > 0 && lastX < 100 && shipx > 200)
+	// 	shipx = 0.f;
+	// if (lastY > 0 && lastY < 100 && shipy > 150)
+	// 	shipy = 0.f;
 
-	shipx = ClampFloat(shipx, 1.f, 224.f);
-	shipy = ClampFloat(shipy, 10.f, 192.f);
+	// shipx = ClampFloat(shipx, 1.f, 224.f);
+	// shipy = ClampFloat(shipy, 10.f, 192.f);
 
-	SNES_MEM_WriteByte(RT3_shipx, (uint8_t)shipx);
-	SNES_MEM_WriteByte(RT3_shipy, (uint8_t)shipy);
+	// SNES_MEM_WriteByte(RT3_shipx, (uint8_t)shipx);
+	// SNES_MEM_WriteByte(RT3_shipy, (uint8_t)shipy);
+
+	if (xmouse != 0)
+	{
+		float dx = (float)xmouse * looksensitivity;
+		if (xmouse < 0)
+			shipX += ceil(dx);
+		else
+			shipX += (uint16_t)dx;
+
+		float r = fmod(dx, 1.f);
+
+		if (abs(r + xAccumulator) >= 1)
+		{
+			if (xmouse > 0)
+				shipX += 1.f;
+			else
+				shipX -= 1.f;
+		}
+	
+		xAccumulator = fmod(r + xAccumulator, 1.f);
+	}
+
+	if (ymouse != 0)
+	{
+		int ym = (invertpitch ? -ymouse : ymouse);
+		float dy = (float)ym * looksensitivity;
+		// if (ymouse < 0)
+		if (ym < 0)
+			shipY += ceil(dy);
+		else
+			shipY += (uint16_t)dy;
+
+		float r = fmod(dy, 1.f);
+
+		if (abs(r + yAccumulator) >= 1)
+		{
+			if (ym > 0)
+				shipY += 1.f;
+			else
+				shipY -= 1.f;
+		}
+		
+		yAccumulator = fmod(r + yAccumulator, 1.f);
+	}
+
+	shipX = ClampFloat(shipX, 1.f, 224.f);
+	shipY = ClampFloat(shipY, 10.f, 192.f);
+
+	SNES_MEM_WriteByte(RT3_shipx, (uint8_t)shipX);
+	SNES_MEM_WriteByte(RT3_shipy, (uint8_t)shipY);
 }

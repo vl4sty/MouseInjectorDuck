@@ -19,96 +19,56 @@
 //==========================================================================
 #include <stdint.h>
 #include <stdio.h>
-#include <math.h>
 #include "../main.h"
 #include "../memory.h"
 #include "../mouse.h"
 #include "game.h"
 
-#define TC2_cursorx 0x3AD240
-#define TC2_cursory 0x3AD244
+#define GSG_cursorx 0x303D80 		// range: 0 (left) - 512 (right)
+#define GSG_last_cursorx 0x303D90
+#define GSG_cursory 0x303D84		// range: 0 (top) - 448 (bottom)
+#define GSG_last_cursory 0x303D94
 
-static uint8_t PS2_TC2_Status(void);
-static void PS2_TC2_Inject(void);
+static uint8_t PS2_GSG_Status(void);
+static void PS2_GSG_Inject(void);
 
 static const GAMEDRIVER GAMEDRIVER_INTERFACE =
 {
-	"PS2 Time Crisis II",
-	PS2_TC2_Status,
-	PS2_TC2_Inject,
+	"PS2 Gunslinger Girl Vol. 1",
+	PS2_GSG_Status,
+	PS2_GSG_Inject,
 	1, // 1000 Hz tickrate
 	0 // crosshair sway not supported for driver
 };
 
-const GAMEDRIVER *GAME_PS2_TIMECRISIS2 = &GAMEDRIVER_INTERFACE;
-
-static float xAccumulator = 0.;
-static float yAccumulator = 0.;
+const GAMEDRIVER *GAME_PS2_GUNSLINGERGIRL1 = &GAMEDRIVER_INTERFACE;
 
 //==========================================================================
 // Purpose: return 1 if game is detected
 //==========================================================================
-static uint8_t PS2_TC2_Status(void)
+static uint8_t PS2_GSG_Status(void)
 {
-	return (PS2_MEM_ReadWord(0x00093390) == 0x534C5553U && PS2_MEM_ReadWord(0x00093394) == 0x5F323032U &&
-			PS2_MEM_ReadWord(0x00093398) == 0x2E31393BU);
+	return (PS2_MEM_ReadWord(0x00093390) == 0x534C5053U && PS2_MEM_ReadWord(0x00093394) == 0x5F323533U &&
+			PS2_MEM_ReadWord(0x00093398) == 0x2E34333BU);
 }
 //==========================================================================
 // Purpose: calculate mouse look and inject into current game
 //==========================================================================
-static void PS2_TC2_Inject(void)
+static void PS2_GSG_Inject(void)
 {
 	if(xmouse == 0 && ymouse == 0) // if mouse is idle
 		return;
 
 	const float looksensitivity = (float)sensitivity / 40.f;
 
-	float cursorXInt = PS2_MEM_ReadUInt(TC2_cursorx);
-	float cursorYInt = PS2_MEM_ReadUInt(TC2_cursory);
-	float cursorX = (float)cursorXInt;
-	float cursorY = (float)cursorYInt;
+	float cursorX = PS2_MEM_ReadFloat(GSG_cursorx);
+	float cursorY = PS2_MEM_ReadFloat(GSG_cursory);
 
-	float dx = (float)xmouse * looksensitivity;
-	if (xmouse < 0)
-		cursorX += ceil(dx);
-	else
-		cursorX += (uint16_t)dx;
+	cursorX += (float)xmouse * looksensitivity;
+	cursorY += (float)(invertpitch ? -ymouse : ymouse) * looksensitivity * 1.2;
 
-	float r = fmod(dx, 1.f);
-
-	if (abs(r + xAccumulator) >= 1)
-	{
-		if (xmouse > 0)
-			cursorX += 1;
-		else
-			cursorX -= 1;
-	}
-	
-	xAccumulator = fmod(r + xAccumulator, 1.f);
-
-	int ym = (invertpitch ? -ymouse : ymouse);
-	float dy = (float)ym * looksensitivity;
-	// if (ymouse < 0)
-	if (ym < 0)
-		cursorY += ceil(dy);
-	else
-		cursorY += (uint16_t)dy;
-
-	r = fmod(dy, 1.f);
-
-	if (abs(r + yAccumulator) >= 1)
-	{
-		if (ym > 0)
-			cursorY += 1;
-		else
-			cursorY -= 1;
-	}
-	
-	yAccumulator = fmod(r + yAccumulator, 1.f);
-
-	// cursorX += (float)xmouse * looksensitivity;
-	// cursorY += (float)(invertpitch ? -ymouse : ymouse) * looksensitivity;
-
-	PS2_MEM_WriteUInt(TC2_cursorx, (uint32_t)cursorX);
-	PS2_MEM_WriteUInt(TC2_cursory, (uint32_t)cursorY);
+	PS2_MEM_WriteFloat(GSG_cursorx, (float)cursorX);
+	PS2_MEM_WriteFloat(GSG_last_cursorx, (float)cursorX);
+	PS2_MEM_WriteFloat(GSG_cursory, (float)cursorY);
+	PS2_MEM_WriteFloat(GSG_last_cursory, (float)cursorY);
 }

@@ -19,96 +19,55 @@
 //==========================================================================
 #include <stdint.h>
 #include <stdio.h>
-#include <math.h>
 #include "../main.h"
 #include "../memory.h"
 #include "../mouse.h"
 #include "game.h"
 
-#define TC2_cursorx 0x3AD240
-#define TC2_cursory 0x3AD244
+#define REDA_cursorx 0x4B0E54
+#define REDA_snapx 0x4B21A4
+#define REDA_cursory 0x2D092C
 
-static uint8_t PS2_TC2_Status(void);
-static void PS2_TC2_Inject(void);
+static uint8_t PS2_REDA_Status(void);
+static void PS2_REDA_Inject(void);
 
 static const GAMEDRIVER GAMEDRIVER_INTERFACE =
 {
-	"PS2 Time Crisis II",
-	PS2_TC2_Status,
-	PS2_TC2_Inject,
+	"PS2 Resident Evil Dead Aim",
+	PS2_REDA_Status,
+	PS2_REDA_Inject,
 	1, // 1000 Hz tickrate
 	0 // crosshair sway not supported for driver
 };
 
-const GAMEDRIVER *GAME_PS2_TIMECRISIS2 = &GAMEDRIVER_INTERFACE;
-
-static float xAccumulator = 0.;
-static float yAccumulator = 0.;
+const GAMEDRIVER *GAME_PS2_REDEADAIM = &GAMEDRIVER_INTERFACE;
 
 //==========================================================================
 // Purpose: return 1 if game is detected
 //==========================================================================
-static uint8_t PS2_TC2_Status(void)
+static uint8_t PS2_REDA_Status(void)
 {
-	return (PS2_MEM_ReadWord(0x00093390) == 0x534C5553U && PS2_MEM_ReadWord(0x00093394) == 0x5F323032U &&
-			PS2_MEM_ReadWord(0x00093398) == 0x2E31393BU);
+	return (PS2_MEM_ReadWord(0x00093390) == 0x534C5553U && PS2_MEM_ReadWord(0x00093394) == 0x5F323036U &&
+			PS2_MEM_ReadWord(0x00093398) == 0x2E36393BU);
 }
 //==========================================================================
 // Purpose: calculate mouse look and inject into current game
 //==========================================================================
-static void PS2_TC2_Inject(void)
+static void PS2_REDA_Inject(void)
 {
 	if(xmouse == 0 && ymouse == 0) // if mouse is idle
 		return;
 
 	const float looksensitivity = (float)sensitivity / 40.f;
 
-	float cursorXInt = PS2_MEM_ReadUInt(TC2_cursorx);
-	float cursorYInt = PS2_MEM_ReadUInt(TC2_cursory);
-	float cursorX = (float)cursorXInt;
-	float cursorY = (float)cursorYInt;
+	float cursorX = PS2_MEM_ReadFloat(REDA_cursorx);
+	float cursorY = PS2_MEM_ReadUInt(REDA_cursory);
 
-	float dx = (float)xmouse * looksensitivity;
-	if (xmouse < 0)
-		cursorX += ceil(dx);
-	else
-		cursorX += (uint16_t)dx;
+	cursorX += (float)xmouse * looksensitivity / 600.f;
+	// cursorX += (float)xmouse / 100.f;
+	cursorY += (float)(invertpitch ? -ymouse : ymouse) * looksensitivity;
 
-	float r = fmod(dx, 1.f);
-
-	if (abs(r + xAccumulator) >= 1)
-	{
-		if (xmouse > 0)
-			cursorX += 1;
-		else
-			cursorX -= 1;
-	}
-	
-	xAccumulator = fmod(r + xAccumulator, 1.f);
-
-	int ym = (invertpitch ? -ymouse : ymouse);
-	float dy = (float)ym * looksensitivity;
-	// if (ymouse < 0)
-	if (ym < 0)
-		cursorY += ceil(dy);
-	else
-		cursorY += (uint16_t)dy;
-
-	r = fmod(dy, 1.f);
-
-	if (abs(r + yAccumulator) >= 1)
-	{
-		if (ym > 0)
-			cursorY += 1;
-		else
-			cursorY -= 1;
-	}
-	
-	yAccumulator = fmod(r + yAccumulator, 1.f);
-
-	// cursorX += (float)xmouse * looksensitivity;
-	// cursorY += (float)(invertpitch ? -ymouse : ymouse) * looksensitivity;
-
-	PS2_MEM_WriteUInt(TC2_cursorx, (uint32_t)cursorX);
-	PS2_MEM_WriteUInt(TC2_cursory, (uint32_t)cursorY);
+	PS2_MEM_WriteFloat(REDA_cursorx, (float)cursorX);
+	PS2_MEM_WriteFloat(REDA_snapx, (float)cursorX);
+	PS2_MEM_WriteUInt(REDA_cursory, (uint32_t)cursorY);
 }

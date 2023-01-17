@@ -19,6 +19,7 @@
 //==========================================================================
 #include <stdint.h>
 #include <stdio.h>
+#include <math.h>
 #include "../main.h"
 #include "../memory.h"
 #include "../mouse.h"
@@ -46,6 +47,9 @@ static const GAMEDRIVER GAMEDRIVER_INTERFACE =
 
 const GAMEDRIVER *GAME_SNES_PACMAN2 = &GAMEDRIVER_INTERFACE;
 
+static float xAccumulator = 0.f;
+static float yAccumulator = 0.f;
+
 //==========================================================================
 // Purpose: return 1 if game is detected
 //==========================================================================
@@ -64,25 +68,60 @@ static void SNES_PAC_Inject(void)
 	if (SNES_MEM_ReadWord(PAC_canMoveCursor) != 0x4 && SNES_MEM_ReadWord(PAC_onMainMenu) != 0) // 4 is in-game, any other value is pause, screen transition, etc..
 		return;
 
-	const float looksensitivity = (float)sensitivity / 80.f;
+	const float looksensitivity = (float)sensitivity / 40.f;
 
-	uint16_t cursorx = SNES_MEM_ReadWord(PAC_cursorx);
-	uint16_t cursory = SNES_MEM_ReadWord(PAC_cursory);
-	uint16_t lastX = cursorx;
-	uint16_t lastY = cursory;
+	uint16_t cursorXInt = SNES_MEM_ReadWord(PAC_cursorx);
+	uint16_t cursorYInt = SNES_MEM_ReadWord(PAC_cursory);
+	float cursorX = (float)cursorXInt;
+	float cursorY = (float)cursorYInt;
 
-	cursorx += ((float)xmouse + 1) * looksensitivity * 1.6;
-	cursory += ((float)ymouse + 1) * looksensitivity * 1.6;
+	if (xmouse != 0)
+	{
+		float dx = (float)xmouse * looksensitivity;
+		if (xmouse < 0)
+			cursorX += ceil(dx);
+		else
+			cursorX += (uint16_t)dx;
 
-	// prevent wrapping
-	if (lastX > 0 && lastX < 100 && cursorx > 200)
-		cursorx = 0.f;
-	if (lastY > 0 && lastY < 80 && cursory > 140)
-		cursory = 0.f;
+		float r = fmod(dx, 1.f);
 
-	cursorx = ClampFloat(cursorx, 17.f, 239.f);
-	cursory = ClampFloat(cursory, 17.f, 182.f);
+		if (abs(r + xAccumulator) >= 1)
+		{
+			if (xmouse > 0)
+				cursorX += 1;
+			else
+				cursorX -= 1;
+		}
+	
+		xAccumulator = fmod(r + xAccumulator, 1.f);
+	}
 
-	SNES_MEM_WriteWord(PAC_cursorx, (uint16_t)cursorx);
-	SNES_MEM_WriteWord(PAC_cursory, (uint16_t)cursory);
+	if (ymouse != 0)
+	{
+		int ym = (invertpitch ? -ymouse : ymouse);
+		float dy = (float)ym * looksensitivity;
+		// if (ymouse < 0)
+		if (ym < 0)
+			cursorY += ceil(dy);
+		else
+			cursorY += (uint16_t)dy;
+
+		float r = fmod(dy, 1.f);
+
+		if (abs(r + yAccumulator) >= 1)
+		{
+			if (ym > 0)
+				cursorY += 1;
+			else
+				cursorY -= 1;
+		}
+		
+		yAccumulator = fmod(r + yAccumulator, 1.f);
+	}
+
+	cursorX = ClampFloat(cursorX, 17.f, 239.f);
+	cursorY = ClampFloat(cursorY, 17.f, 182.f);
+
+	SNES_MEM_WriteWord(PAC_cursorx, (uint16_t)cursorX);
+	SNES_MEM_WriteWord(PAC_cursory, (uint16_t)cursorY);
 }

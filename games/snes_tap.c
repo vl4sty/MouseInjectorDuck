@@ -49,6 +49,8 @@ static const GAMEDRIVER GAMEDRIVER_INTERFACE =
 const GAMEDRIVER *GAME_SNES_TIMONANDPUMBAA = &GAMEDRIVER_INTERFACE;
 
 static uint32_t playerbase = 0;
+static float xAccumulator = 0.f;
+static float yAccumulator = 0.f;
 
 //==========================================================================
 // Purpose: return 1 if game is detected
@@ -65,49 +67,119 @@ static void SNES_TAP_Inject(void)
 	if(xmouse == 0 && ymouse == 0) // if mouse is idle
 		return;
 
-	const float looksensitivity = (float)sensitivity / 80.f;
+	const float looksensitivity = (float)sensitivity / 40.f;
 
 	if (SNES_MEM_ReadWord(TAP_screen) == TAP_screen_hub) // 4 is in-game, any other value is pause, screen transition, etc..
 	{
-		uint16_t cursorx = SNES_MEM_ReadWord(TAP_hubcursorx);
-		uint16_t cursory = SNES_MEM_ReadWord(TAP_hubcursory);
-		uint16_t lastX = cursorx;
-		uint16_t lastY = cursory;
+		uint16_t cursorXInt = SNES_MEM_ReadWord(TAP_hubcursorx);
+		uint16_t cursorYInt = SNES_MEM_ReadWord(TAP_hubcursory);
+		float cursorX = (float)cursorXInt;
+		float cursorY = (float)cursorYInt;
 
-		cursorx += ((float)xmouse + 1) * looksensitivity;
-		cursory += ((float)ymouse + 1) * looksensitivity;
+		if (xmouse != 0)
+		{
+			float dx = (float)xmouse * looksensitivity;
+			if (xmouse < 0)
+				cursorX += ceil(dx);
+			else
+				cursorX += (uint16_t)dx;
 
-		// prevent wrapping
-		if (lastX > 0 && lastX < 100 && cursorx > 200)
-			cursorx = 0.f;
-		if (lastY > 0 && lastY < 100 && cursory > 150)
-			cursory = 0.f;
+			float r = fmod(dx, 1.f);
 
-		cursorx = ClampFloat(cursorx, 1.f, 243.f);
-		cursory = ClampFloat(cursory, 1.f, 211.f);
+			if (abs(r + xAccumulator) >= 1)
+			{
+				if (xmouse > 0)
+					cursorX += 1;
+				else
+					cursorX -= 1;
+			}
+		
+			xAccumulator = fmod(r + xAccumulator, 1.f);
+		}
 
-		SNES_MEM_WriteWord(TAP_hubcursorx, (uint16_t)cursorx);
-		SNES_MEM_WriteWord(TAP_hubcursory, (uint16_t)cursory);
+		if (ymouse != 0)
+		{
+			int ym = (invertpitch ? -ymouse : ymouse);
+			float dy = (float)ym * looksensitivity;
+			// if (ymouse < 0)
+			if (ym < 0)
+				cursorY += ceil(dy);
+			else
+				cursorY += (uint16_t)dy;
+
+			float r = fmod(dy, 1.f);
+
+			if (abs(r + yAccumulator) >= 1)
+			{
+				if (ym > 0)
+					cursorY += 1;
+				else
+					cursorY -= 1;
+			}
+			
+			yAccumulator = fmod(r + yAccumulator, 1.f);
+		}
+
+		cursorX = ClampFloat(cursorX, 1.f, 243.f);
+		cursorY = ClampFloat(cursorY, 1.f, 211.f);
+
+		SNES_MEM_WriteWord(TAP_hubcursorx, (uint16_t)cursorX);
+		SNES_MEM_WriteWord(TAP_hubcursory, (uint16_t)cursorY);
 	} else if (SNES_MEM_ReadWord(TAP_screen) == TAP_screen_slingshooter)
 	{
-		uint16_t cursorx = SNES_MEM_ReadWord(TAP_slingshootercursorx);
-		uint16_t cursory = SNES_MEM_ReadWord(TAP_slingshootercursory);
-		uint16_t lastX = cursorx;
-		uint16_t lastY = cursory;
+		uint16_t cursorXInt = SNES_MEM_ReadWord(TAP_slingshootercursorx);
+		uint16_t cursorYInt = SNES_MEM_ReadWord(TAP_slingshootercursory);
+		float cursorX = (float)cursorXInt;
+		float cursorY = (float)cursorYInt;
 
-		cursorx += ((float)xmouse + 1) * looksensitivity;
-		cursory += ((float)ymouse + 1) * looksensitivity;
+		if (xmouse != 0)
+		{
+			float dx = (float)xmouse * looksensitivity;
+			if (xmouse < 0)
+				cursorX += ceil(dx);
+			else
+				cursorX += (uint16_t)dx;
 
-		// prevent wrapping
-		if (lastX > 0 && lastX < 100 && cursorx > 200)
-			cursorx = 0.f;
-		if (lastY > 0 && lastY < 100 && cursory > 150)
-			cursory = 0.f;
+			float r = fmod(dx, 1.f);
 
-		cursorx = ClampFloat(cursorx, 1.f, 255.f);
-		cursory = ClampFloat(cursory, 1.f, 223.f);
+			if (abs(r + xAccumulator) >= 1)
+			{
+				if (xmouse > 0)
+					cursorX += 1;
+				else
+					cursorX -= 1;
+			}
+		
+			xAccumulator = fmod(r + xAccumulator, 1.f);
+		}
 
-		SNES_MEM_WriteWord(TAP_slingshootercursorx, (uint16_t)cursorx);
-		SNES_MEM_WriteWord(TAP_slingshootercursory, (uint16_t)cursory);
+		if (ymouse != 0)
+		{
+			int ym = (invertpitch ? -ymouse : ymouse);
+			float dy = (float)ym * looksensitivity;
+			// if (ymouse < 0)
+			if (ym < 0)
+				cursorY += ceil(dy);
+			else
+				cursorY += (uint16_t)dy;
+
+			float r = fmod(dy, 1.f);
+
+			if (abs(r + yAccumulator) >= 1)
+			{
+				if (ym > 0)
+					cursorY += 1;
+				else
+					cursorY -= 1;
+			}
+			
+			yAccumulator = fmod(r + yAccumulator, 1.f);
+		}
+
+		cursorX = ClampFloat(cursorX, 1.f, 255.f);
+		cursorY = ClampFloat(cursorY, 1.f, 223.f);
+
+		SNES_MEM_WriteWord(TAP_slingshootercursorx, (uint16_t)cursorX);
+		SNES_MEM_WriteWord(TAP_slingshootercursory, (uint16_t)cursorY);
 	}
 }

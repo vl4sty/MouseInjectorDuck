@@ -145,6 +145,9 @@ static void PS2_RDR_Inject(void)
 	// TODO: prevent mouse during in-game cutscenes
 	// TODO: find a less brute force solution for gatling
 	// TODO: prevent mouse in shops
+	// TODO: fix weird 'popping' when circling mouse, might just be the animation?
+	//  		doesn't feel like it effects aiming but looks weird
+	//			seems like camera goes off center for 1 frame and pops back?	
 
 	// disable aim lock
 	uint32_t aimLockBase = PS2_MEM_ReadPointer(RDR_aimLockBase);
