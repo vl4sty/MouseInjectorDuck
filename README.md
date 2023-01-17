@@ -73,6 +73,8 @@ avoid clicking off the window.
 | --- | :---: | ----------- |
 | Red Dead Revolver (NTSC-U) | Fair | <sup>Gatling guns and final scene may break if game is loaded from memory card after a shutdown.  **Fix below*</sub> |
 | Time Crisis II (NTSC-U) | Good | <sup>Not fully tested</sub> |
+| Vampire Night (NTSC-U) | Good | <sup>Not fully tested</sub> |
+| Gunslinger Girl Vol. 1 (Japan) | Fair | <sup>Not fully tested</sub> |
 * RDR Gatling/Final Scene Fix: Start a new game on a new name. When in-game, pause and quit back to menu. Reload your main save.
 
 # ManyMouse
