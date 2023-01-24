@@ -25,22 +25,26 @@
 #include "../mouse.h"
 #include "game.h"
 
-#define VN_cursorx 0x492E78
-#define VN_cursory 0x492E7A
+#define NA_cursorx 0x4E6E20
+#define NA_cursory 0x4E6E24
+// #define NA_targetLock1 0xE06598
+// #define NA_targetLock2 0xE0659C
+// #define NA_targetLock3 0xE065A4
+// #define NA_targetLock4 0xE065A8
 
-static uint8_t PS2_VN_Status(void);
-static void PS2_VN_Inject(void);
+static uint8_t PS2_NA_Status(void);
+static void PS2_NA_Inject(void);
 
 static const GAMEDRIVER GAMEDRIVER_INTERFACE =
 {
-	"PS2 Vampire Night",
-	PS2_VN_Status,
-	PS2_VN_Inject,
+	"PS2 Ninja Assault",
+	PS2_NA_Status,
+	PS2_NA_Inject,
 	1, // 1000 Hz tickrate
 	0 // crosshair sway not supported for driver
 };
 
-const GAMEDRIVER *GAME_PS2_VAMPIRENIGHT = &GAMEDRIVER_INTERFACE;
+const GAMEDRIVER *GAME_PS2_NINJAASSAULT = &GAMEDRIVER_INTERFACE;
 
 static float xAccumulator = 0.;
 static float yAccumulator = 0.;
@@ -48,24 +52,30 @@ static float yAccumulator = 0.;
 //==========================================================================
 // Purpose: return 1 if game is detected
 //==========================================================================
-static uint8_t PS2_VN_Status(void)
+static uint8_t PS2_NA_Status(void)
 {
-	return (PS2_MEM_ReadWord(0x00093390) == 0x534C5553U && PS2_MEM_ReadWord(0x00093394) == 0x5F323032U &&
-			PS2_MEM_ReadWord(0x00093398) == 0x2E32313BU);
+	return (PS2_MEM_ReadWord(0x00093390) == 0x534C5553U && PS2_MEM_ReadWord(0x00093394) == 0x5F323034U &&
+			PS2_MEM_ReadWord(0x00093398) == 0x2E39323BU);
 }
 //==========================================================================
 // Purpose: calculate mouse look and inject into current game
 //==========================================================================
-static void PS2_VN_Inject(void)
+static void PS2_NA_Inject(void)
 {
+	// disable target lock, nope
+	// PS2_MEM_WriteWord(NA_targetLock1, 0x00000000);
+	// PS2_MEM_WriteWord(NA_targetLock2, 0x00000000);
+	// PS2_MEM_WriteWord(NA_targetLock3, 0x00000000);
+	// PS2_MEM_WriteWord(NA_targetLock4, 0x00000000);
+
 	if(xmouse == 0 && ymouse == 0) // if mouse is idle
 		return;
 
 	const float looksensitivity = (float)sensitivity / 40.f;
 
 
-	uint16_t cursorXInt = PS2_MEM_ReadUInt16(VN_cursorx);
-	uint16_t cursorYInt = PS2_MEM_ReadUInt16(VN_cursory);
+	uint16_t cursorXInt = PS2_MEM_ReadUInt16(NA_cursorx);
+	uint16_t cursorYInt = PS2_MEM_ReadUInt16(NA_cursory);
 	float cursorX = (float)cursorXInt;
 	float cursorY = (float)cursorYInt;
 
@@ -87,7 +97,7 @@ static void PS2_VN_Inject(void)
 	
 	xAccumulator = fmod(r + xAccumulator, 1.f);
 
-	int ym = (invertpitch ? ymouse : -ymouse);
+	int ym = (invertpitch ? -ymouse : ymouse);
 	float dy = (float)ym * looksensitivity;
 	// if (ymouse < 0)
 	if (ym < 0)
@@ -107,6 +117,6 @@ static void PS2_VN_Inject(void)
 	
 	yAccumulator = fmod(r + yAccumulator, 1.f);
 
-	PS2_MEM_WriteUInt16(VN_cursorx, (uint16_t)cursorX);
-	PS2_MEM_WriteUInt16(VN_cursory, (uint16_t)cursorY);
+	PS2_MEM_WriteUInt16(NA_cursorx, (uint16_t)cursorX);
+	PS2_MEM_WriteUInt16(NA_cursory, (uint16_t)cursorY);
 }

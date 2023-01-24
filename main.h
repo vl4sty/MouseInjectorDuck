@@ -55,3 +55,11 @@ inline uint16_t ClampHalfword(const uint16_t value, const uint16_t min, const ui
 extern uint8_t sensitivity;
 extern uint8_t crosshair;
 extern uint8_t invertpitch;
+extern float out;
+extern float out2;
+extern float out3;
+extern float preSinOut;
+extern float preCosOut;
+extern float totalAngleOut;
+extern uint32_t uIntOut1;
+extern uint32_t uIntOut2;

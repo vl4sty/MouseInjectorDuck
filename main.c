@@ -36,6 +36,14 @@ uint8_t sensitivity = 20;
 uint8_t crosshair = 3;
 uint8_t invertpitch = 0;
 int isHooked = 0;
+float out = 0;
+float out2 = 0;
+float out3 = 0;
+float preSinOut = 0;
+float preCosOut = 0;
+float totalAngleOut = 0;
+uint32_t uIntOut1 = 0x0;
+uint32_t uIntOut2 = 0x0;
 
 int32_t main(void);
 static void quit(void);
@@ -103,6 +111,9 @@ int32_t main(void)
 		}
 		Sleep(GAME_Tickrate());
 		GUI_TitleShowHookStatus(hooked);
+
+		// update GUI for debug output
+		// GUI_Update();
 	}
 	return 0;
 }
@@ -255,6 +266,13 @@ static void GUI_Update(void)
 		printf(" Note: [+/-] to Change Values\n%s\n", LINE);
 	else
 		printf(" Note: [+/-] to Change Values - [Insert] for Supported Games\n%s\n", LINE);
+	
+	// printf("horsebase: %X\n", uIntOut1);
+	// printf("coyotebase: %X\n", uIntOut2);
+	// printf("sin: %f\n", out2);
+	// printf("pre cos: %f\n", preCosOut);
+	// printf("cos: %f\n", out3);
+	// printf("totalAngle: %f", totalAngleOut);
 }
 //==========================================================================
 // Purpose: print list of supported games

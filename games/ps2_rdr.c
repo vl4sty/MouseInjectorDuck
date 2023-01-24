@@ -111,10 +111,7 @@ static uint8_t PS2_RDR_Status(void)
 	return (PS2_MEM_ReadWord(0x00093390) == 0x534C5553U && PS2_MEM_ReadWord(0x00093394) == 0x5F323035U) &&
 			PS2_MEM_ReadWord(0x00093398) == 0x2E30303BU;
 }
-//==========================================================================
-// Purpose: detects player pointer from stack address
-// Changed Globals: fovbase, playerbase
-//==========================================================================
+
 static uint8_t PS2_RDR_DetectCamera(void)
 {
 	uint32_t tempcambase = PS2_MEM_ReadPointer(RDR_cambase);
@@ -129,9 +126,7 @@ static uint8_t PS2_RDR_DetectCamera(void)
 
 	return 0;
 }
-//==========================================================================
-// Purpose: calculate mouse look and inject into current game
-//==========================================================================
+
 static void PS2_RDR_Inject(void)
 {
 	// PS2_MEM_WriteFloat(AUF_health_lvl2, 2000.f);
