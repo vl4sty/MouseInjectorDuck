@@ -25,22 +25,27 @@
 #include "game.h"
 
 #define TAU 6.2831853f // 0x40C90FDB
-#define HALF_PI 1.5708f
 
-// #define DW_camy 0x131DC38
-// #define DW_camx 0x131DC3C
-
-#define DW_framerate 0x71FA68
-#define DW_widescreen1 0x641770
-#define DW_widescreen2 0x641774
-
-#define DW_cambase 0x1FFF2A0 // blips between different values but consistently gives a cambase value
-#define DW_cambase_sanity 0xC0 // negative offset
-#define DW_cambase_sanity_value 0x6666E63FU
-#define DW_cambase_sanity2 0x10 // negative offset
-#define DW_cambase_sanity2_value 0x00001643U
-#define DW_camx 0xB8 // negative offset
-#define DW_camy 0xBC // negative offset
+#define DW_cambase 0x6C0230 // requires use of cambase cheat
+#define DW_cambase_sanity 0x80
+#define DW_cambase_sanity_value 0xCCCCCC3F
+// #define DW_cambase_sanity2 0x8
+// #define DW_cambase_sanity2_value 0x285E7800U
+#define DW_cambase_sanity2 0x13C
+#define DW_cambase_sanity2_value 0x6666E63F
+#define DW_cambase_sanity3 0x1EC
+#define DW_cambase_sanity3_value 0x00001643U
+#define DW_cambase_sanity4 0x0
+#define DW_cambase_sanity4_value 0x50A57000U
+#define DW_camx 0x144
+#define DW_camy 0x140
+// #define DW_cambase 0x1FFF2A0 // blips between different values but consistently gives a cambase value
+// #define DW_cambase_sanity 0xC0 // negative offset
+// #define DW_cambase_sanity_value 0x6666E63FU
+// #define DW_cambase_sanity2 0x10 // negative offset
+// #define DW_cambase_sanity2_value 0x00001643U
+// #define DW_camx 0xB8 // negative offset
+// #define DW_camy 0xBC // negative offset
 
 #define DW_coyoteCamPtr 0x953D44
 // offsets from coyote base
@@ -51,12 +56,14 @@
 #define DW_player_in_coyote 0x7C
 #define DW_coyote_sanity_value 0x696E2FA6
 
-#define DW_turretBase 0x1C47E54 // CURRENTLY NOT WORKING, look for pointer chain to turretbase
-#define DW_turret_camY -0x28 // negative offset
-#define DW_turret_camX -0x24 // negative offset
-#define DW_turret_sanity -0x2C // negative offset
+#define DW_turretBase 0x720590 // Requires use of turretBase cheat
+#define DW_turret_camY 0x108
+#define DW_turret_camX 0x10C
+#define DW_turret_sanity 0x104
 #define DW_turret_sanity_value 0xCF09DE58
-#define DW_player_in_turret -0x14 // negative offset
+#define DW_player_in_turret_offset 0x1E8
+#define DW_player_in_turret 0x120
+#define DW_player_in_turret2 0x178
 
 #define DW_horsebase_ptr_1 0xEC8F18 // chain of pointers
 #define DW_horsebase_ptr_2_offset 0x8
@@ -65,6 +72,10 @@
 #define DW_horse_camY 0xE0
 #define DW_horse_camX_sin 0xE4
 #define DW_horse_camX_cos 0xDC
+
+#define DW_fov_base 0x6C0090 // requires use of FOV cheat
+#define DW_fov 0x170
+// #define DW_fov_default 0x16C
 
 #define DW_COYOTE_TOTAL_ANGLE_UNSET -99
 #define DW_HORSE_TOTAL_ANGLE_UNSET -99
@@ -88,7 +99,7 @@ const GAMEDRIVER *GAME_PS2_DARKWATCH = &GAMEDRIVER_INTERFACE;
 
 static uint32_t cambase = 0;
 static uint32_t coyotebase = 0;
-static float totalAngle = DW_COYOTE_TOTAL_ANGLE_UNSET;
+static float coyoteTotalAngle = DW_COYOTE_TOTAL_ANGLE_UNSET;
 static uint32_t turretBase = 0;
 static uint32_t horsebase = 0;
 static float horseTotalAngle = DW_HORSE_TOTAL_ANGLE_UNSET;
@@ -101,9 +112,9 @@ static uint8_t PS2_DW_Status(void)
 
 static uint8_t PS2_DW_DetectCamera(void)
 {
-	// cambase will eventually hold a pointer to cambase?
 	uint32_t tempcambase = PS2_MEM_ReadPointer(DW_cambase);
-	if (PS2_MEM_ReadWord(tempcambase - DW_cambase_sanity) == DW_cambase_sanity_value && PS2_MEM_ReadWord(tempcambase - DW_cambase_sanity2) == DW_cambase_sanity2_value)
+	if (PS2_MEM_ReadWord(tempcambase + DW_cambase_sanity) == DW_cambase_sanity_value && PS2_MEM_ReadWord(tempcambase + DW_cambase_sanity2) == DW_cambase_sanity2_value
+		&& PS2_MEM_ReadWord(tempcambase + DW_cambase_sanity4) == DW_cambase_sanity4_value)
 	{
 		cambase = tempcambase;
 		return 1;
@@ -114,23 +125,13 @@ static uint8_t PS2_DW_DetectCamera(void)
 
 static void PS2_DW_Inject(void)
 {
-	// TODO: find fovbase
-	// TODO: higher camY movement when widescreen?
-	// TODO: find pointer to turret base
 	// TODO: find more consistent coyoteBase pointer? does it break sometimes?
 	// TODO: horse camY on chapter 14 doesn't go as high as it should, due to weird transform used
 	//			the float used for camY also affects the camXSin when pitch is high
 	//			may require keeping track of the pitch angle as well like the camX
-
-	// enable 60FPS
-	// PS2_MEM_WriteUInt(DW_framerate, 0x1);
-
-	// enable widescreen
-	// PS2_MEM_WriteUInt(DW_widescreen1, 0x3FAAAAAA);
-	// PS2_MEM_WriteUInt(DW_widescreen2, 0x3FE38E38);
-
-	// disable auto-center, must start mouse injector at boot to work?
-	// PS2_MEM_WriteUInt(DW_auto_center, 0x0);
+	// TODO: prevent mouse while on pause/main menu
+	// TODO: FOV cheat to increase max FOV
+	// TODO: find pointer chains for cambase, turretbase, etc., to avoid having to use external cheats
 
 	// did player get out of coyote?
 	if (coyotebase && PS2_MEM_ReadUInt(coyotebase + DW_player_in_coyote) == 0) {
@@ -145,22 +146,29 @@ static void PS2_DW_Inject(void)
 		if (PS2_MEM_ReadWord(tempcoyotebase + DW_coyote_sanity) == DW_coyote_sanity_value)
 		{
 			coyotebase = tempcoyotebase;
-			totalAngle = DW_COYOTE_TOTAL_ANGLE_UNSET;
+			coyoteTotalAngle = DW_COYOTE_TOTAL_ANGLE_UNSET;
 		}
 	}
 
-	// unset turretbase if no longer valid
-	if (turretBase && PS2_MEM_ReadUInt(turretBase + DW_player_in_turret) == 0) {
-		turretBase = 0;
-	}
-	// check for valid turretbase if unset | DOES NOT WORK CURRENTLY
-	if (turretBase == 0)
+	uint32_t tempturretbase = PS2_MEM_ReadPointer(DW_turretBase);
+	if (PS2_MEM_ReadWord(tempturretbase + DW_turret_sanity) == DW_turret_sanity_value)
 	{
-		uint32_t tempturretbase = PS2_MEM_ReadPointer(DW_turretBase);
-		
-		if (PS2_MEM_ReadWord(tempturretbase + DW_turret_sanity) == DW_turret_sanity_value)
-		{
+		// if (PS2_MEM_ReadUInt(turretBase + DW_player_in_turret) == 0x0) { // do not set if player is not in a turret
+		// if (PS2_MEM_ReadUInt(tempturretbase + DW_player_in_turret_offset) != DW_player_in_turret) { // do not set if player is not in a turret
+		// 	turretBase = 0;
+		// }
+		// else {
+		// 	turretBase = tempturretbase;
+		// }
+		// if (PS2_MEM_ReadUInt(tempturretbase + DW_player_in_turret) != 0x0) {
+		// if (PS2_MEM_ReadUInt(tempturretbase + DW_player_in_turret_offset) == 0x00020002) {
+		// check that turret is occupied, and 2 pointers are set indicating the player is occupying it
+		if (PS2_MEM_ReadUInt(tempturretbase + DW_player_in_turret_offset) == 0x00020002 && PS2_MEM_ReadUInt(tempturretbase + 0x20) != 0x0
+			&& PS2_MEM_ReadUInt(tempturretbase + DW_player_in_turret2) != 0x0) {
 			turretBase = tempturretbase;
+		}
+		else {
+			turretBase = 0;
 		}
 	}
 
@@ -177,11 +185,6 @@ static void PS2_DW_Inject(void)
 			horsebase = temphorsebase;
 		}
 	}
-
-	// debug output
-	// uIntOut1 = horsebase;
-	// uIntOut1 = cambase;
-	// uIntOut2 = coyotebase;
 
 	if(xmouse == 0 && ymouse == 0) { // if mouse is idle
 		return;
@@ -218,7 +221,8 @@ static void PS2_DW_Inject(void)
 
 		PS2_MEM_WriteFloat(horsebase + DW_horse_camY, horseCamY);
 	}
-	else if (turretBase && PS2_MEM_ReadWord(turretBase + DW_turret_sanity) == DW_turret_sanity_value) // in turret | CURRENTLY NOT WORKING
+	else if (turretBase != 0 && PS2_MEM_ReadWord(turretBase + DW_turret_sanity) == DW_turret_sanity_value) // in turret | CURRENTLY NOT WORKING
+	// else if (turretBase && PS2_MEM_ReadWord(turretBase + DW_player_in_turret_offset) == DW_player_in_turret) // in turret | CURRENTLY NOT WORKING
 	{
 		float camX = PS2_MEM_ReadFloat(turretBase + DW_turret_camX);
 		float camY = PS2_MEM_ReadFloat(turretBase + DW_turret_camY);
@@ -238,23 +242,18 @@ static void PS2_DW_Inject(void)
 		float camXCos = PS2_MEM_ReadFloat(coyotebase + DW_coyote_camX_cos);
 
 		float angle = atan(camXSin / camXCos);
-		if (totalAngle == DW_COYOTE_TOTAL_ANGLE_UNSET) {
-			totalAngle = angle;
+		if (coyoteTotalAngle == DW_COYOTE_TOTAL_ANGLE_UNSET) {
+			coyoteTotalAngle = angle;
 		}
 
 		float angleChange = (float)xmouse * looksensitivity / 200.f;
 
 		angle += angleChange;
-		totalAngle += angleChange;
-		totalAngleOut = totalAngle;
+		coyoteTotalAngle += angleChange;
 		// TODO: while totalAngle > or < TAU, -TAU
 
-		camXSin = sin(totalAngle);
-		camXCos = cos(totalAngle);
-
-		// out = angle;
-		// out2 = camXSin;
-		// out3 = camXCos;
+		camXSin = sin(coyoteTotalAngle);
+		camXCos = cos(coyoteTotalAngle);
 
 		PS2_MEM_WriteFloat(coyotebase + DW_coyote_camX_sin, (float)camXSin);
 		PS2_MEM_WriteFloat(coyotebase + DW_coyote_camX_cos, (float)camXCos);
@@ -268,29 +267,36 @@ static void PS2_DW_Inject(void)
 		coyotebase = 0;
 		horsebase = 0;
 		horseTotalAngle = DW_HORSE_TOTAL_ANGLE_UNSET;
-		// totalAngle = DW_COYOTE_TOTAL_ANGLE_UNSET;
+		coyoteTotalAngle = DW_COYOTE_TOTAL_ANGLE_UNSET;
 
-		if (PS2_MEM_ReadWord(cambase - DW_cambase_sanity) != DW_cambase_sanity_value) // if cambase no longer valid, check for a new one
+		uint32_t fovBase = PS2_MEM_ReadPointer(DW_fov_base);
+		float fov = 55.f;
+		if (fovBase)
+			fov = PS2_MEM_ReadFloat(fovBase + DW_fov);
+
+
+		if (PS2_MEM_ReadWord(cambase + DW_cambase_sanity) != DW_cambase_sanity_value || PS2_MEM_ReadWord(cambase + DW_cambase_sanity2) != DW_cambase_sanity2_value
+			|| PS2_MEM_ReadWord(cambase + DW_cambase_sanity4) != DW_cambase_sanity4_value)
 		{
 			if (!PS2_DW_DetectCamera()) {
 				return;
 			}
 		}
 
-		float camX = PS2_MEM_ReadFloat(cambase - DW_camx);
-		float camY = PS2_MEM_ReadFloat(cambase - DW_camy);
+		float camX = PS2_MEM_ReadFloat(cambase + DW_camx);
+		float camY = PS2_MEM_ReadFloat(cambase + DW_camy);
 		camX /= 180.f;
 		camY /= 180.f;
 
-		camX -= (float)xmouse * looksensitivity / 1200.f;
-		camY += (float)(invertpitch ? -ymouse : ymouse) * looksensitivity / 1200.f;
+		camX -= (float)xmouse * looksensitivity / 1200.f * (fov / 55.f);
+		camY += (float)(invertpitch ? -ymouse : ymouse) * looksensitivity / 1200.f * 1.1f * (fov / 55.f);
 
 		camX *= 180.f;
 		camY *= 180.f;
 
 		camY = ClampFloat(camY, -80.f, 80.f);
 
-		PS2_MEM_WriteFloat(cambase - DW_camx, camX);
-		PS2_MEM_WriteFloat(cambase - DW_camy, camY);
+		PS2_MEM_WriteFloat(cambase + DW_camx, camX);
+		PS2_MEM_WriteFloat(cambase + DW_camy, camY);
 	}
 }

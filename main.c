@@ -267,8 +267,8 @@ static void GUI_Update(void)
 	else
 		printf(" Note: [+/-] to Change Values - [Insert] for Supported Games\n%s\n", LINE);
 	
-	// printf("horsebase: %X\n", uIntOut1);
-	// printf("coyotebase: %X\n", uIntOut2);
+	// printf("cambase: %X\n", uIntOut1);
+	// printf("turretbase: %X\n", uIntOut2);
 	// printf("sin: %f\n", out2);
 	// printf("pre cos: %f\n", preCosOut);
 	// printf("cos: %f\n", out3);

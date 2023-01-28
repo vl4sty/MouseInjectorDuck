@@ -1,0 +1,23 @@
+gametitle=Darkwatch SLUS-21042 0x327053E8
+
+// Disable auto-centering
+patch=1,EE,0020517C,word,00000000
+
+// Disable horizontal aim-lock (required by MouseInjectorDolphinDuck)
+patch=1,EE,00204E94,word,00000000
+
+// Disable vertical aim-lock (required by MouseInjectorDolphinDuck)
+patch=1,EE,002050D4,word,00000000
+
+// Write turret base to 0x720590 (required by MouseInjectorDolphinDuck) (disables turret Y-axis with analog stick)
+patch=1,EE,00287970,word,AC310590
+
+// Write FOV base to 0x620090 (required by MouseInjectorDolphinDuck)
+patch=1,EE,001EF890,word,AC320090
+patch=1,EE,001EF894,word,03E00008
+patch=1,EE,001EF898,word,27BD0080
+
+// Write cambase to 0x620230 (for use with MouseInjectorDolphinDuck)
+patch=1,EE,0020520C,word,AC220230
+patch=1,EE,00205210,word,03E00008
+patch=1,EE,00205214,word,27BD0070
