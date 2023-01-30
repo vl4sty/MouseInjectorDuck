@@ -9,7 +9,7 @@ A external app that injects cursor input into game memory.
 | RetroArch (Mupen64Plus-Next core) | 1.14.0 (2.4-Vulkan bc24153)| retroarch.exe |
 | BizHawk (N64, Mupen64Plus) | 2.8 | EmuHawk.exe |
 | BSNES | v115 | bsnes.exe |
-| PCSX2 Nightly | 1.7.3964 | pcsx2-qtx64-avx2.exe |
+| PCSX2 Nightly | 1.7.3977 | pcsx2-qtx64-avx2.exe |
 * NOTE: Versions given are the latest that have been tested working, may work with newer
 
 ## How to Use
@@ -75,7 +75,9 @@ avoid clicking off the window.
 | Time Crisis II (NTSC-U) | Good | <sup>Not fully tested</sub> |
 | Vampire Night (NTSC-U) | Good | <sup>Not fully tested</sub> |
 | Gunslinger Girl Vol. 1 (Japan) | Fair | <sup>Not fully tested</sub> |
-| Darkwatch | Good | <sup>***Requires use of supplied cheat file to work (327053E8.pnach)*** Horse aiming is not quite right but is usable.</sub> |
+| Darkwatch (NTSC-U) | Good | <sup>***Requires use of supplied cheat file to work (327053E8.pnach)*** Horse aiming is not quite right but is usable.</sub> |
+| Black (NTSC-U) | Good | <sup>Not fully tested</sub> |
+| Urban Chaos: Riot Response (NTSC-U) | Good | <sup>Not fully tested</sub> |
 * RDR Gatling/Final Scene Fix: Start a new game on a new name. When in-game, pause and quit back to menu. Reload your main save.
 * Place cheat files in 'cheats' folder in the main PCSX2 directory. In PCSX2 go to 'Settings/Emulation' and tick 'Enable Cheats'.
 

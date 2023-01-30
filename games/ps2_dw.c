@@ -289,7 +289,8 @@ static void PS2_DW_Inject(void)
 		camY /= 180.f;
 
 		camX -= (float)xmouse * looksensitivity / 1200.f * (fov / 55.f);
-		camY += (float)(invertpitch ? -ymouse : ymouse) * looksensitivity / 1200.f * 1.1f * (fov / 55.f);
+		// camY += (float)(invertpitch ? -ymouse : ymouse) * looksensitivity / 1200.f * 1.1f * (fov / 55.f);
+		camY += (float)(invertpitch ? -ymouse : ymouse) * looksensitivity / 1200.f * (fov / 55.f);
 
 		camX *= 180.f;
 		camY *= 180.f;
