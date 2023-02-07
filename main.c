@@ -267,12 +267,12 @@ static void GUI_Update(void)
 	else
 		printf(" Note: [+/-] to Change Values - [Insert] for Supported Games\n%s\n", LINE);
 	
-	// printf("cambase: %X\n", uIntOut1);
+	// printf("tankBase: %X\n", uIntOut1);
 	// printf("turretbase: %X\n", uIntOut2);
 	// printf("sin: %f\n", out2);
 	// printf("pre cos: %f\n", preCosOut);
 	// printf("cos: %f\n", out3);
-	// printf("totalAngle: %f", totalAngleOut);
+	// printf("onFootTotalAngle: %f", totalAngleOut);
 }
 //==========================================================================
 // Purpose: print list of supported games

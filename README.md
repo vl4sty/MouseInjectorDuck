@@ -9,7 +9,7 @@ A external app that injects cursor input into game memory.
 | RetroArch (Mupen64Plus-Next core) | 1.14.0 (2.4-Vulkan bc24153)| retroarch.exe |
 | BizHawk (N64, Mupen64Plus) | 2.8 | EmuHawk.exe |
 | BSNES | v115 | bsnes.exe |
-| PCSX2 Nightly | 1.7.3977 | pcsx2-qtx64-avx2.exe |
+| PCSX2 Nightly | 1.7.4013 | pcsx2-qtx64-avx2.exe |
 * NOTE: Versions given are the latest that have been tested working, may work with newer
 * NOTE: PCSX2 will only hook with **BIOS versions 5XXXX and up**.
 
@@ -79,6 +79,10 @@ avoid clicking off the window.
 | Darkwatch (NTSC-U) | Good | <sup>***Requires use of supplied cheat file to work (327053E8.pnach)*** Horse aiming is not quite right but is usable.</sub> |
 | Black (NTSC-U) | Good | <sup>Not fully tested</sub> |
 | Urban Chaos: Riot Response (NTSC-U) | Good | <sup>Not fully tested</sub> |
+| 007: Agent Under Fire (NTSC-U) | Good | <sup>Mouse movement warps camera while paused and during in-game cutscenes, aim-lock not disabled on auto-scroller levels</sub> |
+| Quake III: Revolution (NTSC-U) | Good | <sup>Not fully tested</sub> |
+| 50 Cent: Bulletproof (NTSC-U) | Good | <sup>Not fully tested</sub> |
+| Call of Duty: Finest Hour (NTSC-U) | Good | <sup>None</sub> |
 * NOTE: PCSX2 will only hook with **BIOS versions 5XXXX and up**.
 * RDR Gatling/Final Scene Fix: Start a new game on a new name. When in-game, pause and quit back to menu. Reload your main save.
 * Place cheat files in 'cheats' folder in the main PCSX2 directory. In PCSX2 go to 'Settings/Emulation' and tick 'Enable Cheats'.
