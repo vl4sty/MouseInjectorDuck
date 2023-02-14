@@ -55,6 +55,7 @@ avoid clicking off the window.
 | Medal of Honor: Underground (NTSC) | Fair | <sup>Machine Gun sentry doesn't always work (depends on objects in line of sight). Sidecar gun in 6-3 not supported.</sub> |
 | Revolution X (NTSC) | Good | <sup>None</sub> |
 | Armorines: Project S.W.A.R.M. | Fair | <sup>Not fully tested</sub> |
+| Resident Evil: Survivor | Good | <sup>Not fully tested</sub> |
 
 ## Supported Mupen64Plus(RetroArch)/BizHawk 2.8 Titles
 | Game Title | Mouse Support | Issues |
@@ -73,19 +74,20 @@ avoid clicking off the window.
 * NOTE: At the moment BSNES may unhook after minimizing, menuing, pausing emulation, or loading/saving savestates. Requires restarting BSNES and MouseInjector.
 
 ## Supported PCSX2 Titles
-| Game Title | Mouse Support | Issues |
-| --- | :---: | ----------- |
-| Red Dead Revolver (NTSC-U) | Fair | <sup>Gatling guns and final scene may break if game is loaded from memory card after a shutdown.  **Fix below*</sub> |
-| Time Crisis II (NTSC-U) | Good | <sup>Not fully tested</sub> |
-| Vampire Night (NTSC-U) | Good | <sup>Not fully tested</sub> |
-| Gunslinger Girl Vol. 1 (Japan) | Fair | <sup>Not fully tested</sub> |
-| Darkwatch (NTSC-U) | Good | <sup>***Requires use of supplied cheat file to work (327053E8.pnach)*** Horse aiming is not quite right but is usable.</sub> |
-| Black (NTSC-U) | Good | <sup>Not fully tested</sub> |
-| Urban Chaos: Riot Response (NTSC-U) | Good | <sup>Not fully tested</sub> |
-| 007: Agent Under Fire (NTSC-U) | Good | <sup>Mouse movement warps camera while paused and during in-game cutscenes, aim-lock not disabled on auto-scroller levels</sub> |
-| Quake III: Revolution (NTSC-U) | Good | <sup>Not fully tested</sub> |
-| 50 Cent: Bulletproof (NTSC-U) | Good | <sup>Not fully tested</sub> |
-| Call of Duty: Finest Hour (NTSC-U) | Good | <sup>None</sub> |
+| Game Title | Mouse Support | Issues | In-game Options |
+| ------ | :---: | ----------- | ----------- |
+| Red Dead Revolver (NTSC-U) | Fair | <sup>Gatling guns and final scene may break if game is loaded from memory card after a shutdown.  **Fix below*</sub> | <sup>Target Mode: Toggle</sub> |
+| Time Crisis II (NTSC-U) | Good | <sup>Not fully tested</sub> | |
+| Vampire Night (NTSC-U) | Good | <sup>Not fully tested</sub> | |
+| Gunslinger Girl Vol. 1 (Japan) | Fair | <sup>Not fully tested</sub> | |
+| Darkwatch (NTSC-U) | Good | <sup>***Requires use of supplied cheat file to work (327053E8.pnach)*** Horse aiming is not quite right but is usable.</sub> | |
+| Black (NTSC-U) | Good | <sup>Not fully tested</sub> | |
+| Urban Chaos: Riot Response (NTSC-U) | Good | <sup>Not fully tested</sub> | <sup>Auto-Center: No</sub> |
+| 007: Agent Under Fire (NTSC-U) | Good | <sup>Mouse movement warps camera while paused and during in-game cutscenes, aim-lock not disabled on auto-scroller levels</sub> | |
+| Quake III: Revolution (NTSC-U) | Good | <sup>None</sub> | <sup>auto center: no, auto aiming: no (only available from main menu options) |
+| 50 Cent: Bulletproof (NTSC-U) | Good | <sup>Not fully tested</sub> | <sup>Camera->Aim Assist: Off</sub> |
+| Call of Duty: Finest Hour (NTSC-U) | Good | <sup>None</sub> | <sup>Aim Assist: Off</sub> |
+| Cold Winter (NTSC-U) | Good | <sup>Split-screen mode not supported</sub> | <sup>Profile options - Aim Assist: Off</sub> |
 * NOTE: PCSX2 will only hook with **BIOS versions 5XXXX and up**.
 * RDR Gatling/Final Scene Fix: Start a new game on a new name. When in-game, pause and quit back to menu. Reload your main save.
 * Place cheat files in 'cheats' folder in the main PCSX2 directory. In PCSX2 go to 'Settings/Emulation' and tick 'Enable Cheats'.
