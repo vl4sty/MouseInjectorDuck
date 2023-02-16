@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <windows.h>
+#include <math.h>
 #include "main.h"
 #include "memory.h"
 #include "mouse.h"
@@ -372,4 +373,29 @@ static void INI_Save(const uint8_t showerror)
 	}
 	else if(showerror) // if saving file failed
 		MessageBox(HWND_DESKTOP, "Saving mouseinjector.ini failed!", "Error", MB_ICONERROR | MB_OK); // tell the user saving mouseinjector.ini failed
+}
+
+// dx = change to value
+void AccumulateAddRemainder(float *value, float *accumulator, float dir, float dx)
+{
+	// add integer part of dx
+	if (dir < 0)
+		*value += ceil(dx);
+	else
+		*value += (uint16_t)dx;
+
+	// determine remainder
+	float r = fmod(dx, 1.f);
+
+	// if remainder + accumulation > 1, add 1
+	if (abs(r + *accumulator) >= 1)
+	{
+		if (dir > 0)
+			*value += 1;
+		else
+			*value -= 1;
+	}
+
+	// add remainder to accumlation
+	*accumulator = fmod(r + *accumulator, 1.f);
 }

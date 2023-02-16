@@ -52,6 +52,8 @@ inline uint16_t ClampHalfword(const uint16_t value, const uint16_t min, const ui
 	return test > max ? max : test;
 }
 
+extern void AccumulateAddRemainder(float *value, float *accumulator, float dir, float dx);
+
 extern uint8_t sensitivity;
 extern uint8_t crosshair;
 extern uint8_t invertpitch;

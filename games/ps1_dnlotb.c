@@ -18,34 +18,28 @@
 // along with this program; if not, visit http://www.gnu.org/licenses/gpl-2.0.html
 //==========================================================================
 #include <stdint.h>
-#include <stdio.h>
-#include <math.h>
 #include "../main.h"
 #include "../memory.h"
 #include "../mouse.h"
 #include "game.h"
 
-#define TAU 6.2831853f // 0x40C90FDB
+#define LOTB_CAMX 0xE9D1C
+#define LOTB_CAMY_1 0x10A70C
+#define LOTB_CAMY_2 0x10A720
 
-// STATIC addresses
-#define PAC_cursorx 0x001062 // range: 17-239
-#define PAC_cursory 0x001066 // range: 17-182
-#define PAC_canMoveCursor 0x000124
-#define PAC_onMainMenu 0x0000F4
-
-static uint8_t SNES_PAC_Status(void);
-static void SNES_PAC_Inject(void);
+static uint8_t PS1_DNLOTB_Status(void);
+static void PS1_DNLOTB_Inject(void);
 
 static const GAMEDRIVER GAMEDRIVER_INTERFACE =
 {
-	"Pac-Man 2: The New Adventures",
-	SNES_PAC_Status,
-	SNES_PAC_Inject,
+	"Duke Nukem: Land of the Babes",
+	PS1_DNLOTB_Status,
+	PS1_DNLOTB_Inject,
 	1, // 1000 Hz tickrate
-	0 // crosshair sway not supported for driver
+	0 // crosshair sway supported for driver
 };
 
-const GAMEDRIVER *GAME_SNES_PACMAN2 = &GAMEDRIVER_INTERFACE;
+const GAMEDRIVER *GAME_PS1_DNLANDOFTHEBABES = &GAMEDRIVER_INTERFACE;
 
 static float xAccumulator = 0.f;
 static float yAccumulator = 0.f;
@@ -53,46 +47,34 @@ static float yAccumulator = 0.f;
 //==========================================================================
 // Purpose: return 1 if game is detected
 //==========================================================================
-static uint8_t SNES_PAC_Status(void)
+static uint8_t PS1_DNLOTB_Status(void)
 {
-	return (SNES_MEM_ReadWord(0xE3C) == 0x4150 && SNES_MEM_ReadWord(0xE3E) == 0x0043); // PAC.
+	return (PS1_MEM_ReadWord(0x92EC) == 0x534C5553U && PS1_MEM_ReadWord(0x92F0) == 0x5F303130U && PS1_MEM_ReadWord(0x92F4) == 0x2E30323BU); // SLUS_010.02;
 }
 //==========================================================================
 // Purpose: calculate mouse look and inject into current game
 //==========================================================================
-static void SNES_PAC_Inject(void)
+static void PS1_DNLOTB_Inject(void)
 {
+
 	if(xmouse == 0 && ymouse == 0) // if mouse is idle
 		return;
 
-	if (SNES_MEM_ReadWord(PAC_canMoveCursor) != 0x4 && SNES_MEM_ReadWord(PAC_onMainMenu) != 0) // 4 is in-game, any other value is pause, screen transition, etc..
-		return;
+	uint16_t camX = PS1_MEM_ReadHalfword(LOTB_CAMX);
+	// uint16_t camY = PS1_MEM_ReadHalfword(LOTB_CAMY_2);
+	float camXF = (float)camX;
+	// float camYF = (float)camY;
 
-	const float looksensitivity = (float)sensitivity / 40.f;
+	const float looksensitivity = (float)sensitivity / 30.f;
 
-	uint16_t cursorXInt = SNES_MEM_ReadWord(PAC_cursorx);
-	uint16_t cursorYInt = SNES_MEM_ReadWord(PAC_cursory);
-	float cursorX = (float)cursorXInt;
-	float cursorY = (float)cursorYInt;
+	float dx = (float)xmouse * looksensitivity;
+	AccumulateAddRemainder(&camXF, &xAccumulator, xmouse, dx);
 
-	if (xmouse != 0)
-	{
-		float dx = (float)xmouse * looksensitivity;
+	// float ym = (float)(invertpitch ? -ymouse : ymouse);
+	// float dy = ym * looksensitivity;
+	// AccumulateAddRemainder(&camYF, &yAccumulator, ym, dy);
 
-		AccumulateAddRemainder(&cursorX, &xAccumulator, xmouse, dx);
-	}
-
-	if (ymouse != 0)
-	{
-		int ym = (invertpitch ? -ymouse : ymouse);
-		float dy = (float)ym * looksensitivity;
-
-		AccumulateAddRemainder(&cursorY, &yAccumulator, ym, dy);
-	}
-
-	cursorX = ClampFloat(cursorX, 17.f, 239.f);
-	cursorY = ClampFloat(cursorY, 17.f, 182.f);
-
-	SNES_MEM_WriteWord(PAC_cursorx, (uint16_t)cursorX);
-	SNES_MEM_WriteWord(PAC_cursory, (uint16_t)cursorY);
+	PS1_MEM_WriteHalfword(LOTB_CAMX, (uint16_t)camXF);
+	// PS1_MEM_WriteHalfword(LOTB_CAMY_1, (uint16_t)camYF);
+	// PS1_MEM_WriteHalfword(LOTB_CAMY_2, (uint16_t)camYF);
 }

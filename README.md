@@ -55,7 +55,7 @@ avoid clicking off the window.
 | Medal of Honor: Underground (NTSC) | Fair | <sup>Machine Gun sentry doesn't always work (depends on objects in line of sight). Sidecar gun in 6-3 not supported.</sub> |
 | Revolution X (NTSC) | Good | <sup>None</sub> |
 | Armorines: Project S.W.A.R.M. | Fair | <sup>Not fully tested</sub> |
-| Resident Evil: Survivor | Good | <sup>Not fully tested</sub> |
+| Resident Evil: Survivor | Good | <sup>None</sub> |
 
 ## Supported Mupen64Plus(RetroArch)/BizHawk 2.8 Titles
 | Game Title | Mouse Support | Issues |
@@ -89,6 +89,7 @@ avoid clicking off the window.
 | Call of Duty: Finest Hour (NTSC-U) | Good | <sup>None</sub> | <sup>Aim Assist: Off</sub> |
 | Cold Winter (NTSC-U) | Good | <sup>Split-screen mode not supported</sub> | <sup>Profile options - Aim Assist: Off</sub> |
 * NOTE: PCSX2 will only hook with **BIOS versions 5XXXX and up**.
+* PCSX2 Settings: **Disable** *'Settings->Interface->Double-Click Toggles Fullscreen'* | **Enable** *'Settings->Interface->Hide Cursor In Fullscreen'*
 * RDR Gatling/Final Scene Fix: Start a new game on a new name. When in-game, pause and quit back to menu. Reload your main save.
 * Place cheat files in 'cheats' folder in the main PCSX2 directory. In PCSX2 go to 'Settings/Emulation' and tick 'Enable Cheats'.
 

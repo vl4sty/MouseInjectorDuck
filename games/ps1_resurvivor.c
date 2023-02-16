@@ -43,6 +43,9 @@ static const GAMEDRIVER GAMEDRIVER_INTERFACE =
 
 const GAMEDRIVER *GAME_PS1_RESIDENTEVILSURVIVOR = &GAMEDRIVER_INTERFACE;
 
+static float xAccumulator = 0.f;
+static float yAccumulator = 0.f;
+
 //==========================================================================
 // Purpose: return 1 if game is detected
 //==========================================================================
@@ -60,25 +63,20 @@ static void PS1_RES_Inject(void)
 	PS1_MEM_WriteWord(0xA8670, 0x0); // last aim-lock target?
 	PS1_MEM_WriteWord(0xBB018, 0x0); // aim-lock target?
 
-	// disable auto-center?
+	// disable auto-center
 	PS1_MEM_WriteWord(0x78A14, 0x0); // disable -pitch adjust
 	PS1_MEM_WriteWord(0x78A30, 0x0); // disable +pitch adjust
 	// PS1_MEM_WriteWord(0x78A48, 0x0); // disable snap to zero? requires testing
 	// PS1_MEM_WriteWord(0x78A4C, 0x0); // disable snap to zero? requires testing
 
 	// lock cursor to center of screen
-	PS1_MEM_WriteWord(RES_CURSORX, 0xA0); // middle: 160
-	PS1_MEM_WriteWord(RES_CURSORY, 0x78); // middle: 120
+	PS1_MEM_WriteWord(RES_CURSORX, 0xA0); // x middle: 160
+	PS1_MEM_WriteWord(RES_CURSORY, 0x78); // y middle: 120
 
-	// text prompt on screen, don't move camera
+	// if text prompt on screen, don't move camera
 	if (PS1_MEM_ReadWord(RES_TEXT_ON_SCREEN) == 0x0)
 		return;
 
-	// TODO: accumulation for float-like addition to integer
-	// TODO: disable aim locking onto enemy after the first hit
-	//			aim at an enemy then set a break condition for camY, it will change the camY and you can see what opcode is affecting it
-	//			or as long as the aim button is held after locking on, it will stay locked on. perhaps it uses a pointer or an array index
-	//			to determine which enemy is being locked on to, zero it out to force no enemy lock on?
 	// TODO: add strafe
 	// TODO: two modes of play
 	// 			one just uses mouse to move cursor
@@ -92,17 +90,18 @@ static void PS1_RES_Inject(void)
 
 	uint16_t camX = PS1_MEM_ReadHalfword(RES_CAMX);
 	uint16_t camY = PS1_MEM_ReadHalfword(RES_CAMY);
+	float camXF = (float)camX;
+	float camYF = (float)camY;
 
-	const float looksensitivity = (float)sensitivity / 40.f;
+	const float looksensitivity = (float)sensitivity / 30.f;
 
-	camX += (float)xmouse * looksensitivity;
-	// while(camx >= 4096)
-	// 	camx -= 4096;
-	
-	camY += (float)(invertpitch ? -ymouse : ymouse) * looksensitivity;
-	// if(camy < 0)
-	// 	camy += 4096;
+	float dx = (float)xmouse * looksensitivity;
+	AccumulateAddRemainder(&camXF, &xAccumulator, xmouse, dx);
 
-	PS1_MEM_WriteHalfword(RES_CAMX, (uint16_t)camX);
-	PS1_MEM_WriteHalfword(RES_CAMY, (uint16_t)camY);
+	float ym = (float)(invertpitch ? -ymouse : ymouse);
+	float dy = ym * looksensitivity;
+	AccumulateAddRemainder(&camYF, &yAccumulator, ym, dy);
+
+	PS1_MEM_WriteHalfword(RES_CAMX, (uint16_t)camXF);
+	PS1_MEM_WriteHalfword(RES_CAMY, (uint16_t)camYF);
 }
