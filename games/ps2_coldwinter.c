@@ -40,6 +40,7 @@
 #define CW_FRAMERATE_FPS 0x8C // 1=60,2=30
 
 static uint8_t PS2_CW_Status(void);
+static uint8_t PS2_CW_DetectCambase(void);
 static void PS2_CW_Inject(void);
 
 static const GAMEDRIVER GAMEDRIVER_INTERFACE =
