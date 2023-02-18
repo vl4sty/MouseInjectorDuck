@@ -102,6 +102,12 @@ static void PS1_RES_Inject(void)
 	float dy = ym * looksensitivity;
 	AccumulateAddRemainder(&camYF, &yAccumulator, ym, dy);
 
+	// clamp y-axis
+	if (camYF > 800 && camYF < 32000)
+		camYF = 800;
+	if (camYF < 64735 && camYF > 32000)
+		camYF = 64735;
+
 	PS1_MEM_WriteHalfword(RES_CAMX, (uint16_t)camXF);
 	PS1_MEM_WriteHalfword(RES_CAMY, (uint16_t)camYF);
 }
