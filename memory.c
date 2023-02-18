@@ -150,9 +150,24 @@ uint8_t MEM_Init(void)
 			emuhandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_QUERY_INFORMATION, FALSE, pe32.th32ProcessID);
 			break;
 		}
+		//TODO: condense all pcsx2 checks down to one
 		if(strcmp(pe32.szExeFile, "pcsx2-qtx64-avx2.exe") == 0) // if pcsx2 was found
 		{
 			strcpy(hookedEmulatorName, "pcsx2-qtx64-avx2");
+			isPcsx2handle = 1;
+			emuhandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_QUERY_INFORMATION, FALSE, pe32.th32ProcessID);
+			break;
+		}
+		if(strcmp(pe32.szExeFile, "pcsx2-qtx64.exe") == 0) // if pcsx2 was found
+		{
+			strcpy(hookedEmulatorName, "pcsx2-qtx64");
+			isPcsx2handle = 1;
+			emuhandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_QUERY_INFORMATION, FALSE, pe32.th32ProcessID);
+			break;
+		}
+		if(strcmp(pe32.szExeFile, "pcsx2-qt.exe") == 0) // if pcsx2 was found
+		{
+			strcpy(hookedEmulatorName, "pcsx2-qt");
 			isPcsx2handle = 1;
 			emuhandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_QUERY_INFORMATION, FALSE, pe32.th32ProcessID);
 			break;
