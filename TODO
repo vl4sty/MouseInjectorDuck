@@ -1,3 +1,4 @@
 Change all instances of accumulators for float-like addition of integers to use AccumulateAddRemainder
     Also add this functionality to the PS1 games that don't use it yet
 Add ability to reset variables when disabled, that way you can reset wrong bases just by turning it off and on
+Add game serials to README
