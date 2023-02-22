@@ -1,0 +1,7 @@
+gametitle=Mercenaries: Playground of Destruction SLUS-20932 0x23510F99
+
+// 60 fps
+//patch=1,EE,203AD720,extended,2C420001
+
+// disable aim-assist (also causes onFoot reticle to always remain neutral color)
+patch=1,EE,2032D21C,extended,AE200010
