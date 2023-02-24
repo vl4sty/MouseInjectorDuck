@@ -382,7 +382,8 @@ void AccumulateAddRemainder(float *value, float *accumulator, float dir, float d
 	if (dir < 0)
 		*value += ceil(dx);
 	else
-		*value += (uint16_t)dx;
+		*value += floor(dx);
+		// *value += (uint16_t)dx;
 
 	// determine remainder
 	float r = fmod(dx, 1.f);

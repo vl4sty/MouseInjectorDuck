@@ -2,3 +2,12 @@ Change all instances of accumulators for float-like addition of integers to use 
     Also add this functionality to the PS1 games that don't use it yet
 Add ability to reset variables when disabled, that way you can reset wrong bases just by turning it off and on
 Add game serials to README
+Check the BIOS version to make sure it is 5XXXX or higher
+
+-- Long term --
+Add auto-updater
+GUI
+Support for mapping keyboard keys to in-game functions
+    Ex: For Quake III have the ability to map weapons to number keys
+    Change the keys and toggle them on/off
+Ability to enable/disable features like aim-assist from GUI

@@ -48,15 +48,19 @@ avoid clicking off the window.
 | Geist | Fair | <sup> ** *Requires MMU be disabled for game in Dolphin* ** <br />Camera broken on elevators, truck sentry on motorcycle level broken</sub> |
 
 ## Supported DuckStation Titles
-| Game Title | Mouse Support | Issues |
-| --- | :---: | ----------- |
-| Men in Black: The Series - Crashdown (NTSC) | Good | <sup>None</sub> |
-| Codename: Tenka (NTSC) | Fair | <sup>Strafe/Lean must be set to R2 in-game for strafe to work without holding the button</sub> |
-| Medal of Honor: Underground (NTSC) | Fair | <sup>Machine Gun sentry doesn't always work (depends on objects in line of sight). Sidecar gun in 6-3 not supported.</sub> |
-| Revolution X (NTSC) | Good | <sup>None</sub> |
-| Armorines: Project S.W.A.R.M. | Fair | <sup>Not fully tested</sub> |
-| Resident Evil: Survivor (NTSC-U) | Good | <sup>None</sub> |
-| The Note (PAL) | Good | <sup>Not fully tested</sub> |
+| Game Title | Serial | Mouse Support | Issues |
+| --- | --- | :---: | ----------- |
+| Men in Black: The Series - Crashdown (NTSC) | SLUS-01387 | Good | <sup>None</sub> |
+| Codename: Tenka (NTSC) | SCUS-94409 | Fair | <sup>Strafe/Lean must be set to R2 in-game for strafe to work without holding the button</sub> |
+| Medal of Honor: Underground (NTSC) | SLUS-01270 | Fair | <sup>Machine Gun sentry doesn't always work (depends on objects in line of sight). Sidecar gun in 6-3 not supported.</sub> |
+| Revolution X (NTSC) | SLUS-00012 | Good | <sup>None</sub> |
+| Armorines: Project S.W.A.R.M. | SLUS-01022 | Fair | <sup>Not fully tested</sub> |
+| Resident Evil: Survivor (NTSC-U) | SLUS-01087 | Good | <sup>None</sub> |
+| The Note (PAL) | SLES-00749 | Good | <sup>Not fully tested</sub> |
+| Echo Night (NTSC-U) | SLUS-00820 | Good | <sup>Not fully tested</sub> |
+| Shadow Tower (NTSC-U) | SLUS-00863 | Good | <sup>Not fully tested</sub> |
+| South Park (NTSC-U) | SLUS-00936 | Good | <sup>Supplied cheats recommended (SouthPark_SLUS-00936.cht), Not fully tested</sub> |
+* Importing cheat files in DuckStation: 'Tools->Cheat Manager->Cheat List->Import->From File'
 
 ## Supported Mupen64Plus(RetroArch)/BizHawk 2.8 Titles
 | Game Title | Mouse Support | Issues |
@@ -75,22 +79,22 @@ avoid clicking off the window.
 * NOTE: At the moment BSNES may unhook after minimizing, menuing, pausing emulation, or loading/saving savestates. Requires restarting BSNES and MouseInjector.
 
 ## Supported PCSX2 Titles
-| Game Title | Mouse Support | Issues | In-game Options |
-| ------ | :---: | ----------- | ----------- |
-| Red Dead Revolver (NTSC-U) | Fair | <sup>Gatling guns and final scene may break if game is loaded from memory card after a shutdown.  **Fix below*</sub> | <sup>Target Mode: Toggle</sub> |
-| Time Crisis II (NTSC-U) | Good | <sup>Not fully tested</sub> | |
-| Vampire Night (NTSC-U) | Good | <sup>Not fully tested</sub> | |
-| Gunslinger Girl Vol. 1 (Japan) | Fair | <sup>Not fully tested</sub> | |
-| Darkwatch (NTSC-U) | Good | <sup>***Requires use of supplied cheat file to work (327053E8.pnach)*** Horse aiming is not quite right but is usable.</sub> | |
-| Black (NTSC-U) | Good | <sup>Not fully tested</sub> | |
-| Urban Chaos: Riot Response (NTSC-U) | Good | <sup>Not fully tested</sub> | <sup>Auto-Center: No</sub> |
-| 007: Agent Under Fire (NTSC-U) | Good | <sup>Mouse movement warps camera while paused and during in-game cutscenes, aim-lock not disabled on auto-scroller levels</sub> | |
-| Quake III: Revolution (NTSC-U) | Good | <sup>None</sub> | <sup>auto center: no, auto aiming: no (only available from main menu options) |
-| 50 Cent: Bulletproof (NTSC-U) | Good | <sup>Not fully tested</sub> | <sup>Camera->Aim Assist: Off</sub> |
-| Call of Duty: Finest Hour (NTSC-U) | Good | <sup>None</sub> | <sup>Aim Assist: Off</sub> |
-| Cold Winter (NTSC-U) | Good | <sup>Split-screen mode not supported</sub> | <sup>Profile options - Aim Assist: Off</sub> |
-| Medal of Honor: Vanguard (NTSC-U) | Good | <sup>Multiplayer mode not supported</sub> | |
-| Mercenaries: Playground of Destruction (NTSC-U) | Fair | <sup>***Requires cheat file (23510F99.pnach) to disable aim-assist***, x-axis in normal vehicles not supported</sub> | <sup>Not fully tested</sub> |
+| Game Title | Serial | Mouse Support | Issues | In-game Options |
+| ------ | --- | :---: | ----------- | ----------- |
+| Red Dead Revolver (NTSC-U) | SLUS-20500 | Fair | <sup>Gatling guns and final scene may break if game is loaded from memory card after a shutdown.  **Fix below*</sub> | <sup>Target Mode: Toggle</sub> |
+| Time Crisis II (NTSC-U) | SLUS-20219 | Good | <sup>Not fully tested</sub> | |
+| Vampire Night (NTSC-U) | SLUS-20221 | Good | <sup>Not fully tested</sub> | |
+| Gunslinger Girl Vol. 1 (Japan)| SLPS-25343 | Fair | <sup>Not fully tested</sub> | |
+| Darkwatch (NTSC-U) | SLUS-21042 | Good | <sup>***Requires use of supplied cheat file to work (327053E8.pnach)*** Horse aiming is not quite right but is usable.</sub> | |
+| Black (NTSC-U) | SLUS-21376 | Good | <sup>Not fully tested</sub> | |
+| Urban Chaos: Riot Response (NTSC-U) | SLUS-21390 | Good | <sup>Not fully tested</sub> | <sup>Auto-Center: No</sub> |
+| 007: Agent Under Fire (NTSC-U) | SLUS-20265 | Good | <sup>Mouse movement warps camera while paused and during in-game cutscenes, aim-lock not disabled on auto-scroller levels</sub> | |
+| Quake III: Revolution (NTSC-U) | SLUS-20167 | Good | <sup>None</sub> | <sup>Auto Center: No, Auto Aiming: no (only available from main menu options) |
+| 50 Cent: Bulletproof (NTSC-U) | SLUS-21315 | Good | <sup>Not fully tested</sub> | <sup>Camera->Aim Assist: Off</sub> |
+| Call of Duty: Finest Hour (NTSC-U) | SLUS-20725 | Good | <sup>None</sub> | <sup>Aim Assist: Off</sub> |
+| Cold Winter (NTSC-U) | SLUS-20845 | Good | <sup>Split-screen mode not supported</sub> | <sup>Profile options - Aim Assist: Off</sub> |
+| Medal of Honor: Vanguard (NTSC-U) | SLUS-21597 | Good | <sup>Multiplayer mode not supported</sub> | |
+| Mercenaries: Playground of Destruction (NTSC-U) | SLUS-20932 | Fair | <sup>***Requires cheat file (23510F99.pnach) to disable aim-assist***, x-axis in normal vehicles not supported</sub> | |
 * NOTE: PCSX2 will only hook with **BIOS versions 5XXXX and up**.
 * NOTE: Some aspects may break when a game is started with overclocking. Requires testing.
 * PCSX2 Settings: **Disable** *'Settings->Interface->Double-Click Toggles Fullscreen'* | **Enable** *'Settings->Interface->Hide Cursor In Fullscreen'*

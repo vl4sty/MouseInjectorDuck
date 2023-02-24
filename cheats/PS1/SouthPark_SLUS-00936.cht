@@ -1,0 +1,12 @@
+#group=Ungrouped
+#type=Gameshark
+#activation=EndFrame
+[*Disable CamY Slope Adjust (MouseInjector)]
+800186B4 0000
+
+#group=Ungrouped
+#type=Gameshark
+#activation=EndFrame
+[*Disable CamY Rebound (MouseInjector)]
+80018B6C 0000
+
