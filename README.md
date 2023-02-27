@@ -62,6 +62,7 @@ avoid clicking off the window.
 | South Park (NTSC-U) | SLUS-00936 | Good | <sup>Supplied cheats recommended (SouthPark_SLUS-00936.cht), Not fully tested</sub> |
 | King's Field (Japan) | SLPS-00017 | Good | <sup>Not fully tested, Will not hook until in-game</sub> |
 | King's Field II (NTSC-U) | SLUS-00158 | Good | <sup>Not fully tested</sub> |
+* NOTE: If DuckStation is not hooking, try restoring the default settings. 'Settings->General->Restore Defaults'
 * Importing cheat files in DuckStation: 'Tools->Cheat Manager->Cheat List->Import->From File'
 
 ## Supported Mupen64Plus(RetroArch)/BizHawk 2.8 Titles
@@ -69,6 +70,7 @@ avoid clicking off the window.
 | --- | :---: | ----------- |
 | GoldenEye: 007 (NTSC) | Fair | <sup>None</sub> |
 | Sin and Punishment (J) | Good | <sup>Not fully tested</sub> |
+* NOTE: For BizHawk, go to Config->Customize and untick 'Enable Context Menu' to use mouse right-click
 
 ## Supported BSNES Titles
 | Game Title | Mouse Support | Issues |

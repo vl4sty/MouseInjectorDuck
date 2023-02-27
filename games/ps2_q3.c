@@ -56,6 +56,8 @@ static uint8_t PS2_Q3_Status(void)
 //==========================================================================
 static void PS2_Q3_Inject(void)
 {
+	// TODO: disable mouse during level intro and possibly boss cutscenes
+
 	if(xmouse == 0 && ymouse == 0) // if mouse is idle
 		return;
 
