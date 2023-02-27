@@ -17,6 +17,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, visit http://www.gnu.org/licenses/gpl-2.0.html
 //==========================================================================
+#include <string.h>
+
 #define DOLPHINVERSION "Dolphin"
 #define BUILDINFO "(v0.31 - "__DATE__")"
 #define LINE "__________________________________________________________________"
@@ -65,3 +67,4 @@ extern float preCosOut;
 extern float totalAngleOut;
 extern uint32_t uIntOut1;
 extern uint32_t uIntOut2;
+extern char titleOut[256];

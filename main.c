@@ -45,6 +45,7 @@ float preCosOut = 0;
 float totalAngleOut = 0;
 uint32_t uIntOut1 = 0x0;
 uint32_t uIntOut2 = 0x0;
+char titleOut[256];
 
 int32_t main(void);
 static void quit(void);

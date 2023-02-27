@@ -8,7 +8,7 @@ An external app that injects cursor input into game memory.
 | Emulator/Frontend | Version | Executable name (case sensitive) |
 | --- | :---: | :---: |
 | Dolphin | 5.0 and up | dolphin.exe |
-| DuckStation | 0.1-5437 | duckstation-qt-x64-ReleaseLTCG.exe |
+| DuckStation | 0.1-5477 | duckstation-qt-x64-ReleaseLTCG.exe |
 | RetroArch (Mupen64Plus-Next core) | 1.14.0 (2.4-Vulkan bc24153)| retroarch.exe |
 | BizHawk (N64, Mupen64Plus) | 2.8 | EmuHawk.exe |
 | BSNES | v115 | bsnes.exe |
@@ -60,6 +60,8 @@ avoid clicking off the window.
 | Echo Night (NTSC-U) | SLUS-00820 | Good | <sup>Not fully tested</sub> |
 | Shadow Tower (NTSC-U) | SLUS-00863 | Good | <sup>Not fully tested</sub> |
 | South Park (NTSC-U) | SLUS-00936 | Good | <sup>Supplied cheats recommended (SouthPark_SLUS-00936.cht), Not fully tested</sub> |
+| King's Field (Japan) | SLPS-00017 | Good | <sup>Not fully tested, Will not hook until in-game</sub> |
+| King's Field II (NTSC-U) | SLUS-00158 | Good | <sup>Not fully tested</sub> |
 * Importing cheat files in DuckStation: 'Tools->Cheat Manager->Cheat List->Import->From File'
 
 ## Supported Mupen64Plus(RetroArch)/BizHawk 2.8 Titles

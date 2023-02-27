@@ -3,6 +3,10 @@ Change all instances of accumulators for float-like addition of integers to use 
 Add ability to reset variables when disabled, that way you can reset wrong bases just by turning it off and on
 Add game serials to README
 Check the BIOS version to make sure it is 5XXXX or higher
+Find better checks for N64 status
+    After switching games in RetroArch, the last game's status is still valid?
+    so the injector must be closed and reopened
+    Might be a problem with RA in general
 
 -- Long term --
 Add auto-updater

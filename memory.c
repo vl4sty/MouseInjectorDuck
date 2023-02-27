@@ -22,6 +22,7 @@
 #include <windows.h>
 #include <tlhelp32.h>
 #include <psapi.h>
+#include "main.h"
 #include "memory.h"
 
 static uint64_t emuoffset = 0;
@@ -33,6 +34,8 @@ static int isMupenhandle = 0;
 static int isBizHawkhandle = 0;
 static int isBSNEShandle = 0;
 static int isPcsx2handle = 0;
+static int isRetroArchHandle = 0;
+static int isKronosHandle = 0;
 char hookedEmulatorName[80];
 
 uint8_t MEM_Init(void);
@@ -137,9 +140,10 @@ uint8_t MEM_Init(void)
 		}
 		if(strcmp(pe32.szExeFile, "retroarch.exe") == 0) // if retroarch was found, for N64 games using Mupen64Plus-Next
 		{
-			strcpy(hookedEmulatorName, "RetroArch Mupen64Plus-Next");
-			isN64handle = 1;
-			isMupenhandle = 1;
+			strcpy(hookedEmulatorName, "RetroArch - No core loaded");
+			isRetroArchHandle = 1;
+			// isN64handle = 1;
+			// isMupenhandle = 1;
 			emuhandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_QUERY_INFORMATION, FALSE, pe32.th32ProcessID);
 			break;
 		}
@@ -207,7 +211,25 @@ uint8_t MEM_FindRamOffset(void)
 
 		// set region size to look for based on the emulator detected
 		uint32_t emuRegionSize = 0x2000000; // Dolphin
-		if (isPS1handle == 1){
+		if (isRetroArchHandle == 1) {
+			char retroArchTitle[255];
+			HWND foreground = GetForegroundWindow();
+			int a = GetWindowText(foreground, retroArchTitle, 256);
+
+			// check window title for loaded core
+			if (strstr(retroArchTitle, "Mupen") != NULL) {
+				strcpy(hookedEmulatorName, "RetroArch Mupen64Plus-Next");
+				emuRegionSize = 0x20011000; // Mupen64Plus core
+				isN64handle = 1;
+				isMupenhandle = 1;
+			}
+			else if (strstr(retroArchTitle, "Kronos") != NULL) {
+				strcpy(hookedEmulatorName, "RetroArch Kronos");
+				emuRegionSize = 0x101000; // Kronos core
+				isKronosHandle = 1;
+			}
+		}
+		else if (isPS1handle == 1) {
 			emuRegionSize = 0x200000; 		// DuckStation
 		} else if (isN64handle == 1) {
 			if (isMupenhandle)
@@ -222,7 +244,7 @@ uint8_t MEM_FindRamOffset(void)
 		}
 
 		DWORD regionType = MEM_MAPPED; // Dolphin and DuckStation regions are type MEM_MAPPED
-		if (isN64handle == 1)
+		if (isN64handle == 1 || isKronosHandle == 1)
 			regionType = MEM_PRIVATE;  // All N64 emulator regions are type MEM_PRIVATE
 		if (isBSNEShandle == 1)
 			regionType = MEM_IMAGE;
@@ -248,7 +270,10 @@ uint8_t MEM_FindRamOffset(void)
 				if (wsinfo.VirtualAttributes.Valid) { // check if the address space is valid
 					memcpy(&emuoffset, &(info.BaseAddress), sizeof(info.BaseAddress)); // copy the base address location to our emuoffset pointer
 
-					if (isN64handle == 1)
+					if (isKronosHandle == 1){
+						emuoffset += 0x40;
+					}
+					else if (isN64handle == 1)
 					{
 						if (isMupenhandle) { // RetroArch/simple64/RMG (mupen64plus GUIs)
 							// simple64/RMG/retroarch: determine buffer size before RDRAM as it changes every startup
@@ -644,6 +669,16 @@ void PS2_MEM_WriteFloat(const uint32_t addr, float value)
 	// MEM_ByteSwap32((uint32_t *)&value); // byteswap
 	WriteProcessMemory(emuhandle, (LPVOID)(emuoffset + (addr - 0x80000)), &value, sizeof(value), NULL);
 }
+
+// uint16_t SS_MEM_ReadHalfword(const uint32_t addr)
+// {
+// 	if(!emuoffset || SSNOTWITHINMEMRANGE(addr))
+// 		return 0;
+// 	// read only 2 bytes
+// 	uint16_t output;
+// 	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &output, sizeof(output), NULL);
+// 	return output;
+// }
 
 void printdebug(uint32_t val)
 {
