@@ -23,6 +23,7 @@ An external app that injects cursor input into game memory.
 | PS1 | Beetle PSX HW | 0.9.44.1 234433f |
 | PS1 | DuckStation | |
 | PS1 | SwanStation | 1.00 bc5f6c8 |
+* NOTE: For RetroArch the window needs to be focused for it to hook initially.
 
 ## How to Use
 1. Start emulator first
@@ -55,7 +56,7 @@ avoid clicking off the window.
 | Trigger Man | Good | <sup>None</sub> |
 | Geist | Fair | <sup> ** *Requires MMU be disabled for game in Dolphin* ** <br />Camera broken on elevators, truck sentry on motorcycle level broken</sub> |
 
-## Supported DuckStation Titles
+## Supported PS1 Titles
 | Game Title | Serial | Mouse Support | Issues |
 | --- | --- | :---: | ----------- |
 | Men in Black: The Series - Crashdown (NTSC) | SLUS-01387 | Good | <sup>None</sub> |
