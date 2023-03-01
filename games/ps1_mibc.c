@@ -44,6 +44,9 @@ static const GAMEDRIVER GAMEDRIVER_INTERFACE =
 
 const GAMEDRIVER *GAME_PS1_MENINBLACKCRASHDOWN = &GAMEDRIVER_INTERFACE;
 
+static float xAccumulator = 0.f;
+static float yAccumulator = 0.f;
+
 //==========================================================================
 // Purpose: return 1 if game is detected
 //==========================================================================
@@ -75,19 +78,46 @@ static void PS1_MIBC_Inject(void)
 		return;
 
 	// PS1 camx is stored in a Halfword (uint16_t)
-	uint16_t camx = PS1_MEM_ReadHalfword(MIBC_camx);
-	uint16_t camy = PS1_MEM_ReadHalfword(MIBC_camy);
+	// uint16_t camx = PS1_MEM_ReadHalfword(MIBC_camx);
+	// uint16_t camy = PS1_MEM_ReadHalfword(MIBC_camy);
 
-	const float looksensitivity = (float)sensitivity / 40.f;
+	// const float looksensitivity = (float)sensitivity / 40.f;
 
-	camx += (float)xmouse * looksensitivity;
-	while(camx >= 4096)
-		camx -= 4096;
+	// camx += (float)xmouse * looksensitivity;
+	// while(camx >= 4096)
+	// 	camx -= 4096;
 	
-	camy -= (float)ymouse * looksensitivity;
-	// if(camy < 0)
-	// 	camy += 4096;
+	// camy -= (float)ymouse * looksensitivity;
+	// // if(camy < 0)
+	// // 	camy += 4096;
 
-	PS1_MEM_WriteHalfword(MIBC_camx, (uint16_t)camx);
-	PS1_MEM_WriteHalfword(MIBC_camy, (uint16_t)camy);
+	// PS1_MEM_WriteHalfword(MIBC_camx, (uint16_t)camx);
+	// PS1_MEM_WriteHalfword(MIBC_camy, (uint16_t)camy);
+
+	uint16_t camX = PS1_MEM_ReadHalfword(MIBC_camx);
+	uint16_t camY = PS1_MEM_ReadHalfword(MIBC_camy);
+	float camXF = (float)camX;
+	float camYF = (float)camY;
+
+	const float looksensitivity = (float)sensitivity / 20.f;
+	const float scale = 1.f;
+
+	float dx = (float)xmouse * looksensitivity * scale;
+	AccumulateAddRemainder(&camXF, &xAccumulator, xmouse, dx);
+
+	float ym = (float)(invertpitch ? -ymouse : ymouse);
+	float dy = -ym * looksensitivity * scale;
+	AccumulateAddRemainder(&camYF, &yAccumulator, ym, dy);
+
+	// while (camYF > 4096)
+	// 	camYF -= 4096;
+
+	// clamp y-axis
+	// if (camYF > 60000 && camYF < 64764)
+	// 	camYF = 64754;
+	// if (camYF > 682 && camYF < 4000)
+	// 	camYF = 682;
+
+	PS1_MEM_WriteHalfword(MIBC_camx, (uint16_t)camXF);
+	PS1_MEM_WriteHalfword(MIBC_camy, (uint16_t)camYF);
 }

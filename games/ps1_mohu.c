@@ -64,6 +64,8 @@ const GAMEDRIVER *GAME_PS1_MOHUNDERGROUND = &GAMEDRIVER_INTERFACE;
 
 static uint32_t playerbase = 0;
 static uint32_t machinegunbase = 0;
+static float xAccumulator = 0.f;
+static float yAccumulator = 0.f;
 
 //==========================================================================
 // Purpose: return 1 if game is detected
@@ -97,6 +99,8 @@ static uint8_t PS1_MOHU_DetectPlayer(void)
 //==========================================================================
 static void PS1_MOHU_Inject(void)
 {
+	// NOTE: if controller type is set to digital, auto-center will be enabled
+
 	if(!PS1_MOHU_DetectPlayer())
 		return;
 	if(xmouse == 0 && ymouse == 0) // if mouse is idle
@@ -147,22 +151,49 @@ static void PS1_MOHU_Inject(void)
 	else { // on foot
 		machinegunbase = 0;
 
-		uint16_t fov = PS1_MEM_ReadHalfword(playerbase + MOHU_fov);
-		uint16_t camx = PS1_MEM_ReadHalfword(playerbase + MOHU_camx);
-		uint16_t camy = PS1_MEM_ReadHalfword(playerbase + MOHU_camy);
+		// uint16_t fov = PS1_MEM_ReadHalfword(playerbase + MOHU_fov);
+		// uint16_t camx = PS1_MEM_ReadHalfword(playerbase + MOHU_camx);
+		// uint16_t camy = PS1_MEM_ReadHalfword(playerbase + MOHU_camy);
 
-		fov /= 400;
+		// fov /= 400;
 
-		camx += (float)xmouse * looksensitivity / fov;
+		// camx += (float)xmouse * looksensitivity / fov;
 
-		camy -= (float)ymouse * looksensitivity / fov;
-		// clamp camy
-		if (camy > 60000 && camy < 64754)
-			camy = 64754U;
-		if (camy > 682 && camy < 4000)
-			camy = 682U;
+		// camy -= (float)ymouse * looksensitivity / fov;
+		// // clamp camy
+		// if (camy > 60000 && camy < 64754)
+		// 	camy = 64754U;
+		// if (camy > 682 && camy < 4000)
+		// 	camy = 682U;
 
-		PS1_MEM_WriteHalfword(playerbase + MOHU_camx, (uint16_t)camx);
-		PS1_MEM_WriteHalfword(playerbase + MOHU_camy, (uint16_t)camy);
+		// PS1_MEM_WriteHalfword(playerbase + MOHU_camx, (uint16_t)camx);
+		// PS1_MEM_WriteHalfword(playerbase + MOHU_camy, (uint16_t)camy);
+
+		uint16_t camX = PS1_MEM_ReadHalfword(playerbase + MOHU_camx);
+		uint16_t camY = PS1_MEM_ReadHalfword(playerbase + MOHU_camy);
+		float camXF = (float)camX;
+		float camYF = (float)camY;
+
+		// const float looksensitivity = (float)sensitivity / 20.f;
+		const float scale = 1.f;
+
+		float dx = (float)xmouse * looksensitivity * scale;
+		AccumulateAddRemainder(&camXF, &xAccumulator, xmouse, dx);
+
+		float ym = (float)(invertpitch ? -ymouse : ymouse);
+		float dy = -ym * looksensitivity * scale;
+		AccumulateAddRemainder(&camYF, &yAccumulator, ym, dy);
+
+		// while (camYF > 4096)
+		// 	camYF -= 4096;
+
+		// clamp y-axis
+		if (camYF > 60000 && camYF < 64764)
+			camYF = 64754;
+		if (camYF > 682 && camYF < 4000)
+			camYF = 682;
+
+		PS1_MEM_WriteHalfword(playerbase + MOHU_camx, (uint16_t)camXF);
+		PS1_MEM_WriteHalfword(playerbase + MOHU_camy, (uint16_t)camYF);
 	}
 }

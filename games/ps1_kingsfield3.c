@@ -23,23 +23,23 @@
 #include "../mouse.h"
 #include "game.h"
 
-#define KF2_CAMY 0x19950C
-#define KF2_CAMX 0x19950E
-#define KF2_IS_BUSY 0x1758E4
+#define KF3_CAMY 0x1B2610
+#define KF3_CAMX 0x1B2612
+#define KF3_IS_BUSY 0x18FAA8
 
-static uint8_t PS1_KF2_Status(void);
-static void PS1_KF2_Inject(void);
+static uint8_t PS1_KF3_Status(void);
+static void PS1_KF3_Inject(void);
 
 static const GAMEDRIVER GAMEDRIVER_INTERFACE =
 {
-	"King's Field (II)",
-	PS1_KF2_Status,
-	PS1_KF2_Inject,
+	"King's Field II (III)",
+	PS1_KF3_Status,
+	PS1_KF3_Inject,
 	1, // 1000 Hz tickrate
 	0 // crosshair sway supported for driver
 };
 
-const GAMEDRIVER *GAME_PS1_KINGSFIELD2 = &GAMEDRIVER_INTERFACE;
+const GAMEDRIVER *GAME_PS1_KINGSFIELD3 = &GAMEDRIVER_INTERFACE;
 
 static float xAccumulator = 0.f;
 static float yAccumulator = 0.f;
@@ -47,24 +47,26 @@ static float yAccumulator = 0.f;
 //==========================================================================
 // Purpose: return 1 if game is detected
 //==========================================================================
-static uint8_t PS1_KF2_Status(void)
+static uint8_t PS1_KF3_Status(void)
 {
-	return (PS1_MEM_ReadWord(0x92D4) == 0x534C5553U && PS1_MEM_ReadWord(0x92D8) == 0x5F303031U && PS1_MEM_ReadWord(0x92DC) == 0x2E35383BU);
+	return ((PS1_MEM_ReadWord(0x9304) == 0x534C5553U && PS1_MEM_ReadWord(0x9308) == 0x5F303032U && PS1_MEM_ReadWord(0x930C) == 0x2E35353BU));
 }
 //==========================================================================
 // Purpose: calculate mouse look and inject into current game
 //==========================================================================
-static void PS1_KF2_Inject(void)
+static void PS1_KF3_Inject(void)
 {
+	// TODO: play a bit to see if IS_BUSY messes with camera
+
 	// don't move camera if reading message, in conversation, paused, loading, etc...
-	if (PS1_MEM_ReadHalfword(KF2_IS_BUSY))
+	if (PS1_MEM_ReadHalfword(KF3_IS_BUSY))
 		return;
 
 	if(xmouse == 0 && ymouse == 0) // if mouse is idle
 		return;
 	
-	uint16_t camX = PS1_MEM_ReadHalfword(KF2_CAMX);
-	uint16_t camY = PS1_MEM_ReadHalfword(KF2_CAMY);
+	uint16_t camX = PS1_MEM_ReadHalfword(KF3_CAMX);
+	uint16_t camY = PS1_MEM_ReadHalfword(KF3_CAMY);
 	float camXF = (float)camX;
 	float camYF = (float)camY;
 
@@ -84,9 +86,9 @@ static void PS1_KF2_Inject(void)
 	// clamp y-axis
 	if (camYF > 700 && camYF < 2000)
 		camYF = 700;
-	if (camYF < 3400 && camYF > 2000)
-		camYF = 3400;
+	if (camYF < 3396 && camYF > 2000)
+		camYF = 3396;
 
-	PS1_MEM_WriteHalfword(KF2_CAMX, (uint16_t)camXF);
-	PS1_MEM_WriteHalfword(KF2_CAMY, (uint16_t)camYF);
+	PS1_MEM_WriteHalfword(KF3_CAMX, (uint16_t)camXF);
+	PS1_MEM_WriteHalfword(KF3_CAMY, (uint16_t)camYF);
 }

@@ -9,12 +9,20 @@ An external app that injects cursor input into game memory.
 | --- | :---: | :---: |
 | Dolphin | 5.0 and up | dolphin.exe |
 | DuckStation | 0.1-5477 | duckstation-qt-x64-ReleaseLTCG.exe |
-| RetroArch (Mupen64Plus-Next core) | 1.14.0 (2.4-Vulkan bc24153)| retroarch.exe |
 | BizHawk (N64, Mupen64Plus) | 2.8 | EmuHawk.exe |
 | BSNES | v115 | bsnes.exe |
 | PCSX2 Nightly | 1.7.4126 | pcsx2-qtx64-avx2.exe |
+| RetroArch (see cores below) | 1.14.0 | retroarch.exe |
 * NOTE: Versions given are the latest that have been tested working, may work with newer
 * NOTE: PCSX2 will only hook with **BIOS versions 5XXXX and up**.
+
+## Supported RetroArch Cores
+| Console | Core | Version |
+| :---: | :---: | :---: |
+| N64 | Mupen64Plus-Next | 2.4-Vulkan bc24153 |
+| PS1 | Beetle PSX HW | 0.9.44.1 234433f |
+| PS1 | DuckStation | |
+| PS1 | SwanStation | 1.00 bc5f6c8 |
 
 ## How to Use
 1. Start emulator first
@@ -52,7 +60,7 @@ avoid clicking off the window.
 | --- | --- | :---: | ----------- |
 | Men in Black: The Series - Crashdown (NTSC) | SLUS-01387 | Good | <sup>None</sub> |
 | Codename: Tenka (NTSC) | SCUS-94409 | Fair | <sup>Strafe/Lean must be set to R2 in-game for strafe to work without holding the button</sub> |
-| Medal of Honor: Underground (NTSC) | SLUS-01270 | Fair | <sup>Machine Gun sentry doesn't always work (depends on objects in line of sight). Sidecar gun in 6-3 not supported.</sub> |
+| Medal of Honor: Underground (NTSC) | SLUS-01270 | Fair | <sup>Machine Gun sentry doesn't always work (depends on objects in line of sight). Sidecar gun in 6-3 not supported. Precise aim not supported (holding trigger aiming). Controller type must be Analog/DualShock or else auto-center will be enabled. </sub> |
 | Revolution X (NTSC) | SLUS-00012 | Good | <sup>None</sub> |
 | Armorines: Project S.W.A.R.M. | SLUS-01022 | Fair | <sup>Not fully tested</sub> |
 | Resident Evil: Survivor (NTSC-U) | SLUS-01087 | Good | <sup>None</sub> |
@@ -61,7 +69,8 @@ avoid clicking off the window.
 | Shadow Tower (NTSC-U) | SLUS-00863 | Good | <sup>Not fully tested</sub> |
 | South Park (NTSC-U) | SLUS-00936 | Good | <sup>Supplied cheats recommended (SouthPark_SLUS-00936.cht), Not fully tested</sub> |
 | King's Field (Japan) | SLPS-00017 | Good | <sup>Not fully tested, Will not hook until in-game</sub> |
-| King's Field II (NTSC-U) | SLUS-00158 | Good | <sup>Not fully tested</sub> |
+| King's Field (II) (NTSC-U) | SLUS-00158 | Good | <sup>Not fully tested</sub> |
+| King's Field II (III) (NTSC-U) | SLUS-00255 | Good | <sup>Not fully tested</sub> |
 * NOTE: If DuckStation is not hooking, try restoring the default settings. 'Settings->General->Restore Defaults'
 * Importing cheat files in DuckStation: 'Tools->Cheat Manager->Cheat List->Import->From File'
 

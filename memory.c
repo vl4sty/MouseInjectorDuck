@@ -36,6 +36,7 @@ static int isBSNEShandle = 0;
 static int isPcsx2handle = 0;
 static int isRetroArchHandle = 0;
 static int isKronosHandle = 0;
+static int isBeetlePSXHandle = 0;
 char hookedEmulatorName[80];
 
 uint8_t MEM_Init(void);
@@ -227,6 +228,22 @@ uint8_t MEM_FindRamOffset(void)
 				strcpy(hookedEmulatorName, "RetroArch Kronos");
 				emuRegionSize = 0x101000; // Kronos core
 				isKronosHandle = 1;
+			}
+			else if (strstr(retroArchTitle, "Beetle PSX HW") != NULL) {
+				strcpy(hookedEmulatorName, "RetroArch Beetle PSX HW");
+				emuRegionSize = 0x200000; // Kronos core
+			}
+			else if (strstr(retroArchTitle, "Beetle PSX") != NULL) {
+				strcpy(hookedEmulatorName, "RetroArch Beetle PSX");
+				emuRegionSize = 0x200000; // Kronos core
+			}
+			else if (strstr(retroArchTitle, "DuckStation") != NULL) {
+				strcpy(hookedEmulatorName, "RetroArch DuckStation");
+				emuRegionSize = 0x200000; // Kronos core
+			}
+			else if (strstr(retroArchTitle, "SwanStation") != NULL) {
+				strcpy(hookedEmulatorName, "RetroArch SwanStation");
+				emuRegionSize = 0x200000; // Kronos core
 			}
 		}
 		else if (isPS1handle == 1) {
