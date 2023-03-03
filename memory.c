@@ -37,6 +37,7 @@ static int isPcsx2handle = 0;
 static int isRetroArchHandle = 0;
 static int isKronosHandle = 0;
 static int isBeetlePSXHandle = 0;
+static int isFlycastHandle = 0;
 char hookedEmulatorName[80];
 
 uint8_t MEM_Init(void);
@@ -85,6 +86,10 @@ void PS2_MEM_WriteWord(const uint32_t addr, uint32_t value);
 void PS2_MEM_WriteUInt(const uint32_t addr, uint32_t value);
 void PS2_MEM_WriteUInt16(const uint32_t addr, uint16_t value);
 void PS2_MEM_WriteFloat(const uint32_t addr, float value);
+
+uint32_t SD_MEM_ReadWord(const uint32_t addr);
+float SD_MEM_ReadFloat(const uint32_t addr);
+void SD_MEM_WriteFloat(const uint32_t addr, float value);
 
 void printdebug(uint32_t val);
 
@@ -177,6 +182,13 @@ uint8_t MEM_Init(void)
 			emuhandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_QUERY_INFORMATION, FALSE, pe32.th32ProcessID);
 			break;
 		}
+		if(strcmp(pe32.szExeFile, "flycast.exe") == 0) // if pcsx2 was found
+		{
+			strcpy(hookedEmulatorName, "Flycast");
+			isFlycastHandle = 1;
+			emuhandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_QUERY_INFORMATION, FALSE, pe32.th32ProcessID);
+			break;
+		}
 	}
 	while(Process32Next(processes, &pe32)); // loop continued until Process32Next deliver NULL or its interrupted with the "break" above
 	CloseHandle(processes);
@@ -231,19 +243,24 @@ uint8_t MEM_FindRamOffset(void)
 			}
 			else if (strstr(retroArchTitle, "Beetle PSX HW") != NULL) {
 				strcpy(hookedEmulatorName, "RetroArch Beetle PSX HW");
-				emuRegionSize = 0x200000; // Kronos core
+				emuRegionSize = 0x200000;
 			}
 			else if (strstr(retroArchTitle, "Beetle PSX") != NULL) {
 				strcpy(hookedEmulatorName, "RetroArch Beetle PSX");
-				emuRegionSize = 0x200000; // Kronos core
+				emuRegionSize = 0x200000;
 			}
 			else if (strstr(retroArchTitle, "DuckStation") != NULL) {
 				strcpy(hookedEmulatorName, "RetroArch DuckStation");
-				emuRegionSize = 0x200000; // Kronos core
+				emuRegionSize = 0x200000;
 			}
 			else if (strstr(retroArchTitle, "SwanStation") != NULL) {
 				strcpy(hookedEmulatorName, "RetroArch SwanStation");
-				emuRegionSize = 0x200000; // Kronos core
+				emuRegionSize = 0x200000;
+			}
+			else if (strstr(retroArchTitle, "Flycast") != NULL) {
+				strcpy(hookedEmulatorName, "RetroArch Flycast");
+				emuRegionSize = 0x10000;
+				isFlycastHandle = 1;
 			}
 		}
 		else if (isPS1handle == 1) {
@@ -258,6 +275,8 @@ uint8_t MEM_FindRamOffset(void)
 		} else if (isPcsx2handle == 1) {
 			// emuRegionSize = 0x80000;
 			emuRegionSize = 0x1000;
+		} else if (isFlycastHandle == 1) {
+			emuRegionSize = 0x10000;
 		}
 
 		DWORD regionType = MEM_MAPPED; // Dolphin and DuckStation regions are type MEM_MAPPED
@@ -290,6 +309,10 @@ uint8_t MEM_FindRamOffset(void)
 					if (isKronosHandle == 1){
 						emuoffset += 0x40;
 					}
+					else if (isFlycastHandle == 1) {
+						if (lastRegionSize != 0x2000000) // region before is always size 0x2000000?
+							continue;
+					}
 					else if (isN64handle == 1)
 					{
 						if (isMupenhandle) { // RetroArch/simple64/RMG (mupen64plus GUIs)
@@ -313,6 +336,8 @@ uint8_t MEM_FindRamOffset(void)
 					}
 
 					// printdebug(lastRegionSize); // debug
+					// printdebug(info.RegionSize); // debug
+					// printdebug(&(info.BaseAddress)); // debug
 
 					return (emuoffset != 0x0);
 				}
@@ -687,6 +712,38 @@ void PS2_MEM_WriteFloat(const uint32_t addr, float value)
 	WriteProcessMemory(emuhandle, (LPVOID)(emuoffset + (addr - 0x80000)), &value, sizeof(value), NULL);
 }
 
+// TODO: give Dreamcast it's own within mem range
+// =================================================
+//		Sega Dreamcast
+// =================================================
+uint32_t SD_MEM_ReadWord(const uint32_t addr)
+{
+	if(!emuoffset || PS2NOTWITHINMEMRANGE(addr)) // if ps2 memory has not been init by emulator or reading from outside of memory range
+		return 0;
+	uint32_t output; // temp var used for output of function
+	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &output, sizeof(output), NULL);
+	// printdebug(1); // debug
+	MEM_ByteSwap32(&output); // byteswap
+	return output;
+}
+
+float SD_MEM_ReadFloat(const uint32_t addr)
+{
+	if(!emuoffset || PS2NOTWITHINMEMRANGE(addr)) // if gamecube memory has not been init by dolphin or reading from outside of memory range
+		return 0;
+	float output; // temp var used for output of function
+	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &output, sizeof(output), NULL);
+	// MEM_ByteSwap32((uint32_t *)&output); // byteswap
+	return output;
+}
+
+void SD_MEM_WriteFloat(const uint32_t addr, float value)
+{
+	if(!emuoffset || PS2NOTWITHINMEMRANGE(addr)) // if gamecube memory has not been init by dolphin or writing to outside of memory range
+		return;
+	// MEM_ByteSwap32((uint32_t *)&value); // byteswap
+	WriteProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &value, sizeof(value), NULL);
+}
 // uint16_t SS_MEM_ReadHalfword(const uint32_t addr)
 // {
 // 	if(!emuoffset || SSNOTWITHINMEMRANGE(addr))

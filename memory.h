@@ -77,6 +77,10 @@ extern void PS2_MEM_WriteUInt(const uint32_t addr, uint32_t value);
 extern void PS2_MEM_WriteUInt16(const uint32_t addr, uint16_t value);
 extern void PS2_MEM_WriteFloat(const uint32_t addr, float value);
 
+extern uint32_t SD_MEM_ReadWord(const uint32_t addr);
+extern float SD_MEM_ReadFloat(const uint32_t addr);
+extern void SD_MEM_WriteFloat(const uint32_t addr, float value);
+
 extern uint16_t SS_MEM_ReadHalfword(const uint32_t addr);
 
 extern char hookedEmulatorName[80];

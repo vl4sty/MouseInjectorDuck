@@ -23,75 +23,50 @@
 #include "../mouse.h"
 #include "game.h"
 
-#define KF4_CAMY 0x413F90
-#define KF4_CAMX 0x413F94
-#define KF4_CAMY2 0x414290
-#define KF4_CAMX2 0x414294
+#define RD_CURSORX 0x28D358
+#define RD_CURSORY 0x28D35C
 
-#define KF4_IS_NOT_CONVERSING 0x38CC50
-#define KF4_IS_BUSY 0x38CC80
-#define KF4_IS_PAUSED 0x5FB01C
-
-static uint8_t PS2_KF4_Status(void);
-static void PS2_KF4_Inject(void);
+static uint8_t SD_RD_Status(void);
+static void SD_RD_Inject(void);
 
 static const GAMEDRIVER GAMEDRIVER_INTERFACE =
 {
-	"King's Field IV: The Ancient City",
-	PS2_KF4_Status,
-	PS2_KF4_Inject,
+	"Red Dog: Superior Firepower",
+	SD_RD_Status,
+	SD_RD_Inject,
 	1, // 1000 Hz tickrate
 	0 // crosshair sway not supported for driver
 };
 
-const GAMEDRIVER *GAME_PS2_KINGSFIELD4 = &GAMEDRIVER_INTERFACE;
-
+const GAMEDRIVER *GAME_SD_REDDOG = &GAMEDRIVER_INTERFACE;
 
 //==========================================================================
 // Purpose: return 1 if game is detected
 //==========================================================================
-static uint8_t PS2_KF4_Status(void)
+static uint8_t SD_RD_Status(void)
 {
-	return (PS2_MEM_ReadWord(0x00093390) == 0x534C5553U && PS2_MEM_ReadWord(0x00093394) == 0x5F323033U) &&
-			PS2_MEM_ReadWord(0x00093398) == 0x2E31383BU;
+	return (SD_MEM_ReadWord(0x8040) == 0x54343032U && SD_MEM_ReadWord(0x8044) == 0x31354E20U);
 }
 //==========================================================================
 // Purpose: calculate mouse look and inject into current game
 //==========================================================================
-static void PS2_KF4_Inject(void)
+static void SD_RD_Inject(void)
 {
-	// TODO: fix weird ghosting when camera moves quickly
-	// 			camera is smooth when moved with controller but looks weird with mouse?
-	//			might just be caused by the game or emulation
+	// TODO: rotate camera when cursor is at edge
 
 	if(xmouse == 0 && ymouse == 0) // if mouse is idle
 		return;
 
-	// talking to NPCs
-	if (PS2_MEM_ReadUInt16(KF4_IS_NOT_CONVERSING) != 257)
-		return;
-	
-	// picking up item, using item (w/ anim), reading message
-	if (PS2_MEM_ReadUInt16(KF4_IS_BUSY))
-		return;
+	float looksensitivity = (float)sensitivity / 40.f;
+	float scale = 0.01f;
 
-	// pause and status menus
-	if (PS2_MEM_ReadUInt16(KF4_IS_PAUSED))
-		return;
+	float cursorX = SD_MEM_ReadFloat(RD_CURSORX);
+	float cursorY = SD_MEM_ReadFloat(RD_CURSORY);
 
-	float looksensitivity = (float)sensitivity / 14000.f;
+	cursorX += (float)xmouse * looksensitivity * scale;
+	cursorY -= (float)ymouse * looksensitivity * scale;
 
-	float camX = PS2_MEM_ReadFloat(KF4_CAMX);
-	float camY = PS2_MEM_ReadFloat(KF4_CAMY);
-
-	camX += (float)xmouse * looksensitivity;
-	camY -= (float)ymouse * looksensitivity;
-
-	// TODO: clamp Y
-
-	PS2_MEM_WriteFloat(KF4_CAMX, (float)camX);
-	PS2_MEM_WriteFloat(KF4_CAMY, (float)camY);
-	// PS2_MEM_WriteFloat(KF4_CAMX2, (float)camX);
-	// PS2_MEM_WriteFloat(KF4_CAMY2, (float)camY);
+	SD_MEM_WriteFloat(RD_CURSORX, (float)cursorX);
+	SD_MEM_WriteFloat(RD_CURSORY, (float)cursorY);
 
 }
