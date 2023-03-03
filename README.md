@@ -109,6 +109,7 @@ avoid clicking off the window.
 | Cold Winter (NTSC-U) | SLUS-20845 | Good | <sup>Split-screen mode not supported</sub> | <sup>Profile options - Aim Assist: Off</sub> |
 | Medal of Honor: Vanguard (NTSC-U) | SLUS-21597 | Good | <sup>Multiplayer mode not supported</sub> | |
 | Mercenaries: Playground of Destruction (NTSC-U) | SLUS-20932 | Fair | <sup>***Requires cheat file (23510F99.pnach) to disable aim-assist***, x-axis in normal vehicles not supported</sub> | |
+| King's Field IV: The Ancient City (NTSC-U) | SLUS-20318 | Good | <sup>Not fully tested</sub> | |
 * NOTE: PCSX2 will only hook with **BIOS versions 5XXXX and up**.
 * NOTE: Some aspects may break when a game is started with overclocking. Requires testing.
 * PCSX2 Settings: **Disable** *'Settings->Interface->Double-Click Toggles Fullscreen'* | **Enable** *'Settings->Interface->Hide Cursor In Fullscreen'*
