@@ -8,7 +8,7 @@ An external app that injects cursor input into game memory.
 | Emulator/Frontend | Version | Executable name (case sensitive) |
 | --- | :---: | :---: |
 | Dolphin | 5.0 and up | dolphin.exe |
-| DuckStation | 0.1-5477 | duckstation-qt-x64-ReleaseLTCG.exe |
+| DuckStation | 0.1-5485 | duckstation-qt-x64-ReleaseLTCG.exe |
 | BizHawk (N64, Mupen64Plus) | 2.8 | EmuHawk.exe |
 | BSNES | v115 | bsnes.exe |
 | PCSX2 Nightly | 1.7.4126 | pcsx2-qtx64-avx2.exe |
@@ -72,6 +72,7 @@ avoid clicking off the window.
 | King's Field (Japan) | SLPS-00017 | Good | <sup>Not fully tested, Will not hook until in-game</sub> |
 | King's Field (II) (NTSC-U) | SLUS-00158 | Good | <sup>Not fully tested</sub> |
 | King's Field II (III) (NTSC-U) | SLUS-00255 | Good | <sup>Not fully tested</sub> |
+| Armored Core (NTSC-U) | SCUS-94182 / SLUS-01323 | Fair | <sup>VS Mode not supported, Not fully tested</sub> |
 * NOTE: If DuckStation is not hooking, try restoring the default settings. 'Settings->General->Restore Defaults'
 * Importing cheat files in DuckStation: 'Tools->Cheat Manager->Cheat List->Import->From File'
 

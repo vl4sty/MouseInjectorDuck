@@ -2,3 +2,4 @@ obj/
 .vscode/
 *.exe
 *.ini
+*.zip
