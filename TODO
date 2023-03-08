@@ -15,3 +15,4 @@ Support for mapping keyboard keys to in-game functions
     Ex: For Quake III have the ability to map weapons to number keys
     Change the keys and toggle them on/off
 Ability to enable/disable features like aim-assist from GUI
+Select emulator to hook to from drop-down menu

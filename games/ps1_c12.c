@@ -23,28 +23,22 @@
 #include "../mouse.h"
 #include "game.h"
 
-#define AC_CAMY 0x411C0
-#define AC_CAMX 0x1A26CA
-#define AC_IS_NOT_BUSY 0x1AC80C
-#define AC_IS_NOT_PAUSED 0x39AD4
-#define AC_IS_MAP_OPEN 0x14C82B
-// #define AC_IS_ABORT_PROMPT 0x1ED848
-#define AC_IS_ABORT_PROMPT 0x1FE06E
+#define C12_TP_CAMY 0x1DE800
+#define C12_TP_CAMX 0x1DE802
 
-
-static uint8_t PS1_AC_Status(void);
-static void PS1_AC_Inject(void);
+static uint8_t PS1_C12_Status(void);
+static void PS1_C12_Inject(void);
 
 static const GAMEDRIVER GAMEDRIVER_INTERFACE =
 {
-	"Armored Core",
-	PS1_AC_Status,
-	PS1_AC_Inject,
+	"C-12: Final Resistance",
+	PS1_C12_Status,
+	PS1_C12_Inject,
 	1, // 1000 Hz tickrate
 	0 // crosshair sway supported for driver
 };
 
-const GAMEDRIVER *GAME_PS1_ARMOREDCORE = &GAMEDRIVER_INTERFACE;
+const GAMEDRIVER *GAME_PS1_C12FINALRESISTANCE = &GAMEDRIVER_INTERFACE;
 
 static float xAccumulator = 0.f;
 static float yAccumulator = 0.f;
@@ -52,57 +46,39 @@ static float yAccumulator = 0.f;
 //==========================================================================
 // Purpose: return 1 if game is detected
 //==========================================================================
-static uint8_t PS1_AC_Status(void)
+static uint8_t PS1_C12_Status(void)
 {
-	return ((PS1_MEM_ReadWord(0x928C) == 0x534C5553U && PS1_MEM_ReadWord(0x9290) == 0x5F303133U && PS1_MEM_ReadWord(0x9294) == 0x2E32333BU) || // SLUS_013.23 
-			(PS1_MEM_ReadWord(0x928C) == 0x53435553U && PS1_MEM_ReadWord(0x9290) == 0x5F393431U && PS1_MEM_ReadWord(0x9294) == 0x2E38323BU)); // SCUS_941.82
+	return (PS1_MEM_ReadWord(0x9274) == 0x53435553U && PS1_MEM_ReadWord(0x9278) == 0x5F393436U && PS1_MEM_ReadWord(0x927C) == 0x2E36363BU);
 }
 //==========================================================================
 // Purpose: calculate mouse look and inject into current game
 //==========================================================================
-static void PS1_AC_Inject(void)
+static void PS1_C12_Inject(void)
 {
-	// TODO: set idle rotating animation with xmouse input
-	// TODO: optional setting to account for AC turning speed
-
-	if (!PS1_MEM_ReadHalfword(AC_IS_NOT_BUSY))
-		return;
-	
-	if (!PS1_MEM_ReadHalfword(AC_IS_NOT_PAUSED))
-		return;
-	
-	if (PS1_MEM_ReadByte(AC_IS_MAP_OPEN))
-		return;
-
-	// if (PS1_MEM_ReadByte(AC_IS_ABORT_PROMPT))
-	if (PS1_MEM_ReadByte(AC_IS_ABORT_PROMPT) == 0x1A)
-		return;
-
 	if(xmouse == 0 && ymouse == 0) // if mouse is idle
 		return;
 	
-	uint16_t camX = PS1_MEM_ReadHalfword(AC_CAMX);
-	uint16_t camY = PS1_MEM_ReadHalfword(AC_CAMY);
+	uint16_t camX = PS1_MEM_ReadHalfword(C12_TP_CAMX);
+	uint16_t camY = PS1_MEM_ReadHalfword(C12_TP_CAMY);
 	float camXF = (float)camX;
 	float camYF = (float)camY;
 
 	const float looksensitivity = (float)sensitivity / 20.f;
 	const float scale = 1.f;
 
-	float dx = -(float)xmouse * looksensitivity * scale;
+	float dx = (float)xmouse * looksensitivity * scale;
 	AccumulateAddRemainder(&camXF, &xAccumulator, xmouse, dx);
 
 	float ym = (float)(invertpitch ? -ymouse : ymouse);
-	float dy = ym * looksensitivity * scale;
+	float dy = -ym * looksensitivity * scale;
 	AccumulateAddRemainder(&camYF, &yAccumulator, ym, dy);
 
 	// clamp y-axis
-	// range is larger than game usually allows but feels better
 	// if (camYF > 600 && camYF < 32000)
 	// 	camYF = 600;
 	// if (camYF < 65000 && camYF > 32000)
 	// 	camYF = 65000;
 
-	PS1_MEM_WriteHalfword(AC_CAMX, (uint16_t)camXF);
-	PS1_MEM_WriteHalfword(AC_CAMY, (uint16_t)camYF);
+	PS1_MEM_WriteHalfword(C12_TP_CAMX, (uint16_t)camXF);
+	PS1_MEM_WriteHalfword(C12_TP_CAMY, (uint16_t)camYF);
 }

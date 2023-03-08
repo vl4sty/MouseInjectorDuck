@@ -49,7 +49,7 @@ static void N64_GOLD_Inject(void);
 
 static const GAMEDRIVER GAMEDRIVER_INTERFACE =
 {
-	"N64 007 - GoldenEye",
+	"007: GoldenEye",
 	N64_GOLD_Status,
 	N64_GOLD_Inject,
 	1, // 1000 Hz tickrate

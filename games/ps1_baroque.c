@@ -23,28 +23,28 @@
 #include "../mouse.h"
 #include "game.h"
 
-#define AC_CAMY 0x411C0
-#define AC_CAMX 0x1A26CA
-#define AC_IS_NOT_BUSY 0x1AC80C
-#define AC_IS_NOT_PAUSED 0x39AD4
-#define AC_IS_MAP_OPEN 0x14C82B
-// #define AC_IS_ABORT_PROMPT 0x1ED848
-#define AC_IS_ABORT_PROMPT 0x1FE06E
+#define BAR_CURRENT_FLOOR 0xBF698
+#define BAR_CURRENT_FLOOR_MODE 0xBF699 // 0 is outer world, 1 is normal dungeon, 2 is Coffin Man tutorial
+#define BAR_CAMY 0xC0670
+#define BAR_CAMX 0xC0672
+#define BAR_IS_BUSY 0xC6AAC
+#define BAR_IS_PAUSED 0xB6584
 
+#define BAR_FLOOR_MODE_TUTORIAL 0x2
 
-static uint8_t PS1_AC_Status(void);
-static void PS1_AC_Inject(void);
+static uint8_t PS1_BAR_Status(void);
+static void PS1_BAR_Inject(void);
 
 static const GAMEDRIVER GAMEDRIVER_INTERFACE =
 {
-	"Armored Core",
-	PS1_AC_Status,
-	PS1_AC_Inject,
+	"Baroque",
+	PS1_BAR_Status,
+	PS1_BAR_Inject,
 	1, // 1000 Hz tickrate
 	0 // crosshair sway supported for driver
 };
 
-const GAMEDRIVER *GAME_PS1_ARMOREDCORE = &GAMEDRIVER_INTERFACE;
+const GAMEDRIVER *GAME_PS1_BAROQUE = &GAMEDRIVER_INTERFACE;
 
 static float xAccumulator = 0.f;
 static float yAccumulator = 0.f;
@@ -52,57 +52,52 @@ static float yAccumulator = 0.f;
 //==========================================================================
 // Purpose: return 1 if game is detected
 //==========================================================================
-static uint8_t PS1_AC_Status(void)
+static uint8_t PS1_BAR_Status(void)
 {
-	return ((PS1_MEM_ReadWord(0x928C) == 0x534C5553U && PS1_MEM_ReadWord(0x9290) == 0x5F303133U && PS1_MEM_ReadWord(0x9294) == 0x2E32333BU) || // SLUS_013.23 
-			(PS1_MEM_ReadWord(0x928C) == 0x53435553U && PS1_MEM_ReadWord(0x9290) == 0x5F393431U && PS1_MEM_ReadWord(0x9294) == 0x2E38323BU)); // SCUS_941.82
+	return ((PS1_MEM_ReadWord(0x937C) == 0x534C504DU && PS1_MEM_ReadWord(0x9380) == 0x5F383633U && PS1_MEM_ReadWord(0x9384) == 0x2E32383BU) || // 1.02 English patch
+			(PS1_MEM_ReadWord(0x9364) == 0x534C504DU && PS1_MEM_ReadWord(0x9368) == 0x5F383633U && PS1_MEM_ReadWord(0x936C) == 0x2E32383BU));  // original Japanese
 }
 //==========================================================================
 // Purpose: calculate mouse look and inject into current game
 //==========================================================================
-static void PS1_AC_Inject(void)
+static void PS1_BAR_Inject(void)
 {
-	// TODO: set idle rotating animation with xmouse input
-	// TODO: optional setting to account for AC turning speed
-
-	if (!PS1_MEM_ReadHalfword(AC_IS_NOT_BUSY))
+	if (PS1_MEM_ReadWord(BAR_IS_BUSY))
 		return;
 	
-	if (!PS1_MEM_ReadHalfword(AC_IS_NOT_PAUSED))
-		return;
-	
-	if (PS1_MEM_ReadByte(AC_IS_MAP_OPEN))
-		return;
-
-	// if (PS1_MEM_ReadByte(AC_IS_ABORT_PROMPT))
-	if (PS1_MEM_ReadByte(AC_IS_ABORT_PROMPT) == 0x1A)
+	if (PS1_MEM_ReadHalfword(BAR_IS_PAUSED))
 		return;
 
 	if(xmouse == 0 && ymouse == 0) // if mouse is idle
 		return;
 	
-	uint16_t camX = PS1_MEM_ReadHalfword(AC_CAMX);
-	uint16_t camY = PS1_MEM_ReadHalfword(AC_CAMY);
+	uint16_t camX = PS1_MEM_ReadHalfword(BAR_CAMX);
+	uint16_t camY = PS1_MEM_ReadHalfword(BAR_CAMY);
 	float camXF = (float)camX;
 	float camYF = (float)camY;
 
 	const float looksensitivity = (float)sensitivity / 20.f;
 	const float scale = 1.f;
 
-	float dx = -(float)xmouse * looksensitivity * scale;
+	float dx = (float)xmouse * looksensitivity * scale;
 	AccumulateAddRemainder(&camXF, &xAccumulator, xmouse, dx);
 
 	float ym = (float)(invertpitch ? -ymouse : ymouse);
-	float dy = ym * looksensitivity * scale;
+	float dy = -ym * looksensitivity * scale;
 	AccumulateAddRemainder(&camYF, &yAccumulator, ym, dy);
 
 	// clamp y-axis
-	// range is larger than game usually allows but feels better
-	// if (camYF > 600 && camYF < 32000)
-	// 	camYF = 600;
-	// if (camYF < 65000 && camYF > 32000)
-	// 	camYF = 65000;
+	if (camYF > 400 && camYF < 32000)
+		camYF = 400;
+	if (camYF < 65000 && camYF > 32000)
+		camYF = 65000;
 
-	PS1_MEM_WriteHalfword(AC_CAMX, (uint16_t)camXF);
-	PS1_MEM_WriteHalfword(AC_CAMY, (uint16_t)camYF);
+	// prevent camY movement on final floor of tutorial as any value other than 0 when leaving will softlock
+	uint8_t skipCamY = 0;
+	if (PS1_MEM_ReadByte(BAR_CURRENT_FLOOR_MODE) == BAR_FLOOR_MODE_TUTORIAL && PS1_MEM_ReadByte(BAR_CURRENT_FLOOR) == 0x7)
+		skipCamY = 1;
+	
+	PS1_MEM_WriteHalfword(BAR_CAMX, (uint16_t)camXF);
+	if (!skipCamY)
+		PS1_MEM_WriteHalfword(BAR_CAMY, (uint16_t)camYF);
 }

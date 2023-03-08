@@ -1,4 +1,4 @@
-# Mouse Injector for Dolphin 5.0, DuckStation, Mupen64Plus (RetroArch/BizHawk 2.8), BSNES, PCSX2
+# Mouse Injector for Dolphin 5.0, DuckStation, PCSX2, and other emulators
 
 An external app that injects cursor input into game memory.
 
@@ -10,7 +10,6 @@ An external app that injects cursor input into game memory.
 | Dolphin | 5.0 and up | dolphin.exe |
 | DuckStation | 0.1-5485 | duckstation-qt-x64-ReleaseLTCG.exe |
 | BizHawk (N64, Mupen64Plus) | 2.8 | EmuHawk.exe |
-| BSNES | v115 | bsnes.exe |
 | PCSX2 Nightly | 1.7.4126 | pcsx2-qtx64-avx2.exe |
 | RetroArch (see cores below) | 1.14.0 | retroarch.exe |
 * NOTE: Versions given are the latest that have been tested working, may work with newer
@@ -23,6 +22,7 @@ An external app that injects cursor input into game memory.
 | PS1 | Beetle PSX HW | 0.9.44.1 234433f |
 | PS1 | DuckStation | |
 | PS1 | SwanStation | 1.00 bc5f6c8 |
+| SNES | bsnes-mercury Balanced | v094 |
 * NOTE: For RetroArch the window needs to be focused for it to hook initially.
 
 ## How to Use
@@ -68,11 +68,12 @@ avoid clicking off the window.
 | The Note (PAL) | SLES-00749 | Good | <sup>Not fully tested</sub> |
 | Echo Night (NTSC-U) | SLUS-00820 | Good | <sup>Not fully tested</sub> |
 | Shadow Tower (NTSC-U) | SLUS-00863 | Good | <sup>Not fully tested</sub> |
-| South Park (NTSC-U) | SLUS-00936 | Good | <sup>Supplied cheats recommended (SouthPark_SLUS-00936.cht), Not fully tested</sub> |
+| South Park (NTSC-U) | SLUS-00936 | Good | <sup>Supplied cheats recommended (**SouthPark_SLUS-00936.cht**), Not fully tested</sub> |
 | King's Field (Japan) | SLPS-00017 | Good | <sup>Not fully tested, Will not hook until in-game</sub> |
 | King's Field (II) (NTSC-U) | SLUS-00158 | Good | <sup>Not fully tested</sub> |
 | King's Field II (III) (NTSC-U) | SLUS-00255 | Good | <sup>Not fully tested</sub> |
 | Armored Core (NTSC-U) | SCUS-94182 / SLUS-01323 | Fair | <sup>VS Mode not supported, Not fully tested</sub> |
+| Baroque - Yuganda Mousou (Japan) | SLPM-86328 | Fair | <sup>Supplied cheat (**Baroque_SLPM-86328.cht**) required to prevent camera y-axis from being reset on hit, Not fully tested</sub> |
 * NOTE: If DuckStation is not hooking, try restoring the default settings. 'Settings->General->Restore Defaults'
 * Importing cheat files in DuckStation: 'Tools->Cheat Manager->Cheat List->Import->From File'
 
@@ -83,15 +84,15 @@ avoid clicking off the window.
 | Sin and Punishment (J) | Good | <sup>Not fully tested</sub> |
 * NOTE: For BizHawk, go to Config->Customize and untick 'Enable Context Menu' to use mouse right-click
 
-## Supported BSNES Titles
+## Supported SNES Titles
 | Game Title | Mouse Support | Issues |
 | --- | :---: | ----------- |
-| Pac-Man 2: The New Adventures | Good | <sup>Not fully tested</sub> |
-| Timon & Pumbaa's Jungle Games | Good | <sup>None</sub> |
-| The Untouchables | Good | <sup>Crosshair shooting sections only</sub> |
-| R-Type III: The Third Lightning | Good | <sup>Not fully tested</sub> |
-* BSNES TIP: Press F12 to toggle mouse capture and it will hide the cursor.
-* NOTE: At the moment BSNES may unhook after minimizing, menuing, pausing emulation, or loading/saving savestates. Requires restarting BSNES and MouseInjector.
+| Pac-Man 2: The New Adventures (USA) | Good | <sup>Not fully tested</sub> |
+| Timon & Pumbaa's Jungle Games (USA) | Good | <sup>None</sub> |
+| The Untouchables (USA) | Good | <sup>Crosshair shooting sections only</sub> |
+| R-Type III: The Third Lightning (USA) | Good | <sup>Not fully tested</sub> |
+| Wild Guns (USA) | Good | <sup>Recommended use of supplied patch to disable cursor movement when moving character (Disables x-axis cursor movement for both players)</sub> |
+* NOTE: Patches must either be applied with an IPS patching tool, such as Lunar IPS, or by using softpatching with RetroArch
 
 ## Supported PCSX2 Titles
 | Game Title | Serial | Mouse Support | Issues | In-game Options |

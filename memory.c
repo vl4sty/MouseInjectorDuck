@@ -38,6 +38,9 @@ static int isRetroArchHandle = 0;
 static int isKronosHandle = 0;
 static int isBeetlePSXHandle = 0;
 static int isFlycastHandle = 0;
+static int isBizHawkSNESHandle = 0;
+static int isBSNESMercuryHandle = 0;
+static int isMesenHandle = 0;
 char hookedEmulatorName[80];
 
 uint8_t MEM_Init(void);
@@ -122,8 +125,9 @@ uint8_t MEM_Init(void)
 		}
 		if(strcmp(pe32.szExeFile, "EmuHawk.exe") == 0) // if EmuHawk was found, 2.8 oldest tested working - 2.9 not supported
 		{
-			strcpy(hookedEmulatorName, "BizHawk N64");
-			isN64handle = 1;
+			// strcpy(hookedEmulatorName, "BizHawk N64");
+			strcpy(hookedEmulatorName, "BizHawk - No core loaded");
+			// isN64handle = 1;
 			isBizHawkhandle = 1;
 			emuhandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_QUERY_INFORMATION, FALSE, pe32.th32ProcessID);
 			break;
@@ -224,7 +228,27 @@ uint8_t MEM_FindRamOffset(void)
 
 		// set region size to look for based on the emulator detected
 		uint32_t emuRegionSize = 0x2000000; // Dolphin
-		if (isRetroArchHandle == 1) {
+		if (isBizHawkhandle == 1) {
+			char bizHawkTitle[255];
+			HWND foreground = GetForegroundWindow();
+			int a = GetWindowText(foreground, bizHawkTitle, 256);
+
+			// check window title for loaded core
+			if (strstr(bizHawkTitle, "SNES") != NULL) {
+				strcpy(hookedEmulatorName, "BizHawk SNES");
+				// SNES region size is not static but region before is? (size: 0x19E000?)
+				emuRegionSize = 0x1E000;
+				// emuRegionSize = 0x19000;
+				// emuRegionSize = 0x13000;
+				isBizHawkSNESHandle = 1;
+			}
+			else if (strstr(bizHawkTitle, "Nintendo 64") != NULL) {
+				strcpy(hookedEmulatorName, "BizHawk N64");
+				emuRegionSize = 0x22D0000; 	// BizHawk 2.8 (Mupen64Plus)
+				isN64handle = 1;
+			}
+		}
+		else if (isRetroArchHandle == 1) {
 			char retroArchTitle[255];
 			HWND foreground = GetForegroundWindow();
 			int a = GetWindowText(foreground, retroArchTitle, 256);
@@ -262,6 +286,11 @@ uint8_t MEM_FindRamOffset(void)
 				emuRegionSize = 0x10000;
 				isFlycastHandle = 1;
 			}
+			else if (strstr(retroArchTitle, "bsnes-mercury") != NULL) {
+				strcpy(hookedEmulatorName, "RetroArch bsnes-mercury");
+				emuRegionSize = 0x39000;
+				isBSNESMercuryHandle = 1;
+			}
 		}
 		else if (isPS1handle == 1) {
 			emuRegionSize = 0x200000; 		// DuckStation
@@ -277,12 +306,14 @@ uint8_t MEM_FindRamOffset(void)
 			emuRegionSize = 0x1000;
 		} else if (isFlycastHandle == 1) {
 			emuRegionSize = 0x10000;
+		} else if (isMesenHandle == 1) {
+			emuRegionSize = 0x1BF000;
 		}
 
 		DWORD regionType = MEM_MAPPED; // Dolphin and DuckStation regions are type MEM_MAPPED
 		if (isN64handle == 1 || isKronosHandle == 1)
 			regionType = MEM_PRIVATE;  // All N64 emulator regions are type MEM_PRIVATE
-		if (isBSNEShandle == 1)
+		if (isBSNEShandle == 1 || isBSNESMercuryHandle == 1)
 			regionType = MEM_IMAGE;
 		if (isPcsx2handle == 1)
 		{
@@ -291,10 +322,42 @@ uint8_t MEM_FindRamOffset(void)
 			regionType = MEM_MAPPED;
 		}
 
+		// if (isBSNEShandle == 1)
+		// {
+		// 	// if BSNES, just look until you find region at 0xB140000
+		// 	PSAPI_WORKING_SET_EX_INFORMATION wsinfo;
+		// 	wsinfo.VirtualAddress = info.BaseAddress;
+
+		// 	if (info.BaseAddress == 0xB14000)
+		// 	{
+		// 		if (QueryWorkingSetEx(emuhandle, &wsinfo, sizeof(wsinfo))) { // query extended info about the memory page at the current virtual address space
+		// 			if (wsinfo.VirtualAttributes.Valid) { // check if the address space is valid
+		// 				memcpy(&emuoffset, &(info.BaseAddress), sizeof(info.BaseAddress)); // copy the base address location to our emuoffset pointer
+		// 				emuoffset += 0x2D7C; // WRAM always here? 0xB14000 + 0x2D7C, but region size is not fixed
+
+		// 				return (emuoffset != 0x0);
+		// 			}
+		// 		}
+		// 	}
+		// }
+
 		// check if region is the size of region where console memory is located
 		uint8_t regionFound = 0;
 		if (info.RegionSize == emuRegionSize && ((info.Type == regionType) || isN64handle))
 			regionFound = 1;
+		
+		// if (isBizHawkSNESHandle && !regionFound)
+		// {
+		// 	if (info.Type == regionType)
+		// 	{
+		// 		if (info.RegionSize >= (uint32_t)0x11000 && info.RegionSize <= (uint32_t)0x20000)
+		// 		{
+		// 			// handle the other possible region size
+		// 			emuRegionSize = info.RegionSize;
+		// 			regionFound = 1;
+		// 		}
+		// 	}
+		// }
 
 		if (regionFound == 1) { // why '|| isN64handle'? one N64 emulator is not MEM_PRIVATE?
 		// if (info.RegionSize == emuRegionSize) {
@@ -306,7 +369,16 @@ uint8_t MEM_FindRamOffset(void)
 				if (wsinfo.VirtualAttributes.Valid) { // check if the address space is valid
 					memcpy(&emuoffset, &(info.BaseAddress), sizeof(info.BaseAddress)); // copy the base address location to our emuoffset pointer
 
-					if (isKronosHandle == 1){
+
+					if (isBSNESMercuryHandle == 1) {
+						if (lastRegionSize != 0xB7000)
+							continue;
+						emuoffset += 0x7F1C;
+					}
+					else if (isBizHawkSNESHandle == 1) {
+						emuoffset += 0x40;
+					}
+					else if (isKronosHandle == 1){
 						emuoffset += 0x40;
 					}
 					else if (isFlycastHandle == 1) {

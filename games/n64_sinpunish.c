@@ -37,7 +37,7 @@ static void N64_SIN_Inject(void);
 
 static const GAMEDRIVER GAMEDRIVER_INTERFACE =
 {
-	"N64 Tsumi to Batsu - Hoshi no Keishousha",
+	"Tsumi to Batsu - Hoshi no Keishousha",
 	N64_SIN_Status,
 	N64_SIN_Inject,
 	1, // 1000 Hz tickrate
