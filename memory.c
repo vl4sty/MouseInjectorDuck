@@ -41,6 +41,7 @@ static int isFlycastHandle = 0;
 static int isBizHawkSNESHandle = 0;
 static int isBSNESMercuryHandle = 0;
 static int isMesenHandle = 0;
+static int isRPCS3Handle = 0;
 char hookedEmulatorName[80];
 
 uint8_t MEM_Init(void);
@@ -93,6 +94,10 @@ void PS2_MEM_WriteFloat(const uint32_t addr, float value);
 uint32_t SD_MEM_ReadWord(const uint32_t addr);
 float SD_MEM_ReadFloat(const uint32_t addr);
 void SD_MEM_WriteFloat(const uint32_t addr, float value);
+
+uint32_t PS3_MEM_ReadUInt(const uint32_t addr);
+float PS3_MEM_ReadFloat(const uint32_t addr);
+void PS3_MEM_WriteFloat(const uint32_t addr, float value);
 
 void printdebug(uint32_t val);
 
@@ -190,6 +195,13 @@ uint8_t MEM_Init(void)
 		{
 			strcpy(hookedEmulatorName, "Flycast");
 			isFlycastHandle = 1;
+			emuhandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_QUERY_INFORMATION, FALSE, pe32.th32ProcessID);
+			break;
+		}
+		if(strcmp(pe32.szExeFile, "rpcs3.exe") == 0) // if pcsx2 was found
+		{
+			strcpy(hookedEmulatorName, "RPCS3");
+			isRPCS3Handle = 1;
 			emuhandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_QUERY_INFORMATION, FALSE, pe32.th32ProcessID);
 			break;
 		}
@@ -308,6 +320,8 @@ uint8_t MEM_FindRamOffset(void)
 			emuRegionSize = 0x10000;
 		} else if (isMesenHandle == 1) {
 			emuRegionSize = 0x1BF000;
+		} else if (isRPCS3Handle == 1) {
+			emuRegionSize = 0xCC00000;
 		}
 
 		DWORD regionType = MEM_MAPPED; // Dolphin and DuckStation regions are type MEM_MAPPED
@@ -746,7 +760,7 @@ uint32_t PS2_MEM_ReadUInt16(const uint32_t addr)
 
 float PS2_MEM_ReadFloat(const uint32_t addr)
 {
-	if(!emuoffset || PS2NOTWITHINMEMRANGE(addr)) // if gamecube memory has not been init by dolphin or reading from outside of memory range
+	if(!emuoffset || PS2NOTWITHINMEMRANGE(addr)) 
 		return 0;
 	float output; // temp var used for output of function
 	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + (addr - 0x80000)), &output, sizeof(output), NULL);
@@ -778,7 +792,7 @@ void PS2_MEM_WriteUInt16(const uint32_t addr, uint16_t value)
 
 void PS2_MEM_WriteFloat(const uint32_t addr, float value)
 {
-	if(!emuoffset || PS2NOTWITHINMEMRANGE(addr)) // if gamecube memory has not been init by dolphin or writing to outside of memory range
+	if(!emuoffset || PS2NOTWITHINMEMRANGE(addr)) 
 		return;
 	// MEM_ByteSwap32((uint32_t *)&value); // byteswap
 	WriteProcessMemory(emuhandle, (LPVOID)(emuoffset + (addr - 0x80000)), &value, sizeof(value), NULL);
@@ -790,7 +804,7 @@ void PS2_MEM_WriteFloat(const uint32_t addr, float value)
 // =================================================
 uint32_t SD_MEM_ReadWord(const uint32_t addr)
 {
-	if(!emuoffset || PS2NOTWITHINMEMRANGE(addr)) // if ps2 memory has not been init by emulator or reading from outside of memory range
+	if(!emuoffset || PS2NOTWITHINMEMRANGE(addr)) 
 		return 0;
 	uint32_t output; // temp var used for output of function
 	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &output, sizeof(output), NULL);
@@ -801,7 +815,7 @@ uint32_t SD_MEM_ReadWord(const uint32_t addr)
 
 float SD_MEM_ReadFloat(const uint32_t addr)
 {
-	if(!emuoffset || PS2NOTWITHINMEMRANGE(addr)) // if gamecube memory has not been init by dolphin or reading from outside of memory range
+	if(!emuoffset || PS2NOTWITHINMEMRANGE(addr)) 
 		return 0;
 	float output; // temp var used for output of function
 	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &output, sizeof(output), NULL);
@@ -811,7 +825,7 @@ float SD_MEM_ReadFloat(const uint32_t addr)
 
 void SD_MEM_WriteFloat(const uint32_t addr, float value)
 {
-	if(!emuoffset || PS2NOTWITHINMEMRANGE(addr)) // if gamecube memory has not been init by dolphin or writing to outside of memory range
+	if(!emuoffset || PS2NOTWITHINMEMRANGE(addr))
 		return;
 	// MEM_ByteSwap32((uint32_t *)&value); // byteswap
 	WriteProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &value, sizeof(value), NULL);
@@ -825,6 +839,34 @@ void SD_MEM_WriteFloat(const uint32_t addr, float value)
 // 	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &output, sizeof(output), NULL);
 // 	return output;
 // }
+
+uint32_t PS3_MEM_ReadUInt(const uint32_t addr)
+{
+	if(!emuoffset || PS3NOTWITHINMEMRANGE(addr))
+		return 0;
+	uint32_t output; // temp var used for output of function
+	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &output, sizeof(output), NULL);
+	MEM_ByteSwap32((uint32_t *)&output); // byteswap
+	return output;
+}
+
+float PS3_MEM_ReadFloat(const uint32_t addr)
+{
+	if(!emuoffset || PS3NOTWITHINMEMRANGE(addr))
+		return 0;
+	float output; // temp var used for output of function
+	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &output, sizeof(output), NULL);
+	MEM_ByteSwap32((uint32_t *)&output); // byteswap
+	return output;
+}
+
+void PS3_MEM_WriteFloat(const uint32_t addr, float value)
+{
+	if(!emuoffset || PS3NOTWITHINMEMRANGE(addr)) 
+		return;
+	MEM_ByteSwap32((uint32_t *)&value); // byteswap
+	WriteProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &value, sizeof(value), NULL);
+}
 
 void printdebug(uint32_t val)
 {

@@ -31,6 +31,8 @@
 #define PS2WITHINMEMRANGE(X) (!PS2NOTWITHINMEMRANGE(X))
 #define SSNOTWITHINMEMRANGE(X) (X > 0xFFFFF)
 #define SSWITHINMEMRANGE(X) (!SSNOTWITHINMEMRANGE(X))
+#define PS3NOTWITHINMEMRANGE(X) (X > 0xCC00000)
+#define PS3WITHINMEMRANGE(X) (!PS3NOTWITHINMEMRANGE(X))
 
 extern uint8_t MEM_Init(void);
 extern void MEM_Quit(void);
@@ -81,6 +83,10 @@ extern uint32_t SD_MEM_ReadWord(const uint32_t addr);
 extern float SD_MEM_ReadFloat(const uint32_t addr);
 extern void SD_MEM_WriteFloat(const uint32_t addr, float value);
 
-extern uint16_t SS_MEM_ReadHalfword(const uint32_t addr);
+// extern uint16_t SS_MEM_ReadHalfword(const uint32_t addr);
+
+extern uint32_t PS3_MEM_ReadUInt(const uint32_t addr);
+extern float PS3_MEM_ReadFloat(const uint32_t addr);
+extern void PS3_MEM_WriteFloat(const uint32_t addr, float value);
 
 extern char hookedEmulatorName[80];

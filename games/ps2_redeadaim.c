@@ -24,9 +24,25 @@
 #include "../mouse.h"
 #include "game.h"
 
+#define TAU 6.2831853f // 0x40C90FDB
+
 #define REDA_cursorx 0x4B0E54
 #define REDA_snapx 0x4B21A4
-#define REDA_cursory 0x2D092C
+#define REDA_CURSORY 0x2D092C
+
+#define REDA_TPS_CAMX 0x4B0E54
+#define REDA_TPS_CAMY 0x4B0E50
+#define REDA_TPS_CAMX_2 0x2DC7A4
+#define REDA_FPS_CAMY 0x4B21A0
+#define REDA_FPS_CAMX 0x4B21A4
+#define REDA_IS_AIMING 0x4B0DD8
+#define REDA_ROTX 0x4AF9E4
+// #define REDA_MODEL_PITCH 0x4AF9E0
+#define REDA_MODEL_PITCH 0x4B0E80
+
+#define REDA_ON_STAIRS 0x2DE184
+#define REDA_IS_EXAMINE 0x4B0CB8
+#define REDA_IS_NOT_PAUSED 0x31C6CC
 
 static uint8_t PS2_REDA_Status(void);
 static void PS2_REDA_Inject(void);
@@ -47,7 +63,8 @@ const GAMEDRIVER *GAME_PS2_REDEADAIM = &GAMEDRIVER_INTERFACE;
 //==========================================================================
 static uint8_t PS2_REDA_Status(void)
 {
-	return (PS2_MEM_ReadWord(0x00093390) == 0x534C5553U && PS2_MEM_ReadWord(0x00093394) == 0x5F323036U &&
+	return (PS2_MEM_ReadWord(0x00093390) == 0x534C5553U && 
+			PS2_MEM_ReadWord(0x00093394) == 0x5F323036U &&
 			PS2_MEM_ReadWord(0x00093398) == 0x2E36393BU);
 }
 //==========================================================================
@@ -55,19 +72,58 @@ static uint8_t PS2_REDA_Status(void)
 //==========================================================================
 static void PS2_REDA_Inject(void)
 {
+	// lock cursorY to middle
+	PS2_MEM_WriteUInt16(REDA_CURSORY, 215);
+
+	if (PS2_MEM_ReadUInt16(REDA_ON_STAIRS))
+		return;
+	
+	// when game pauses to exmaine something, some in-game cutscenes, saving
+	if (PS2_MEM_ReadUInt16(REDA_IS_EXAMINE))
+		return;
+	
+	// pause menu, item pickup
+	if (!PS2_MEM_ReadUInt16(REDA_IS_NOT_PAUSED))
+		return;
+
 	if(xmouse == 0 && ymouse == 0) // if mouse is idle
 		return;
 
 	const float looksensitivity = (float)sensitivity / 40.f;
+	const float scale = 600.f;
 
-	float cursorX = PS2_MEM_ReadFloat(REDA_cursorx);
-	float cursorY = PS2_MEM_ReadUInt(REDA_cursory);
+	if (PS2_MEM_ReadUInt16(REDA_IS_AIMING))	 {
+		float camX = PS2_MEM_ReadFloat(REDA_FPS_CAMX);
+		float camY = PS2_MEM_ReadFloat(REDA_FPS_CAMY);
+		camY -= (float)(invertpitch ? -ymouse : ymouse) * looksensitivity / scale;
+		camX += (float)xmouse * looksensitivity / scale;
 
-	cursorX += (float)xmouse * looksensitivity / 600.f;
-	// cursorX += (float)xmouse / 100.f;
-	cursorY += (float)(invertpitch ? -ymouse : ymouse) * looksensitivity;
+		if (camY > 1)
+			camY = 1;
+		if (camY < -1)
+			camY = -1;
 
-	PS2_MEM_WriteFloat(REDA_cursorx, (float)cursorX);
-	PS2_MEM_WriteFloat(REDA_snapx, (float)cursorX);
-	PS2_MEM_WriteUInt(REDA_cursory, (uint32_t)cursorY);
+		PS2_MEM_WriteFloat(REDA_FPS_CAMY, (float)camY);
+		PS2_MEM_WriteFloat(REDA_FPS_CAMX, (float)camX);
+		PS2_MEM_WriteFloat(REDA_TPS_CAMX, (float)camX);
+	}
+	else {
+		// float camY = PS2_MEM_ReadFloat(REDA_TPS_CAMY);	
+		float camX = PS2_MEM_ReadFloat(REDA_TPS_CAMX);	
+		// camY -= (float)(invertpitch ? -ymouse : ymouse) * looksensitivity / scale;
+		camX += (float)xmouse * looksensitivity / scale;
+
+		while (camX > TAU / 2)
+			camX -= TAU;
+		while (camX < -TAU / 2)
+			camX += TAU;
+		
+		// if (camY > 1)
+		// 	camY = 1;
+		// if (camY < -1)
+		// 	camY = -1;
+
+		// PS2_MEM_WriteFloat(REDA_TPS_CAMY, (float)camY);
+		PS2_MEM_WriteFloat(REDA_TPS_CAMX, (float)camX);
+	}
 }

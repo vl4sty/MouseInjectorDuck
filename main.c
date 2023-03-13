@@ -37,6 +37,8 @@ uint8_t sensitivity = 20;
 uint8_t crosshair = 3;
 uint8_t invertpitch = 0;
 int isHooked = 0;
+uint8_t uncapTickrate = 0;
+
 float out = 0;
 float out2 = 0;
 float out3 = 0;
@@ -110,8 +112,15 @@ int32_t main(void)
 				MEM_FindRamOffset();
 				Sleep(100);
 			}
+
+			if (!uncapTickrate)
+				Sleep(GAME_Tickrate());
 		}
-		Sleep(GAME_Tickrate());
+		else 
+		{
+			Sleep(100);
+		}
+
 		GUI_TitleShowHookStatus(hooked);
 
 		// update GUI for debug output
@@ -148,7 +157,7 @@ static void GUI_TitleShowHookStatus(int hooked)
 static void GUI_Init(void)
 {
 	SetConsoleTitle("Mouse Injector");
-	system("mode 80, 25"); // set window height and width
+	system("mode 80, 27"); // set window height and width
 }
 //==========================================================================
 // Purpose: prints the welcome message
@@ -197,6 +206,11 @@ static void GUI_Interact(void)
 	if(K_7 && !locksettings && !updateinterface) // invert pitch toggle (7)
 	{
 		invertpitch = !invertpitch;
+		updateinterface = 1;
+	}
+	if(K_8 && !locksettings && !updateinterface) // invert pitch toggle (7)
+	{
+		uncapTickrate = !uncapTickrate;
 		updateinterface = 1;
 	}
 	if(K_PLUS && !locksettings && !updateinterface) // numpad plus (+)
@@ -256,6 +270,7 @@ static void GUI_Update(void)
 			printf("Not Available For Game");
 		printf(selectedoption == EDITINGCROSSHAIR ? " [+/-]\n\n" : "\n\n");
 		printf(invertpitch ? "   [7] - [ON] Invert Pitch\n\n" : "   [7] - [OFF] Invert Pitch\n\n");
+		printf(uncapTickrate ? "   [8] - [ON] Uncap Mouse Tickrate (Drastically increases CPU usage)\n" : "   [8] - [OFF] Uncap Mouse Tickrate (Drastically increases CPU usage)\n");
 		printf("\n\n\n\n\n");
 		printf("   [CTRL+0] - Lock Settings\n\n");
 	}

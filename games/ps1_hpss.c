@@ -23,74 +23,62 @@
 #include "../mouse.h"
 #include "game.h"
 
-#define KF4_CAMY 0x413F90
-#define KF4_CAMX 0x413F94
-#define KF4_CAMY2 0x414290
-#define KF4_CAMX2 0x414294
+#define HPSS_CAMY 0x1ABD95
+#define HPSS_CAMX 0x1ABD99
 
-#define KF4_IS_NOT_CONVERSING 0x38CC50
-#define KF4_IS_BUSY 0x38CC80
-#define KF4_IS_PAUSED 0x5FB01C
-
-static uint8_t PS2_KF4_Status(void);
-static void PS2_KF4_Inject(void);
+static uint8_t PS1_HPSS_Status(void);
+static void PS1_HPSS_Inject(void);
 
 static const GAMEDRIVER GAMEDRIVER_INTERFACE =
 {
-	"King's Field IV: The Ancient City",
-	PS2_KF4_Status,
-	PS2_KF4_Inject,
+	"Harry Potter and the Sorcerer's Stone",
+	PS1_HPSS_Status,
+	PS1_HPSS_Inject,
 	1, // 1000 Hz tickrate
-	0 // crosshair sway not supported for driver
+	0 // crosshair sway supported for driver
 };
 
-const GAMEDRIVER *GAME_PS2_KINGSFIELD4 = &GAMEDRIVER_INTERFACE;
+const GAMEDRIVER *GAME_PS1_HPSORCERERSSTONE = &GAMEDRIVER_INTERFACE;
+
+static float xAccumulator = 0.f;
+static float yAccumulator = 0.f;
 
 //==========================================================================
 // Purpose: return 1 if game is detected
 //==========================================================================
-static uint8_t PS2_KF4_Status(void)
+static uint8_t PS1_HPSS_Status(void)
 {
-	return (PS2_MEM_ReadWord(0x00093390) == 0x534C5553U && PS2_MEM_ReadWord(0x00093394) == 0x5F323033U) &&
-			PS2_MEM_ReadWord(0x00093398) == 0x2E31383BU;
+	return (PS1_MEM_ReadWord(0x9274) == 0x534C5553U && PS1_MEM_ReadWord(0x9278) == 0x5F303134U && PS1_MEM_ReadWord(0x927C) == 0x2E31353BU);
 }
 //==========================================================================
 // Purpose: calculate mouse look and inject into current game
 //==========================================================================
-static void PS2_KF4_Inject(void)
+static void PS1_HPSS_Inject(void)
 {
-	// TODO: fix weird ghosting when camera moves quickly
-	// 			camera is smooth when moved with controller but looks weird with mouse?
-	//			might just be caused by the game or emulation
-
 	if(xmouse == 0 && ymouse == 0) // if mouse is idle
 		return;
-
-	// talking to NPCs
-	if (PS2_MEM_ReadUInt16(KF4_IS_NOT_CONVERSING) != 257)
-		return;
 	
-	// picking up item, using item (w/ anim), reading message
-	if (PS2_MEM_ReadUInt16(KF4_IS_BUSY))
-		return;
+	uint16_t camX = PS1_MEM_ReadHalfword(HPSS_CAMX);
+	uint16_t camY = PS1_MEM_ReadHalfword(HPSS_CAMY);
+	float camXF = (float)camX;
+	float camYF = (float)camY;
 
-	// pause and status menus
-	if (PS2_MEM_ReadUInt16(KF4_IS_PAUSED))
-		return;
+	const float looksensitivity = (float)sensitivity / 20.f;
+	const float scale = 10.f;
 
-	float looksensitivity = (float)sensitivity / 14000.f;
+	float dx = -(float)xmouse * looksensitivity * scale;
+	AccumulateAddRemainder(&camXF, &xAccumulator, xmouse, dx);
 
-	float camX = PS2_MEM_ReadFloat(KF4_CAMX);
-	float camY = PS2_MEM_ReadFloat(KF4_CAMY);
+	float ym = (float)(invertpitch ? -ymouse : ymouse);
+	float dy = -ym * looksensitivity * scale;
+	AccumulateAddRemainder(&camYF, &yAccumulator, ym, dy);
 
-	camX += (float)xmouse * looksensitivity;
-	camY -= (float)(invertpitch ? -ymouse : ymouse) * looksensitivity;
+	// clamp y-axis
+	// if (camYF > 600 && camYF < 32000)
+	// 	camYF = 600;
+	// if (camYF < 65000 && camYF > 32000)
+	// 	camYF = 65000;
 
-	// TODO: clamp Y
-
-	PS2_MEM_WriteFloat(KF4_CAMX, (float)camX);
-	PS2_MEM_WriteFloat(KF4_CAMY, (float)camY);
-	// PS2_MEM_WriteFloat(KF4_CAMX2, (float)camX);
-	// PS2_MEM_WriteFloat(KF4_CAMY2, (float)camY);
-
+	PS1_MEM_WriteHalfword(HPSS_CAMX, (uint16_t)camXF);
+	PS1_MEM_WriteHalfword(HPSS_CAMY, (uint16_t)camYF);
 }

@@ -23,74 +23,75 @@
 #include "../mouse.h"
 #include "game.h"
 
-#define KF4_CAMY 0x413F90
-#define KF4_CAMX 0x413F94
-#define KF4_CAMY2 0x414290
-#define KF4_CAMX2 0x414294
+#define KZ_CAMY 0x88606CC
+#define KZ_CAMX_COS 0x6549DE8
+#define KZ_CAMX_SIN 0x6549DEC
 
-#define KF4_IS_NOT_CONVERSING 0x38CC50
-#define KF4_IS_BUSY 0x38CC80
-#define KF4_IS_PAUSED 0x5FB01C
+#define KZ_ON_FOOT_ANGLE_UNSET -99
 
-static uint8_t PS2_KF4_Status(void);
-static void PS2_KF4_Inject(void);
+static uint8_t PS3_KZ_Status(void);
+static void PS3_KZ_Inject(void);
 
 static const GAMEDRIVER GAMEDRIVER_INTERFACE =
 {
-	"King's Field IV: The Ancient City",
-	PS2_KF4_Status,
-	PS2_KF4_Inject,
+	"Killzone HD",
+	PS3_KZ_Status,
+	PS3_KZ_Inject,
 	1, // 1000 Hz tickrate
-	0 // crosshair sway not supported for driver
+	0 // crosshair sway supported for driver
 };
 
-const GAMEDRIVER *GAME_PS2_KINGSFIELD4 = &GAMEDRIVER_INTERFACE;
+const GAMEDRIVER *GAME_PS3_KILLZONEHD = &GAMEDRIVER_INTERFACE;
+
+static float onFootAngle = KZ_ON_FOOT_ANGLE_UNSET;
 
 //==========================================================================
 // Purpose: return 1 if game is detected
 //==========================================================================
-static uint8_t PS2_KF4_Status(void)
+static uint8_t PS3_KZ_Status(void)
 {
-	return (PS2_MEM_ReadWord(0x00093390) == 0x534C5553U && PS2_MEM_ReadWord(0x00093394) == 0x5F323033U) &&
-			PS2_MEM_ReadWord(0x00093398) == 0x2E31383BU;
+	return (PS3_MEM_ReadUInt(0x107EA0) == 0x50554138U && PS3_MEM_ReadUInt(0x107EA4) == 0x30383536U);
 }
 //==========================================================================
 // Purpose: calculate mouse look and inject into current game
 //==========================================================================
-static void PS2_KF4_Inject(void)
+static void PS3_KZ_Inject(void)
 {
-	// TODO: fix weird ghosting when camera moves quickly
-	// 			camera is smooth when moved with controller but looks weird with mouse?
-	//			might just be caused by the game or emulation
-
+	// TODO: fix flickering for camX, maybe find the angle in memory and add to and set based on that
+	// TODO: clamp camY
+	// TODO: scale camY to match camX
+	//			camY is on a -1 to 1 scale
+	//			camX is a sin/cos angle
+	// TODO: find FOV
 	if(xmouse == 0 && ymouse == 0) // if mouse is idle
 		return;
-
-	// talking to NPCs
-	if (PS2_MEM_ReadUInt16(KF4_IS_NOT_CONVERSING) != 257)
-		return;
 	
-	// picking up item, using item (w/ anim), reading message
-	if (PS2_MEM_ReadUInt16(KF4_IS_BUSY))
-		return;
+	const float looksensitivity = (float)sensitivity / 20.f;
 
-	// pause and status menus
-	if (PS2_MEM_ReadUInt16(KF4_IS_PAUSED))
-		return;
+	float camY = PS3_MEM_ReadFloat(KZ_CAMY);
+	float ym = (float)(invertpitch ? -ymouse : ymouse);
+	camY -= ym * looksensitivity / 200.f;
 
-	float looksensitivity = (float)sensitivity / 14000.f;
+	float camXSin = PS3_MEM_ReadFloat(KZ_CAMX_SIN);
+	float camXCos = PS3_MEM_ReadFloat(KZ_CAMX_COS);
 
-	float camX = PS2_MEM_ReadFloat(KF4_CAMX);
-	float camY = PS2_MEM_ReadFloat(KF4_CAMY);
+	// keep track of total rotation angle since it is not kept in-game
+	float angle = atan(camXSin / camXCos);
+	if (onFootAngle == KZ_ON_FOOT_ANGLE_UNSET) {
+		onFootAngle = angle;
+	}
 
-	camX += (float)xmouse * looksensitivity;
-	camY -= (float)(invertpitch ? -ymouse : ymouse) * looksensitivity;
+	float angleChange = (float)xmouse * looksensitivity / 200.f;
 
-	// TODO: clamp Y
+	// angle += angleChange;
+	onFootAngle += angleChange;
+	// TODO: while totalAngle > or < TAU, -TAU
 
-	PS2_MEM_WriteFloat(KF4_CAMX, (float)camX);
-	PS2_MEM_WriteFloat(KF4_CAMY, (float)camY);
-	// PS2_MEM_WriteFloat(KF4_CAMX2, (float)camX);
-	// PS2_MEM_WriteFloat(KF4_CAMY2, (float)camY);
+	camXSin = sin(onFootAngle);
+	camXCos = cos(onFootAngle);
 
+	PS3_MEM_WriteFloat(KZ_CAMX_SIN, (float)camXSin);
+	PS3_MEM_WriteFloat(KZ_CAMX_COS, (float)camXCos);
+
+	PS3_MEM_WriteFloat(KZ_CAMY, camY);
 }

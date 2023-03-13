@@ -7,6 +7,8 @@ Find better checks for N64 status
     After switching games in RetroArch, the last game's status is still valid?
     so the injector must be closed and reopened
     Might be a problem with RA in general
+Different time/sleep implementation for more consistent tickrate
+    Some PS2 titles (or all?) seem to be affected
 
 -- Long term --
 Add auto-updater

@@ -39,6 +39,8 @@ An external app that injects cursor input into game memory.
 work very well if you have also mapped the mouse buttons as you may click off the window. Fullscreen is
 recommended and with dual-monitors it is recommended to put the cursor in the corner before hooking to
 avoid clicking off the window.
+* NOTE: Uncapping the mouse tickrate will make input for some games smoother, particularly PS2 titles. But it will
+**drastically increase the CPU usage.**
 
 ## Supported Dolphin Titles (NTSC Only)
 | Game Title | Mouse Support | Issues |
@@ -74,6 +76,7 @@ avoid clicking off the window.
 | King's Field II (III) (NTSC-U) | SLUS-00255 | Good | <sup>Not fully tested</sub> |
 | Armored Core (NTSC-U) | SCUS-94182 / SLUS-01323 | Fair | <sup>VS Mode not supported, Not fully tested</sub> |
 | Baroque - Yuganda Mousou (Japan) | SLPM-86328 | Fair | <sup>Supplied cheat (**Baroque_SLPM-86328.cht**) required to prevent camera y-axis from being reset on hit, Not fully tested</sub> |
+| Alient Trilogy (NTSC-U) | SLUS-00007 | Good | <sup>Requires supplied cheat file (**AlienTrilogy_SLUS-00007.cht**), Not fully tested</sub> |
 * NOTE: If DuckStation is not hooking, try restoring the default settings. 'Settings->General->Restore Defaults'
 * Importing cheat files in DuckStation: 'Tools->Cheat Manager->Cheat List->Import->From File'
 
@@ -112,6 +115,8 @@ avoid clicking off the window.
 | Medal of Honor: Vanguard (NTSC-U) | SLUS-21597 | Good | <sup>Multiplayer mode not supported</sub> | |
 | Mercenaries: Playground of Destruction (NTSC-U) | SLUS-20932 | Fair | <sup>***Requires cheat file (23510F99.pnach) to disable aim-assist***, x-axis in normal vehicles not supported</sub> | |
 | King's Field IV: The Ancient City (NTSC-U) | SLUS-20318 | Good | <sup>Not fully tested</sub> | |
+| Eternal Ring (NTSC-U) | SLUS-20015 | Good | <sup>Uncap Mouse Tickrate recommended, Not fully tested</sub> | |
+| Resident Evil: Dead Aim (NTSC-U) | SLUS-20669 | Good | <sup>***Requires cheat file (FBB5290C.pnach)***, Third-person camera y-axis not supported</sub> | |
 * NOTE: PCSX2 will only hook with **BIOS versions 5XXXX and up**.
 * NOTE: Some aspects may break when a game is started with overclocking. Requires testing.
 * PCSX2 Settings: **Disable** *'Settings->Interface->Double-Click Toggles Fullscreen'* | **Enable** *'Settings->Interface->Hide Cursor In Fullscreen'*

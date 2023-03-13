@@ -23,10 +23,13 @@
 #include "../mouse.h"
 #include "game.h"
 
-#define MML_CAMX 0xB5206
-#define MML_CAMX2 0xB520E
+#define MML_ROT_X 0xB5206
 #define MML_CAMY 0xB52B8
+#define MML_CAMX_WALKING 0xA3968
 #define MML_CAMY_WALKING 0xA396C
+#define MML_IS_BUSY 0x98A5B
+#define MML_IS_ROOM_TRANSITION 0x98824
+#define MML_IS_MAP 0xB526D
 
 static uint8_t PS1_MML_Status(void);
 static void PS1_MML_Inject(void);
@@ -82,34 +85,52 @@ static void PS1_MML_Inject(void)
 	// TODO: see if free aim shooting while normal walk is possible
 	//			use a spider on ceiling or other high enemy to check for aim angle
 	// TODO: disable auto-aim
+	// TODO: fix when going from aiming to walking, camX is not changed but MM rotation is
+	//			so the camera will pop to the direction he is facing
 
+	if (PS1_MEM_ReadByte(MML_IS_BUSY))
+		return;
+
+	if (PS1_MEM_ReadByte(MML_IS_MAP))
+		return;
+
+	if (PS1_MEM_ReadByte(MML_IS_ROOM_TRANSITION))
+		return;
 
 	if(xmouse == 0 && ymouse == 0) // if mouse is idle
 		return;
 	
-	uint16_t camX = PS1_MEM_ReadHalfword(MML_CAMX);
+	uint16_t rotX = PS1_MEM_ReadHalfword(MML_ROT_X);
 	uint16_t camY = PS1_MEM_ReadHalfword(MML_CAMY);
-	float camXF = (float)camX;
+	float rotXF = (float)rotX;
 	float camYF = (float)camY;
 
 	const float looksensitivity = (float)sensitivity / 20.f;
 	const float scale = 1.f;
 
 	float dx = (float)xmouse * looksensitivity * scale;
-	AccumulateAddRemainder(&camXF, &xAccumulator, xmouse, dx);
+	AccumulateAddRemainder(&rotXF, &xAccumulator, xmouse, dx);
 
 	float ym = (float)(invertpitch ? -ymouse : ymouse);
 	float dy = ym * looksensitivity * scale;
 	AccumulateAddRemainder(&camYF, &yAccumulator, ym, dy);
 
 	// clamp y-axis while walking
-	// if (camYF > 700 && camYF < 32000)
-	// 	camYF = 700;
-	// if (camYF < 65510 && camYF > 32000)
-	// 	camYF = 65510;
+	if (camYF > 700 && camYF < 32000)
+		camYF = 700;
+	if (camYF < 65000 && camYF > 32000)
+		camYF = 65000;
+	
+	// while (rotXF >= 4096)
+	// 	rotXF -= 4096;
 
-	PS1_MEM_WriteHalfword(MML_CAMX, (uint16_t)camXF);
-	PS1_MEM_WriteHalfword(MML_CAMX2, (uint16_t)camXF);
+	// camera follows rotation of MM
+	float cameraX = rotXF + 2048;
+	// while (cameraX > 4096)
+	// 	cameraX -= 4096;
+
+	PS1_MEM_WriteHalfword(MML_ROT_X, (uint16_t)rotXF);
+	PS1_MEM_WriteHalfword(MML_CAMX_WALKING, (uint16_t)cameraX);
 	PS1_MEM_WriteHalfword(MML_CAMY, (uint16_t)camYF);
 	PS1_MEM_WriteHalfword(MML_CAMY_WALKING, (uint16_t)camYF);
 }

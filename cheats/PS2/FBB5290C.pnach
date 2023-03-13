@@ -1,0 +1,8 @@
+gametitle=Resident Evil: Dead Aim SLUS-20669 0xFBB5290C
+
+// Disable FPS Camera Auto-Center
+patch=1,EE,20233234,word,00000000
+patch=1,EE,2023328C,word,00000000
+
+// Disable Rounded Corner CamX Adjust
+patch=1,EE,201D96F4,word,00000000
