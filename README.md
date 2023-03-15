@@ -9,7 +9,6 @@ An external app that injects cursor input into game memory.
 | --- | :---: | :---: |
 | Dolphin | 5.0 and up | dolphin.exe |
 | DuckStation | 0.1-5485 | duckstation-qt-x64-ReleaseLTCG.exe |
-| BizHawk (N64, Mupen64Plus) | 2.8 | EmuHawk.exe |
 | PCSX2 Nightly | 1.7.4126 | pcsx2-qtx64-avx2.exe |
 | RetroArch (see cores below) | 1.14.0 | retroarch.exe |
 * NOTE: Versions given are the latest that have been tested working, may work with newer
@@ -80,12 +79,11 @@ avoid clicking off the window.
 * NOTE: If DuckStation is not hooking, try restoring the default settings. 'Settings->General->Restore Defaults'
 * Importing cheat files in DuckStation: 'Tools->Cheat Manager->Cheat List->Import->From File'
 
-## Supported Mupen64Plus(RetroArch)/BizHawk 2.8 Titles
+## Supported Mupen64Plus(RetroArch)
 | Game Title | Mouse Support | Issues |
 | --- | :---: | ----------- |
 | GoldenEye: 007 (NTSC) | Fair | <sup>None</sub> |
 | Sin and Punishment (J) | Good | <sup>Not fully tested</sub> |
-* NOTE: For BizHawk, go to Config->Customize and untick 'Enable Context Menu' to use mouse right-click
 
 ## Supported SNES Titles
 | Game Title | Mouse Support | Issues |

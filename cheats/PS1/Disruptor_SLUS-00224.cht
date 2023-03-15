@@ -1,0 +1,7 @@
+#group=MouseInjector
+#type=Gameshark
+#activation=EndFrame
+[*Disable CamX]
+E00093AC 0053
+800380A0 0000
+
