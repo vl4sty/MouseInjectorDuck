@@ -74,7 +74,7 @@ avoid clicking off the window.
 | Armored Core (NTSC-U) | SCUS-94182 / SLUS-01323 | Fair | <sup>VS Mode not supported, Not fully tested</sub> |
 | Baroque - Yuganda Mousou (Japan) | SLPM-86328 | Fair | <sup>Supplied cheat (**Baroque_SLPM-86328.cht**) required to prevent camera y-axis from being reset on hit, Not fully tested</sub> |
 | Alient Trilogy (NTSC-U) | SLUS-00007 | Good | <sup>Requires supplied cheat file (**AlienTrilogy_SLUS-00007.cht**), Not fully tested</sub> |
-| Disruptor (NTSC-U) | SLUS-00224 | Good | <sup>Not fully tested</sub> |
+| Disruptor (NTSC-U) | SLUS-00224 | Good | <sup>Requires supplied cheat file (**Disruptor_SLUS-00224.cht**), Not fully tested</sub> |
 * NOTE: If DuckStation is not hooking, try restoring the default settings. 'Settings->General->Restore Defaults'
 * Importing cheat files in DuckStation: 'Tools->Cheat Manager->Cheat List->Import->From File'
 
