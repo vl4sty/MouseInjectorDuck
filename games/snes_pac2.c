@@ -75,20 +75,12 @@ static void SNES_PAC_Inject(void)
 	float cursorX = (float)cursorXInt;
 	float cursorY = (float)cursorYInt;
 
-	if (xmouse != 0)
-	{
-		float dx = (float)xmouse * looksensitivity;
+	float dx = (float)xmouse * looksensitivity;
+	AccumulateAddRemainder(&cursorX, &xAccumulator, xmouse, dx);
 
-		AccumulateAddRemainder(&cursorX, &xAccumulator, xmouse, dx);
-	}
-
-	if (ymouse != 0)
-	{
-		int ym = (invertpitch ? -ymouse : ymouse);
-		float dy = (float)ym * looksensitivity;
-
-		AccumulateAddRemainder(&cursorY, &yAccumulator, ym, dy);
-	}
+	int ym = (invertpitch ? -ymouse : ymouse);
+	float dy = (float)ym * looksensitivity;
+	AccumulateAddRemainder(&cursorY, &yAccumulator, ym, dy);
 
 	cursorX = ClampFloat(cursorX, 17.f, 239.f);
 	cursorY = ClampFloat(cursorY, 17.f, 182.f);

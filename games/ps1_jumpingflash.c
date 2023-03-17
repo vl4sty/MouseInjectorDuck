@@ -126,7 +126,7 @@ static void PS1_JF_Inject(void)
 
 	float ym = (float)(invertpitch ? -ymouse : ymouse);
 	float dy = -ym * looksensitivity * scale;
-	AccumulateAddRemainder(&camYF, &yAccumulator, ym, dy);
+	AccumulateAddRemainder(&camYF, &yAccumulator, -ym, dy);
 
 	camX = (uint16_t)camXF;
 	camY = (uint16_t)camYF;

@@ -28,14 +28,7 @@
 #define APS_railcar_camx 0x00060562
 #define APS_inrailcar 0x00060548
 
-#define MIBC_camx 0x000EFF32
-#define MIBC_camy 0x00EFFBC
-#define MIBC_lookahead 0x000EFFB8
-#define MIBC_playerbase 0x000EF9F0
-#define MIBC_playerbase_sanity 0x000008E5 // stable value at playerbase
-
 static uint8_t PS1_APS_Status(void);
-// static uint8_t PS1_MIBC_DetectPlayer(void);
 static void PS1_APS_Inject(void);
 
 static const GAMEDRIVER GAMEDRIVER_INTERFACE =
@@ -49,6 +42,9 @@ static const GAMEDRIVER GAMEDRIVER_INTERFACE =
 
 const GAMEDRIVER *GAME_PS1_ARMORINES = &GAMEDRIVER_INTERFACE;
 
+static float xAccumulator = 0.f;
+static float yAccumulator = 0.f;
+
 //==========================================================================
 // Purpose: return 1 if game is detected
 //==========================================================================
@@ -57,49 +53,48 @@ static uint8_t PS1_APS_Status(void)
 	return (PS1_MEM_ReadUInt(0xB8B8) == 0x5F53554CU && PS1_MEM_ReadUInt(0xB8BC) == 0x2E303130U && PS1_MEM_ReadUInt(0xB8C0) == 0x313B3232U); // SLUS_013.87;
 }
 //==========================================================================
-// Purpose: detects player pointer from stack address
-// Changed Globals: fovbase, playerbase
-//==========================================================================
-// static uint8_t PS1_MIBC_DetectPlayer(void)
-// {
-// 	if(PS1_MEM_ReadWord(MIBC_playerbase) == MIBC_playerbase_sanity)
-// 		return 1;
-
-// 	return 0;
-// }
-//==========================================================================
 // Purpose: calculate mouse look and inject into current game
 //==========================================================================
 static void PS1_APS_Inject(void)
 {
-	// if(!PS1_MIBC_DetectPlayer())
-	// 	return;
-	// PS1_MEM_WriteWord(MIBC_lookahead, 0); // disable lookahead
+	// TODO: prevent cam when dead, paused, loading
 
 	if(xmouse == 0 && ymouse == 0) // if mouse is idle
 		return;
 
 	uint16_t inRailcar = PS1_MEM_ReadUInt(APS_inrailcar);
 
-	// PS1 camx is stored in a Halfword (uint16_t)
-	uint16_t camx = PS1_MEM_ReadHalfword(APS_camx);
+	uint16_t camX;
 	if (inRailcar == 5)
-		camx = PS1_MEM_ReadHalfword(APS_railcar_camx);
-	uint16_t camy = PS1_MEM_ReadHalfword(APS_camy);
+		camX = PS1_MEM_ReadHalfword(APS_railcar_camx);
+	else
+		camX = PS1_MEM_ReadHalfword(APS_camx);
+	uint16_t camY = PS1_MEM_ReadHalfword(APS_camy);
+	float camXF = (float)camX;
+	float camYF = (float)camY;
 
 	const float looksensitivity = (float)sensitivity / 20.f;
 
-	camx -= (float)xmouse * looksensitivity;
-	while(camx >= 4096)
-		camx -= 4096;
+	const float scale = 1.f;
+
+	float dx = -(float)xmouse * looksensitivity * scale;
+	AccumulateAddRemainder(&camXF, &xAccumulator, -xmouse, dx);
+
+	float ym = (float)(invertpitch ? -ymouse : ymouse);
+	float dy = ym * looksensitivity * scale;
+	AccumulateAddRemainder(&camYF, &yAccumulator, ym, dy);
+
+	// camx -= (float)xmouse * looksensitivity;
+	while(camXF >= 4096)
+		camXF -= 4096;
 	
-	camy += (float)ymouse * looksensitivity;
+	// camy += (float)ymouse * looksensitivity;
 	// if(camy < 0)
 	// 	camy += 4096;
 
 	if (inRailcar == 5)
-		PS1_MEM_WriteHalfword(APS_railcar_camx, (uint16_t)camx);
+		PS1_MEM_WriteHalfword(APS_railcar_camx, (uint16_t)camXF);
 	else
-		PS1_MEM_WriteHalfword(APS_camx, (uint16_t)camx);
-	PS1_MEM_WriteHalfword(APS_camy, (uint16_t)camy);
+		PS1_MEM_WriteHalfword(APS_camx, (uint16_t)camXF);
+	PS1_MEM_WriteHalfword(APS_camy, (uint16_t)camYF);
 }

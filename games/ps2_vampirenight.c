@@ -63,50 +63,18 @@ static void PS2_VN_Inject(void)
 
 	const float looksensitivity = (float)sensitivity / 40.f;
 
-
-	uint16_t cursorXInt = PS2_MEM_ReadUInt16(VN_cursorx);
-	uint16_t cursorYInt = PS2_MEM_ReadUInt16(VN_cursory);
-	float cursorX = (float)cursorXInt;
-	float cursorY = (float)cursorYInt;
+	float cursorX = PS2_MEM_ReadUInt16(VN_cursorx);
+	float cursorY = PS2_MEM_ReadUInt16(VN_cursory);
+	float cursorXF = (float)cursorX;
+	float cursorYF = (float)cursorY;
 
 	float dx = (float)xmouse * looksensitivity;
-	if (xmouse < 0)
-		cursorX += ceil(dx);
-	else
-		cursorX += (uint16_t)dx;
+	AccumulateAddRemainder(&cursorXF, &xAccumulator, xmouse, dx);
 
-	float r = fmod(dx, 1.f);
+	float ym = (float)(invertpitch ? -ymouse : ymouse);
+	float dy = -ym * looksensitivity;
+	AccumulateAddRemainder(&cursorYF, &yAccumulator, -ym, dy);
 
-	if (abs(r + xAccumulator) >= 1)
-	{
-		if (xmouse > 0)
-			cursorX += 1;
-		else
-			cursorX -= 1;
-	}
-	
-	xAccumulator = fmod(r + xAccumulator, 1.f);
-
-	int ym = (invertpitch ? ymouse : -ymouse);
-	float dy = (float)ym * looksensitivity;
-	// if (ymouse < 0)
-	if (ym < 0)
-		cursorY += ceil(dy);
-	else
-		cursorY += (uint16_t)dy;
-
-	r = fmod(dy, 1.f);
-
-	if (abs(r + yAccumulator) >= 1)
-	{
-		if (ym > 0)
-			cursorY += 1;
-		else
-			cursorY -= 1;
-	}
-	
-	yAccumulator = fmod(r + yAccumulator, 1.f);
-
-	PS2_MEM_WriteUInt16(VN_cursorx, (uint16_t)cursorX);
-	PS2_MEM_WriteUInt16(VN_cursory, (uint16_t)cursorY);
+	PS2_MEM_WriteUInt16(VN_cursorx, (uint16_t)cursorXF);
+	PS2_MEM_WriteUInt16(VN_cursory, (uint16_t)cursorYF);
 }

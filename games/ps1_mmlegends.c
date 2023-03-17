@@ -53,7 +53,9 @@ static float yAccumulator = 0.f;
 //==========================================================================
 static uint8_t PS1_MML_Status(void)
 {
-	return (PS1_MEM_ReadWord(0x925C) == 0x534C5553U && PS1_MEM_ReadWord(0x9260) == 0x5F303036U && PS1_MEM_ReadWord(0x9264) == 0x2E30333BU);
+	return (PS1_MEM_ReadWord(0x925C) == 0x534C5553U && 
+			PS1_MEM_ReadWord(0x9260) == 0x5F303036U && 
+			PS1_MEM_ReadWord(0x9264) == 0x2E30333BU);
 }
 //==========================================================================
 // Purpose: calculate mouse look and inject into current game

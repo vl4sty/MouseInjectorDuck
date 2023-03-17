@@ -85,11 +85,11 @@ static void PS1_SP_Inject(void)
 	const float scale = 10.f;
 
 	float dx = -(float)xmouse * looksensitivity * scale * fov;
-	AccumulateAddRemainder(&camXF, &xAccumulator, xmouse, dx);
+	AccumulateAddRemainder(&camXF, &xAccumulator, -xmouse, dx);
 
 	float ym = (float)(invertpitch ? -ymouse : ymouse);
 	float dy = -ym * looksensitivity * scale * fov;
-	AccumulateAddRemainder(&camYF, &yAccumulator, ym, dy);
+	AccumulateAddRemainder(&camYF, &yAccumulator, -ym, dy);
 
 
 	// clamp y-axis

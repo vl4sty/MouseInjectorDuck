@@ -47,6 +47,9 @@ static const GAMEDRIVER GAMEDRIVER_INTERFACE =
 
 const GAMEDRIVER *GAME_PS1_CODENAMETENKA = &GAMEDRIVER_INTERFACE;
 
+static float xAccumulator = 0.f;
+static float yAccumulator = 0.f;
+
 //==========================================================================
 // Purpose: return 1 if game is detected
 //==========================================================================
@@ -84,19 +87,29 @@ static void PS1_TENKA_Inject(void)
 
 	const uint32_t cam_base = PS1_MEM_ReadPointer(TENKA_cam_base);
 
-	uint16_t camx = PS1_MEM_ReadHalfword(cam_base + TENKA_camx_offset);
-	uint16_t camy = PS1_MEM_ReadHalfword(cam_base + TENKA_camy_offset);
+	uint16_t camX = PS1_MEM_ReadHalfword(cam_base + TENKA_camx_offset);
+	uint16_t camY = PS1_MEM_ReadHalfword(cam_base + TENKA_camy_offset);
+	float camXF = (float)camX;
+	float camYF = (float)camY;
 
 	const float looksensitivity = (float)sensitivity / 40.f;
+	const float scale = 1.f;
 
-	camx -= (float)xmouse * looksensitivity;
+	float dx = -(float)xmouse * looksensitivity * scale;
+	AccumulateAddRemainder(&camXF, &xAccumulator, -xmouse, dx);
+
+	float ym = (float)(invertpitch ? -ymouse : ymouse);
+	float dy = ym * looksensitivity * scale;
+	AccumulateAddRemainder(&camYF, &yAccumulator, ym, dy);
+
+	// camx -= (float)xmouse * looksensitivity;
 	// while(camx >= 4096)
 	// 	camx -= 4096;
 	
-	camy += (float)ymouse * looksensitivity;
+	// camy += (float)ymouse * looksensitivity;
 	// if(camy < 0)
 	// 	camy += 4096;
 
-	PS1_MEM_WriteHalfword(cam_base + TENKA_camx_offset, (uint16_t)camx);
-	PS1_MEM_WriteHalfword(cam_base + TENKA_camy_offset, (uint16_t)camy);
+	PS1_MEM_WriteHalfword(cam_base + TENKA_camx_offset, (uint16_t)camXF);
+	PS1_MEM_WriteHalfword(cam_base + TENKA_camy_offset, (uint16_t)camYF);
 }

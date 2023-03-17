@@ -17,9 +17,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, visit http://www.gnu.org/licenses/gpl-2.0.html
 //==========================================================================
+#include <windows.h>
 #include <stdio.h>
 #include <stdint.h>
-#include <windows.h>
 #include <math.h>
 #include "main.h"
 #include "memory.h"
@@ -66,6 +66,8 @@ static void INI_Save(const uint8_t showerror);
 //==========================================================================
 int32_t main(void)
 {
+	timeBeginPeriod(1);
+
 	// TODO: Warn if multiple valid emulators are running
 	// Hide mouse when hooked to emulator and supported game is running
 	GUI_Init();
@@ -113,8 +115,7 @@ int32_t main(void)
 				Sleep(100);
 			}
 
-			if (!uncapTickrate)
-				Sleep(GAME_Tickrate());
+			Sleep(GAME_Tickrate());
 		}
 		else 
 		{
@@ -126,6 +127,8 @@ int32_t main(void)
 		// update GUI for debug output
 		// GUI_Update();
 	}
+
+	timeEndPeriod(1);
 	return 0;
 }
 //==========================================================================
@@ -208,11 +211,6 @@ static void GUI_Interact(void)
 		invertpitch = !invertpitch;
 		updateinterface = 1;
 	}
-	if(K_8 && !locksettings && !updateinterface) // invert pitch toggle (7)
-	{
-		uncapTickrate = !uncapTickrate;
-		updateinterface = 1;
-	}
 	if(K_PLUS && !locksettings && !updateinterface) // numpad plus (+)
 	{
 		if(selectedoption == EDITINGSENSITIVITY && sensitivity < 200)
@@ -270,7 +268,6 @@ static void GUI_Update(void)
 			printf("Not Available For Game");
 		printf(selectedoption == EDITINGCROSSHAIR ? " [+/-]\n\n" : "\n\n");
 		printf(invertpitch ? "   [7] - [ON] Invert Pitch\n\n" : "   [7] - [OFF] Invert Pitch\n\n");
-		printf(uncapTickrate ? "   [8] - [ON] Uncap Mouse Tickrate (Drastically increases CPU usage)\n" : "   [8] - [OFF] Uncap Mouse Tickrate (Drastically increases CPU usage)\n");
 		printf("\n\n\n\n\n");
 		printf("   [CTRL+0] - Lock Settings\n\n");
 	}
@@ -394,6 +391,8 @@ static void INI_Save(const uint8_t showerror)
 // dx = change to value
 void AccumulateAddRemainder(float *value, float *accumulator, float dir, float dx)
 {
+	if (dir == 0) return;
+
 	// add integer part of dx
 	if (dir < 0)
 		*value += ceil(dx);

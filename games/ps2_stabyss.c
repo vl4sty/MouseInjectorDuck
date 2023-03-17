@@ -1,0 +1,110 @@
+//===========================================================
+// Mouse Injector for Dolphin
+//==========================================================================
+// Copyright (C) 2019-2020 Carnivorous
+// All rights reserved.
+//
+// Mouse Injector is free software; you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the Free
+// Software Foundation; either version 2 of the License, or (at your option)
+// any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+// or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+// for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, visit http://www.gnu.org/licenses/gpl-2.0.html
+//==========================================================================
+#include <stdint.h>
+#include "../main.h"
+#include "../memory.h"
+#include "../mouse.h"
+#include "game.h"
+
+#define PI 3.14159265f // 0x40490FDB
+#define TAU 6.2831853f // 0x40C90FDB
+
+#define STA_CAMY 0xB7F820
+#define STA_CAMY2 0xB7F830
+#define STA_CAMX 0xB7F824
+#define STA_CAMX2 0xB7F834
+#define STA_CAMX_COS 0xB7F860
+#define STA_CAMX_COS2 0xB7F888
+#define STA_CAMX_COS3 0xB7F9E0
+#define STA_CAMX_COS4 0xB7FA08
+#define STA_CAMX_SIN 0xB7F868
+#define STA_CAMX_SIN2 0xB7F880
+#define STA_CAMX_SIN3 0xB7F9E8
+#define STA_CAMX_SIN4 0xB7FA00
+
+static uint8_t PS2_STA_Status(void);
+static void PS2_STA_Inject(void);
+
+static const GAMEDRIVER GAMEDRIVER_INTERFACE =
+{
+	"Shadow Tower: Abyss",
+	PS2_STA_Status,
+	PS2_STA_Inject,
+	1, // 1000 Hz tickrate
+	0 // crosshair sway not supported for driver
+};
+
+const GAMEDRIVER *GAME_PS2_STABYSS = &GAMEDRIVER_INTERFACE;
+
+//==========================================================================
+// Purpose: return 1 if game is detected
+//==========================================================================
+static uint8_t PS2_STA_Status(void)
+{
+	return (PS2_MEM_ReadWord(0x00093390) == 0x534C5053U && 
+			PS2_MEM_ReadWord(0x00093394) == 0x5F323532U &&
+			PS2_MEM_ReadWord(0x00093398) == 0x2E31373BU);
+}
+//==========================================================================
+// Purpose: calculate mouse look and inject into current game
+//==========================================================================
+static void PS2_STA_Inject(void)
+{
+	if(xmouse == 0 && ymouse == 0) // if mouse is idle
+		return;
+
+	float looksensitivity = (float)sensitivity / 40.f;
+	float scale = 600.f;
+
+	float camX = PS2_MEM_ReadFloat(STA_CAMX);
+	float camX2 = PS2_MEM_ReadFloat(STA_CAMX2);
+	float camY = PS2_MEM_ReadFloat(STA_CAMY);
+	float camY2 = PS2_MEM_ReadFloat(STA_CAMY2);
+
+	// camX += (float)xmouse * looksensitivity / scale;
+	float dx = (float)xmouse * looksensitivity / scale;
+	camX += dx;
+	camX2 += dx;
+	// camY -= (float)(invertpitch ? -ymouse : ymouse) * looksensitivity / scale;
+	float dy = (float)(invertpitch ? -ymouse : ymouse) * looksensitivity / scale;
+	camY -= dy;
+	camY2 -= dy;
+
+	while (camX > PI)
+		camX -= TAU;
+	while (camX < -PI)
+		camX += TAU;
+	
+	// PS2_MEM_WriteFloat(STA_CAMX_COS, (float)cos(camX));
+	// PS2_MEM_WriteFloat(STA_CAMX_COS2, (float)cos(camX));
+	// PS2_MEM_WriteFloat(STA_CAMX_COS3, (float)cos(camX));
+	// PS2_MEM_WriteFloat(STA_CAMX_COS4, (float)cos(camX));
+	// PS2_MEM_WriteFloat(STA_CAMX_SIN, (float)sin(camX));
+	// PS2_MEM_WriteFloat(STA_CAMX_SIN2, -(float)sin(camX));
+	// PS2_MEM_WriteFloat(STA_CAMX_SIN2, -(float)sin(camX));
+	// PS2_MEM_WriteFloat(STA_CAMX_SIN4, (float)sin(camX));
+
+	PS2_MEM_WriteFloat(STA_CAMX, (float)camX);
+	PS2_MEM_WriteFloat(STA_CAMX2, (float)camX2);
+	// PS2_MEM_WriteFloat(STA_CAMX2, (float)camX);
+	PS2_MEM_WriteFloat(STA_CAMY, (float)camY);
+	// PS2_MEM_WriteFloat(STA_CAMY2, (float)camY2);
+	// PS2_MEM_WriteFloat(STA_CAMY2, (float)camY);
+}

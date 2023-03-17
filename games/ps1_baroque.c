@@ -84,7 +84,7 @@ static void PS1_BAR_Inject(void)
 
 	float ym = (float)(invertpitch ? -ymouse : ymouse);
 	float dy = -ym * looksensitivity * scale;
-	AccumulateAddRemainder(&camYF, &yAccumulator, ym, dy);
+	AccumulateAddRemainder(&camYF, &yAccumulator, -ym, dy);
 
 	// clamp y-axis
 	if (camYF > 400 && camYF < 32000)

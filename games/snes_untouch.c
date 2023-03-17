@@ -95,60 +95,23 @@ static void SNES_UT_Inject(void)
 
 	const float looksensitivity = (float)sensitivity / 40.f;
 
-	uint16_t cursorXInt = SNES_MEM_ReadWord(UT_cursorx);
-	uint16_t cursorYInt = SNES_MEM_ReadWord(UT_cursory);
-	float cursorX = (float)cursorXInt;
-	float cursorY = (float)cursorYInt;
+	uint16_t cursorX = SNES_MEM_ReadWord(UT_cursorx);
+	uint16_t cursorY = SNES_MEM_ReadWord(UT_cursory);
+	float cursorXF = (float)cursorX;
+	float cursorYF = (float)cursorY;
 
-	if (xmouse != 0)
-	{
-		float dx = (float)xmouse * looksensitivity;
-		if (xmouse < 0)
-			cursorX += ceil(dx);
-		else
-			cursorX += (uint16_t)dx;
+	float dx = (float)xmouse * looksensitivity;
+	AccumulateAddRemainder(&cursorXF, &xAccumulator, xmouse, dx);
 
-		float r = fmod(dx, 1.f);
-
-		if (abs(r + xAccumulator) >= 1)
-		{
-			if (xmouse > 0)
-				cursorX += 1;
-			else
-				cursorX -= 1;
-		}
-	
-		xAccumulator = fmod(r + xAccumulator, 1.f);
-	}
-
-	if (ymouse != 0)
-	{
-		int ym = (invertpitch ? -ymouse : ymouse);
-		float dy = (float)ym * looksensitivity;
-		// if (ymouse < 0)
-		if (ym < 0)
-			cursorY += ceil(dy);
-		else
-			cursorY += (uint16_t)dy;
-
-		float r = fmod(dy, 1.f);
-
-		if (abs(r + yAccumulator) >= 1)
-		{
-			if (ym > 0)
-				cursorY += 1;
-			else
-				cursorY -= 1;
-		}
-		
-		yAccumulator = fmod(r + yAccumulator, 1.f);
-	}
+	int ym = (invertpitch ? -ymouse : ymouse);
+	float dy = (float)ym * looksensitivity;
+	AccumulateAddRemainder(&cursorYF, &yAccumulator, ym, dy);
 
 	uint16_t screenleft = SNES_MEM_ReadWord(UT_screenleft);
 
-	cursorX = ClampFloat(cursorX, (float)screenleft, (float)screenleft + 255.f);
-	cursorY = ClampFloat(cursorY, camylow, camyhigh);
+	cursorXF = ClampFloat(cursorXF, (float)screenleft, (float)screenleft + 255.f);
+	cursorYF = ClampFloat(cursorYF, camylow, camyhigh);
 
-	SNES_MEM_WriteWord(UT_cursorx, (uint16_t)cursorX);
-	SNES_MEM_WriteWord(UT_cursory, (uint16_t)cursorY);
+	SNES_MEM_WriteWord(UT_cursorx, (uint16_t)cursorXF);
+	SNES_MEM_WriteWord(UT_cursory, (uint16_t)cursorYF);
 }

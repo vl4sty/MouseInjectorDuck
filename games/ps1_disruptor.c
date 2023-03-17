@@ -52,7 +52,9 @@ static float xAccumulator = 0.f;
 //==========================================================================
 static uint8_t PS1_DIS_Status(void)
 {
-	return (PS1_MEM_ReadWord(0x93AC) == 0x534C5553U && PS1_MEM_ReadWord(0x93B0) == 0x5F303032U && PS1_MEM_ReadWord(0x93B4) == 0x2E32343BU);
+	return (PS1_MEM_ReadWord(0x93AC) == 0x534C5553U && 
+			PS1_MEM_ReadWord(0x93B0) == 0x5F303032U && 
+			PS1_MEM_ReadWord(0x93B4) == 0x2E32343BU);
 }
 //==========================================================================
 // Purpose: calculate mouse look and inject into current game

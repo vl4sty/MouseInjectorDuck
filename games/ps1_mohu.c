@@ -182,7 +182,7 @@ static void PS1_MOHU_Inject(void)
 
 		float ym = (float)(invertpitch ? -ymouse : ymouse);
 		float dy = -ym * looksensitivity * scale;
-		AccumulateAddRemainder(&camYF, &yAccumulator, ym, dy);
+		AccumulateAddRemainder(&camYF, &yAccumulator, -ym, dy);
 
 		// while (camYF > 4096)
 		// 	camYF -= 4096;

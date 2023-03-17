@@ -50,6 +50,7 @@ const GAMEDRIVER *GAME_PS1_ECHONIGHT = &GAMEDRIVER_INTERFACE;
 
 static float xAccumulator = 0.f;
 static float yAccumulator = 0.f;
+static float scale = 30.f;
 
 //==========================================================================
 // Purpose: return 1 if game is detected
@@ -94,20 +95,22 @@ static void PS1_ECHO_Inject(void)
 	float camXF = (float)camX;
 	float camYF = (float)camY;
 
-	const float looksensitivity = (float)sensitivity / 20.f;
+	const float looksensitivity = (float)sensitivity;
 
-	float dx = -(float)xmouse * looksensitivity;
-	AccumulateAddRemainder(&camXF, &xAccumulator, xmouse, dx);
+	float dx = -(float)xmouse * looksensitivity / scale;
+	AccumulateAddRemainder(&camXF, &xAccumulator, -xmouse, dx);
 
-	float ym = (float)(invertpitch ? -ymouse : ymouse);
-	float dy = ym * looksensitivity;
-	AccumulateAddRemainder(&camYF, &yAccumulator, ym, dy);
+	// float ym = (float)(invertpitch ? -ymouse : ymouse);
+	// float dy = ym * looksensitivity / scale;
+	float dy = (float)ymouse * looksensitivity / scale;
+	AccumulateAddRemainder(&camYF, &yAccumulator, ymouse, dy);
+	// AccumulateAddRemainder(&camYF, &yAccumulator, ym, dy);
 
 	// clamp y-axis
-	if (camYF > 640 && camYF < 32000)
-		camYF = 640;
-	if (camYF < 64896 && camYF > 32000)
-		camYF = 64896;
+	// if (camYF > 640 && camYF < 32000)
+	// 	camYF = 640;
+	// if (camYF < 64896 && camYF > 32000)
+	// 	camYF = 64896;
 
 	PS1_MEM_WriteHalfword(ECHO_CAMX, (uint16_t)camXF);
 	PS1_MEM_WriteHalfword(ECHO_CAMY, (uint16_t)camYF);

@@ -51,8 +51,9 @@ const GAMEDRIVER *GAME_PS2_KINGSFIELD4 = &GAMEDRIVER_INTERFACE;
 //==========================================================================
 static uint8_t PS2_KF4_Status(void)
 {
-	return (PS2_MEM_ReadWord(0x00093390) == 0x534C5553U && PS2_MEM_ReadWord(0x00093394) == 0x5F323033U) &&
-			PS2_MEM_ReadWord(0x00093398) == 0x2E31383BU;
+	return (PS2_MEM_ReadWord(0x00093390) == 0x534C5553U && 
+			PS2_MEM_ReadWord(0x00093394) == 0x5F323033U &&
+			PS2_MEM_ReadWord(0x00093398) == 0x2E31383BU);
 }
 //==========================================================================
 // Purpose: calculate mouse look and inject into current game

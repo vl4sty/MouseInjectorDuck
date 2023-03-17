@@ -83,13 +83,14 @@ static void PS1_STOW_Inject(void)
 	float camXF = (float)camX;
 	float camYF = (float)camY;
 
-	const float looksensitivity = (float)sensitivity / 20.f;
+	const float looksensitivity = (float)sensitivity;
+	const float scale = 30.f;
 
-	float dx = -(float)xmouse * looksensitivity;
-	AccumulateAddRemainder(&camXF, &xAccumulator, xmouse, dx);
+	float dx = -(float)xmouse * looksensitivity / scale;
+	AccumulateAddRemainder(&camXF, &xAccumulator, -xmouse, dx);
 
 	float ym = (float)(invertpitch ? -ymouse : ymouse);
-	float dy = ym * looksensitivity;
+	float dy = ym * looksensitivity / scale;
 	AccumulateAddRemainder(&camYF, &yAccumulator, ym, dy);
 
 	// clamp y-axis

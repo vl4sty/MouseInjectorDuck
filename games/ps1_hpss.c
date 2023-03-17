@@ -67,11 +67,11 @@ static void PS1_HPSS_Inject(void)
 	const float scale = 10.f;
 
 	float dx = -(float)xmouse * looksensitivity * scale;
-	AccumulateAddRemainder(&camXF, &xAccumulator, xmouse, dx);
+	AccumulateAddRemainder(&camXF, &xAccumulator, -xmouse, dx);
 
 	float ym = (float)(invertpitch ? -ymouse : ymouse);
 	float dy = -ym * looksensitivity * scale;
-	AccumulateAddRemainder(&camYF, &yAccumulator, ym, dy);
+	AccumulateAddRemainder(&camYF, &yAccumulator, -ym, dy);
 
 	// clamp y-axis
 	// if (camYF > 600 && camYF < 32000)
