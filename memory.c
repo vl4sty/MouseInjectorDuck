@@ -75,6 +75,7 @@ uint32_t N64_MEM_ReadUInt(const uint32_t addr);
 float N64_MEM_ReadFloat(const uint32_t addr);
 void N64_MEM_WriteFloat(const uint32_t addr, float value);
 void N64_MEM_WriteUInt(const uint32_t addr, uint32_t value);
+void N64_MEM_WriteByte(const uint32_t addr, uint8_t value);
 
 uint8_t SNES_MEM_ReadByte(const uint32_t addr);
 uint16_t SNES_MEM_ReadWord(const uint32_t addr);
@@ -671,6 +672,13 @@ float N64_MEM_ReadFloat(const uint32_t addr)
 }
 
 void N64_MEM_WriteUInt(const uint32_t addr, uint32_t value)
+{
+	if(!emuoffset || N64NOTWITHINMEMRANGE(addr)) // if n64 memory has not been init by emulator or writing to outside of memory range
+		return;
+	WriteProcessMemory(emuhandle, (LPVOID)(emuoffset + (addr - 0x80000000)), &value, sizeof(value), NULL);
+}
+
+void N64_MEM_WriteByte(const uint32_t addr, uint8_t value)
 {
 	if(!emuoffset || N64NOTWITHINMEMRANGE(addr)) // if n64 memory has not been init by emulator or writing to outside of memory range
 		return;

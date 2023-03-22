@@ -246,11 +246,11 @@ static void PS2_CODFH_Inject(void)
 			float angleChange = (float)xmouse * looksensitivity / 100.f * fov;
 
 			float angle = atan(camXSin / camXCos);
-			if (onFootTotalAngle == CODFH_ONFOOT_TOTAL_ANGLE_UNSET) {
+			// if (onFootTotalAngle == CODFH_ONFOOT_TOTAL_ANGLE_UNSET) {
 				onFootTotalAngle = angle;
 				if (camXCos < 0) // if in opposite 2 quadrants
 					onFootTotalAngle = angle - (TAU / 2.f); // turn angle 180 degrees
-			}
+			// }
 
 			// angle += angleChange;
 			onFootTotalAngle += angleChange;

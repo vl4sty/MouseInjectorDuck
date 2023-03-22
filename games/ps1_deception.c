@@ -23,76 +23,72 @@
 #include "../mouse.h"
 #include "game.h"
 
-#define KZ_CAMY 0x88606CC
-#define KZ_CAMX_COS 0x6549DE8
-#define KZ_CAMX_SIN 0x6549DEC
+#define TD_CAMX 0xA387A
+#define TD_CAMY 0xA3880
 
-#define KZ_ON_FOOT_ANGLE_UNSET -99
-
-static uint8_t PS3_KZ_Status(void);
-static void PS3_KZ_Inject(void);
+static uint8_t PS1_TD_Status(void);
+static void PS1_TD_Inject(void);
 
 static const GAMEDRIVER GAMEDRIVER_INTERFACE =
 {
-	"Killzone HD",
-	PS3_KZ_Status,
-	PS3_KZ_Inject,
+	"Tecmo's Deception - Invitation to Darkness",
+	PS1_TD_Status,
+	PS1_TD_Inject,
 	1, // 1000 Hz tickrate
 	0 // crosshair sway supported for driver
 };
 
-const GAMEDRIVER *GAME_PS3_KILLZONEHD = &GAMEDRIVER_INTERFACE;
+const GAMEDRIVER *GAME_PS1_DECEPTION = &GAMEDRIVER_INTERFACE;
 
-static float onFootAngle = KZ_ON_FOOT_ANGLE_UNSET;
+static float xAccumulator = 0.f;
+static float yAccumulator = 0.f;
+static float scale = 20.f;
 
 //==========================================================================
 // Purpose: return 1 if game is detected
 //==========================================================================
-static uint8_t PS3_KZ_Status(void)
+static uint8_t PS1_TD_Status(void)
 {
-	return (PS3_MEM_ReadUInt(0x107EA0) == 0x50554138U && PS3_MEM_ReadUInt(0x107EA4) == 0x30383536U);
+	return (PS1_MEM_ReadWord(0x928C) == 0x534C5553U && PS1_MEM_ReadWord(0x9290) == 0x5F303033U && PS1_MEM_ReadWord(0x9294) == 0x2E34303BU);
 }
 //==========================================================================
 // Purpose: calculate mouse look and inject into current game
 //==========================================================================
-static void PS3_KZ_Inject(void)
+static void PS1_TD_Inject(void)
 {
-	// TODO: fix flickering for camX, maybe find the angle in memory and add to and set based on that
-	// TODO: clamp camY
-	// TODO: scale camY to match camX
-	//			camY is on a -1 to 1 scale
-	//			camX is a sin/cos angle
-	// TODO: find FOV
+	// TODO: bird's-eye map cam
+	// TODO: disable auto center
+	// TODO: disable during
+	//			pause
+	//			conversation
+	//			examine
+	//			map
+	// TODO: determine if crooked camera is caused by cheats?
+
 	if(xmouse == 0 && ymouse == 0) // if mouse is idle
 		return;
-	
-	const float looksensitivity = (float)sensitivity / 20.f;
-	const float scale = 400.f;
 
-	float camY = PS3_MEM_ReadFloat(KZ_CAMY);
-	float ym = (float)(invertpitch ? -ymouse : ymouse);
-	camY -= ym * looksensitivity / scale;
+	uint16_t camX = PS1_MEM_ReadHalfword(TD_CAMX);
+	uint16_t camY = PS1_MEM_ReadHalfword(TD_CAMY);
+	float camXF = (float)camX;
+	float camYF = (float)camY;
 
-	float camXSin = PS3_MEM_ReadFloat(KZ_CAMX_SIN);
-	float camXCos = PS3_MEM_ReadFloat(KZ_CAMX_COS);
+	const float looksensitivity = (float)sensitivity;
 
-	// keep track of total rotation angle since it is not kept in-game
-	float angle = atan(camXSin / camXCos);
-	// if (onFootAngle == KZ_ON_FOOT_ANGLE_UNSET) {
-		onFootAngle = angle;
-	// }
+	float dx = (float)xmouse * looksensitivity / scale;
+	AccumulateAddRemainder(&camXF, &xAccumulator, xmouse, dx);
 
-	float angleChange = (float)xmouse * looksensitivity / scale / 3.14;
+	float dy = -(float)ymouse * looksensitivity / scale;
+	AccumulateAddRemainder(&camYF, &yAccumulator, -ymouse, dy);
 
-	// angle += angleChange;
-	onFootAngle += angleChange;
-	// TODO: while totalAngle > or < TAU, -TAU
+	while (camXF >= 4096)
+		camXF -= 4096;
 
-	camXSin = sin(onFootAngle);
-	camXCos = cos(onFootAngle);
+	if (camYF > 768 && camYF < 32000)
+		camYF = 768;
+	if (camYF < 65024 && camYF > 32000)
+		camYF = 65024;
 
-	PS3_MEM_WriteFloat(KZ_CAMX_SIN, (float)camXSin);
-	PS3_MEM_WriteFloat(KZ_CAMX_COS, (float)camXCos);
-
-	PS3_MEM_WriteFloat(KZ_CAMY, camY);
+	PS1_MEM_WriteHalfword(TD_CAMX, (uint16_t)camXF);
+	PS1_MEM_WriteHalfword(TD_CAMY, (uint16_t)camYF);
 }

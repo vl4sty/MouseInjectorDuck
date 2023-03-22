@@ -23,76 +23,69 @@
 #include "../mouse.h"
 #include "game.h"
 
-#define KZ_CAMY 0x88606CC
-#define KZ_CAMX_COS 0x6549DE8
-#define KZ_CAMX_SIN 0x6549DEC
+#define LSD_CAMX 0x91EC2
+#define LSD_CAMY 0x9B5E0
+#define LSD_CAMY_SIGN 0x9B5E2
 
-#define KZ_ON_FOOT_ANGLE_UNSET -99
-
-static uint8_t PS3_KZ_Status(void);
-static void PS3_KZ_Inject(void);
+static uint8_t PS1_LSD_Status(void);
+static void PS1_LSD_Inject(void);
 
 static const GAMEDRIVER GAMEDRIVER_INTERFACE =
 {
-	"Killzone HD",
-	PS3_KZ_Status,
-	PS3_KZ_Inject,
+	"LSD Dream Emulator",
+	PS1_LSD_Status,
+	PS1_LSD_Inject,
 	1, // 1000 Hz tickrate
 	0 // crosshair sway supported for driver
 };
 
-const GAMEDRIVER *GAME_PS3_KILLZONEHD = &GAMEDRIVER_INTERFACE;
+const GAMEDRIVER *GAME_PS1_LSDDREAMEMULATOR = &GAMEDRIVER_INTERFACE;
 
-static float onFootAngle = KZ_ON_FOOT_ANGLE_UNSET;
+static float xAccumulator = 0.f;
+static float yAccumulator = 0.f;
+static float scale = 20.f;
+static uint16_t sign = 0xFFFF;
 
 //==========================================================================
 // Purpose: return 1 if game is detected
 //==========================================================================
-static uint8_t PS3_KZ_Status(void)
+static uint8_t PS1_LSD_Status(void)
 {
-	return (PS3_MEM_ReadUInt(0x107EA0) == 0x50554138U && PS3_MEM_ReadUInt(0x107EA4) == 0x30383536U);
+	return (PS1_MEM_ReadWord(0x9244) == 0x534C5053U && PS1_MEM_ReadWord(0x9248) == 0x5F303135U && PS1_MEM_ReadWord(0x924C) == 0x2E35363BU);
 }
 //==========================================================================
 // Purpose: calculate mouse look and inject into current game
 //==========================================================================
-static void PS3_KZ_Inject(void)
+static void PS1_LSD_Inject(void)
 {
-	// TODO: fix flickering for camX, maybe find the angle in memory and add to and set based on that
-	// TODO: clamp camY
-	// TODO: scale camY to match camX
-	//			camY is on a -1 to 1 scale
-	//			camX is a sin/cos angle
-	// TODO: find FOV
+	// TODO: disable on stairs
+	// TODO: clampY
+	// TODO: camBase
+
 	if(xmouse == 0 && ymouse == 0) // if mouse is idle
 		return;
-	
-	const float looksensitivity = (float)sensitivity / 20.f;
-	const float scale = 400.f;
 
-	float camY = PS3_MEM_ReadFloat(KZ_CAMY);
-	float ym = (float)(invertpitch ? -ymouse : ymouse);
-	camY -= ym * looksensitivity / scale;
+	uint16_t camX = PS1_MEM_ReadHalfword(LSD_CAMX);
+	uint16_t camY = PS1_MEM_ReadHalfword(LSD_CAMY);
+	float camXF = (float)camX;
+	float camYF = (float)camY;
 
-	float camXSin = PS3_MEM_ReadFloat(KZ_CAMX_SIN);
-	float camXCos = PS3_MEM_ReadFloat(KZ_CAMX_COS);
+	const float looksensitivity = (float)sensitivity;
 
-	// keep track of total rotation angle since it is not kept in-game
-	float angle = atan(camXSin / camXCos);
-	// if (onFootAngle == KZ_ON_FOOT_ANGLE_UNSET) {
-		onFootAngle = angle;
-	// }
+	float dx = (float)xmouse * looksensitivity / scale;
+	AccumulateAddRemainder(&camXF, &xAccumulator, xmouse, dx);
 
-	float angleChange = (float)xmouse * looksensitivity / scale / 3.14;
+	// float ym = (float)(invertpitch ? -ymouse : ymouse);
+	// float dy = ym * looksensitivity / scale;
+	float dy = ((float)ymouse * looksensitivity / scale) * 8.f;
+	AccumulateAddRemainder(&camYF, &yAccumulator, ymouse, dy);
+	// AccumulateAddRemainder(&camYF, &yAccumulator, ym, dy);
 
-	// angle += angleChange;
-	onFootAngle += angleChange;
-	// TODO: while totalAngle > or < TAU, -TAU
+	sign = 0xFFFF;
+	if (camYF < 32000)
+		sign = 0x0;
+	PS1_MEM_WriteHalfword(LSD_CAMY_SIGN, sign);
 
-	camXSin = sin(onFootAngle);
-	camXCos = cos(onFootAngle);
-
-	PS3_MEM_WriteFloat(KZ_CAMX_SIN, (float)camXSin);
-	PS3_MEM_WriteFloat(KZ_CAMX_COS, (float)camXCos);
-
-	PS3_MEM_WriteFloat(KZ_CAMY, camY);
+	PS1_MEM_WriteHalfword(LSD_CAMX, (uint16_t)camXF);
+	PS1_MEM_WriteHalfword(LSD_CAMY, (uint16_t)camYF);
 }
