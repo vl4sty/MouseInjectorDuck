@@ -48,6 +48,7 @@ const GAMEDRIVER *GAME_PS2_NINJAASSAULT = &GAMEDRIVER_INTERFACE;
 
 static float xAccumulator = 0.;
 static float yAccumulator = 0.;
+static float scale = 1.f;
 
 //==========================================================================
 // Purpose: return 1 if game is detected
@@ -62,61 +63,27 @@ static uint8_t PS2_NA_Status(void)
 //==========================================================================
 static void PS2_NA_Inject(void)
 {
-	// disable target lock, nope
-	// PS2_MEM_WriteWord(NA_targetLock1, 0x00000000);
-	// PS2_MEM_WriteWord(NA_targetLock2, 0x00000000);
-	// PS2_MEM_WriteWord(NA_targetLock3, 0x00000000);
-	// PS2_MEM_WriteWord(NA_targetLock4, 0x00000000);
-
 	if(xmouse == 0 && ymouse == 0) // if mouse is idle
 		return;
 
 	const float looksensitivity = (float)sensitivity / 40.f;
 
 
-	uint16_t cursorXInt = PS2_MEM_ReadUInt16(NA_cursorx);
-	uint16_t cursorYInt = PS2_MEM_ReadUInt16(NA_cursory);
-	float cursorX = (float)cursorXInt;
-	float cursorY = (float)cursorYInt;
+	uint16_t cursorX = PS2_MEM_ReadUInt16(NA_cursorx);
+	uint16_t cursorY = PS2_MEM_ReadUInt16(NA_cursory);
+	float cursorXF = (float)cursorX;
+	float cursorYF = (float)cursorY;
 
-	float dx = (float)xmouse * looksensitivity;
-	if (xmouse < 0)
-		cursorX += ceil(dx);
-	else
-		cursorX += (uint16_t)dx;
+	float dx = (float)xmouse * looksensitivity / scale;
+	AccumulateAddRemainder(&cursorXF, &xAccumulator, xmouse, dx);
 
-	float r = fmod(dx, 1.f);
+	float ym = (float)(invertpitch ? -ymouse : ymouse);
+	float dy = ym * looksensitivity / scale;
+	AccumulateAddRemainder(&cursorYF, &yAccumulator, ym, dy);
 
-	if (abs(r + xAccumulator) >= 1)
-	{
-		if (xmouse > 0)
-			cursorX += 1;
-		else
-			cursorX -= 1;
-	}
-	
-	xAccumulator = fmod(r + xAccumulator, 1.f);
+	cursorXF = ClampFloat(cursorXF, 0, 639);
+	cursorYF = ClampFloat(cursorYF, 0, 479);
 
-	int ym = (invertpitch ? -ymouse : ymouse);
-	float dy = (float)ym * looksensitivity;
-	// if (ymouse < 0)
-	if (ym < 0)
-		cursorY += ceil(dy);
-	else
-		cursorY += (uint16_t)dy;
-
-	r = fmod(dy, 1.f);
-
-	if (abs(r + yAccumulator) >= 1)
-	{
-		if (ym > 0)
-			cursorY += 1;
-		else
-			cursorY -= 1;
-	}
-	
-	yAccumulator = fmod(r + yAccumulator, 1.f);
-
-	PS2_MEM_WriteUInt16(NA_cursorx, (uint16_t)cursorX);
-	PS2_MEM_WriteUInt16(NA_cursory, (uint16_t)cursorY);
+	PS2_MEM_WriteUInt16(NA_cursorx, (uint16_t)cursorXF);
+	PS2_MEM_WriteUInt16(NA_cursory, (uint16_t)cursorYF);
 }

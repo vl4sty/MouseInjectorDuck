@@ -42,6 +42,8 @@ static int isBizHawkSNESHandle = 0;
 static int isBSNESMercuryHandle = 0;
 static int isMesenHandle = 0;
 static int isRPCS3Handle = 0;
+static int isPPSSPPHandle = 0;
+static int isBizHawkGenesisHandle = 0;
 char hookedEmulatorName[80];
 
 uint8_t MEM_Init(void);
@@ -64,8 +66,10 @@ void ARAM_WriteFloat(const uint32_t addr, float value);
 uint32_t PS1_MEM_ReadPointer(const uint32_t addr);
 uint32_t PS1_MEM_ReadWord(const uint32_t addr);
 uint32_t PS1_MEM_ReadUInt(const uint32_t addr);
+int32_t PS1_MEM_ReadInt(const uint32_t addr);
 uint16_t PS1_MEM_ReadHalfword(const uint32_t addr);
 uint8_t PS1_MEM_ReadByte(const uint32_t addr);
+void PS1_MEM_WriteInt(const uint32_t addr, int32_t value);
 void PS1_MEM_WriteWord(const uint32_t addr, uint32_t value);
 void PS1_MEM_WriteHalfword(const uint32_t addr, uint16_t value);
 void PS1_MEM_WriteByte(const uint32_t addr, uint8_t value);
@@ -99,6 +103,13 @@ void SD_MEM_WriteFloat(const uint32_t addr, float value);
 uint32_t PS3_MEM_ReadUInt(const uint32_t addr);
 float PS3_MEM_ReadFloat(const uint32_t addr);
 void PS3_MEM_WriteFloat(const uint32_t addr, float value);
+
+uint32_t PSP_MEM_ReadWord(const uint32_t addr);
+uint32_t PSP_MEM_ReadPointer(const uint32_t addr);
+uint32_t PSP_MEM_ReadUInt(const uint32_t addr);
+uint16_t PSP_MEM_ReadUInt16(const uint32_t addr);
+float PSP_MEM_ReadFloat(const uint32_t addr);
+void PSP_MEM_WriteFloat(const uint32_t addr, float value);
 
 void printdebug(uint32_t val);
 
@@ -192,17 +203,24 @@ uint8_t MEM_Init(void)
 			emuhandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_QUERY_INFORMATION, FALSE, pe32.th32ProcessID);
 			break;
 		}
-		if(strcmp(pe32.szExeFile, "flycast.exe") == 0) // if pcsx2 was found
+		if(strcmp(pe32.szExeFile, "flycast.exe") == 0) 
 		{
 			strcpy(hookedEmulatorName, "Flycast");
 			isFlycastHandle = 1;
 			emuhandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_QUERY_INFORMATION, FALSE, pe32.th32ProcessID);
 			break;
 		}
-		if(strcmp(pe32.szExeFile, "rpcs3.exe") == 0) // if pcsx2 was found
+		if(strcmp(pe32.szExeFile, "rpcs3.exe") == 0) 
 		{
 			strcpy(hookedEmulatorName, "RPCS3");
 			isRPCS3Handle = 1;
+			emuhandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_QUERY_INFORMATION, FALSE, pe32.th32ProcessID);
+			break;
+		}
+		if(strcmp(pe32.szExeFile, "PPSSPPWindows.exe") == 0 || strcmp(pe32.szExeFile, "PPSSPPWindows64.exe") == 0) 
+		{
+			strcpy(hookedEmulatorName, "PPSSPP");
+			isPPSSPPHandle = 1;
 			emuhandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_QUERY_INFORMATION, FALSE, pe32.th32ProcessID);
 			break;
 		}
@@ -259,6 +277,11 @@ uint8_t MEM_FindRamOffset(void)
 				strcpy(hookedEmulatorName, "BizHawk N64");
 				emuRegionSize = 0x22D0000; 	// BizHawk 2.8 (Mupen64Plus)
 				isN64handle = 1;
+			}
+			else if (strstr(bizHawkTitle, "Genesis") != NULL) {
+				strcpy(hookedEmulatorName, "BizHawk Genesis");
+				emuRegionSize = 0xE3000; 	// BizHawk 2.8 
+				isBizHawkGenesisHandle = 1;
 			}
 		}
 		else if (isRetroArchHandle == 1) {
@@ -323,6 +346,8 @@ uint8_t MEM_FindRamOffset(void)
 			emuRegionSize = 0x1BF000;
 		} else if (isRPCS3Handle == 1) {
 			emuRegionSize = 0xCC00000;
+		} else if (isPPSSPPHandle == 1) {
+			emuRegionSize = 0x1F00000;
 		}
 
 		DWORD regionType = MEM_MAPPED; // Dolphin and DuckStation regions are type MEM_MAPPED
@@ -336,6 +361,13 @@ uint8_t MEM_FindRamOffset(void)
 			// regionType = MEM_PRIVATE;
 			regionType = MEM_MAPPED;
 		}
+		if (isPPSSPPHandle == 1)
+		{
+			// regionType = MEM_IMAGE;
+			// regionType = MEM_PRIVATE;
+			regionType = MEM_MAPPED;
+		}
+
 
 		// if (isBSNEShandle == 1)
 		// {
@@ -420,6 +452,9 @@ uint8_t MEM_FindRamOffset(void)
 						// if (lastRegionSize != 0x80000 || lastlastRegionSize != 0x1000)
 						if (lastRegionSize != 0x80000 || lastlastRegionSize > 0xF000)
 							continue;
+					// } else if (isPPSSPPHandle) {
+					// 	if (lastRegionSize != 0x3800000 && lastlastRegionSize != 0x200000)
+					// 		continue;
 					}
 
 					// printdebug(lastRegionSize); // debug
@@ -610,6 +645,15 @@ uint32_t PS1_MEM_ReadUInt(const uint32_t addr)
 	return output;
 }
 
+int32_t PS1_MEM_ReadInt(const uint32_t addr)
+{
+	if(!emuoffset || PS1NOTWITHINMEMRANGE(addr))
+		return 0;
+	int32_t output;
+	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &output, sizeof(output), NULL);
+	return output;
+}
+
 uint16_t PS1_MEM_ReadHalfword(const uint32_t addr)
 {
 	if(!emuoffset || PS1NOTWITHINMEMRANGE(addr))
@@ -627,6 +671,13 @@ uint8_t PS1_MEM_ReadByte(const uint32_t addr)
 	uint8_t output;
 	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &output, sizeof(output), NULL);
 	return output;
+}
+
+void PS1_MEM_WriteInt(const uint32_t addr, int32_t value)
+{
+	if(!emuoffset || PS1NOTWITHINMEMRANGE(addr))
+		return;
+	WriteProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &value, sizeof(value), NULL);
 }
 
 void PS1_MEM_WriteWord(const uint32_t addr, uint32_t value)
@@ -873,6 +924,61 @@ void PS3_MEM_WriteFloat(const uint32_t addr, float value)
 	if(!emuoffset || PS3NOTWITHINMEMRANGE(addr)) 
 		return;
 	MEM_ByteSwap32((uint32_t *)&value); // byteswap
+	WriteProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &value, sizeof(value), NULL);
+}
+
+uint32_t PSP_MEM_ReadWord(const uint32_t addr)
+{
+	if(!emuoffset || PSPNOTWITHINMEMRANGE(addr))
+		return 0;
+	uint32_t output; // temp var used for output of function
+	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &output, sizeof(output), NULL);
+	MEM_ByteSwap32((uint32_t *)&output); // byteswap
+	return output;
+}
+
+uint32_t PSP_MEM_ReadPointer(const uint32_t addr)
+{
+	if(!emuoffset || PSPNOTWITHINMEMRANGE(addr))
+		return 0;
+	uint32_t output; // temp var used for output of function
+	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &output, sizeof(output), NULL);
+	return output - 0x8000000;
+}
+
+uint32_t PSP_MEM_ReadUInt(const uint32_t addr)
+{
+	if(!emuoffset || PSPNOTWITHINMEMRANGE(addr))
+		return 0;
+	uint32_t output; // temp var used for output of function
+	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &output, sizeof(output), NULL);
+	return output;
+}
+
+uint16_t PSP_MEM_ReadUInt16(const uint32_t addr)
+{
+	if(!emuoffset || PSPNOTWITHINMEMRANGE(addr))
+		return 0;
+	uint32_t output; // temp var used for output of function
+	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &output, sizeof(output), NULL);
+	return output;
+}
+
+float PSP_MEM_ReadFloat(const uint32_t addr)
+{
+	if(!emuoffset || PSPNOTWITHINMEMRANGE(addr)) 
+		return 0;
+	float output; // temp var used for output of function
+	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &output, sizeof(output), NULL);
+	// MEM_ByteSwap32((uint32_t *)&output); // byteswap
+	return output;
+}
+
+void PSP_MEM_WriteFloat(const uint32_t addr, float value)
+{
+	if(!emuoffset || PSPNOTWITHINMEMRANGE(addr))
+		return;
+	// MEM_ByteSwap32((uint32_t *)&value); // byteswap
 	WriteProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &value, sizeof(value), NULL);
 }
 

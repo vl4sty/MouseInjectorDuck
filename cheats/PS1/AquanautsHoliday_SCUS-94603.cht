@@ -1,0 +1,16 @@
+#group=MouseInjector
+#type=Gameshark
+#activation=EndFrame
+[*Disable CamY Auto-Center]
+80017F9C 0000
+80017F9E 0000
+80017F88 0000
+80017F8A 0000
+
+#group=MouseInjector
+#type=Gameshark
+#activation=EndFrame
+[*Disable CamY Zero]
+80017F74 0000
+80017F76 0000
+

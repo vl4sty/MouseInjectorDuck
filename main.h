@@ -27,6 +27,7 @@
 #define K_5 GetAsyncKeyState(0x35) // key '5'
 #define K_6 GetAsyncKeyState(0x36) // key '6'
 #define K_7 GetAsyncKeyState(0x37) // key '7'
+#define K_8 GetAsyncKeyState(0x38) // key '8'
 #define K_CTRL0 (GetAsyncKeyState(0x11) && GetAsyncKeyState(0x30) || GetAsyncKeyState(0x30) && GetAsyncKeyState(0x11)) // key combo control + '0'
 #define K_CTRL1 (GetAsyncKeyState(0x11) && GetAsyncKeyState(0x31) || GetAsyncKeyState(0x31) && GetAsyncKeyState(0x11)) // key combo control + '1'
 #define K_PLUS (GetAsyncKeyState(0x6B) || GetAsyncKeyState(0xBB)) // key '+'
@@ -59,6 +60,7 @@ extern void AccumulateAddRemainder(float *value, float *accumulator, float dir, 
 extern uint8_t sensitivity;
 extern uint8_t crosshair;
 extern uint8_t invertpitch;
+extern uint8_t optionToggle;
 extern float out;
 extern float out2;
 extern float out3;

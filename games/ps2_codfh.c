@@ -63,9 +63,22 @@
 
 
 // tank base is generally held in one of these locations
-#define CODFH_TANK_BASE_1 0x496910
-#define CODFH_TANK_BASE_2 0x49694C
-#define CODFH_TANK_BASE_3 0x5048DC
+// #define CODFH_TANK_BASE 0x496910
+#define CODFH_TANK_BASE_1 0x5048CC
+#define CODFH_TANK_BASE_2 0x5048DC
+#define CODFH_WHICH_TANK_PTR 0x71CC4C
+// #define CODFH_WHICH_TANK_PTR 0x60ABD8
+// #define CODFH_WHICH_TANK_PTR 0x4ACB78
+// #define CODFH_WHICH_TANK_PTR 0x4AA1DC
+// #define CODFH_WHICH_TANK_PTR 0x4AA18C
+// #define CODFH_WHICH_TANK_PTR 0x4BA678
+// #define CODFH_WHICH_TANK_PTR 0x48E3AC
+// #define CODFH_WHICH_TANK_PTR 0x496F4C
+// #define CODFH_WHICH_TANK_PTR 0x4967E0
+// #define CODFH_WHICH_TANK_PTR 0x4967F8
+// #define CODFH_TANK_BASE_1 0x496910
+// #define CODFH_TANK_BASE_2 0x49694C
+// #define CODFH_TANK_BASE_3 0x5048DC
 #define CODFH_WHICH_TANK_BASE -0x1C
 #define CODFH_TANK_IS_HAND_AIMING 0x831B70
 #define CODFH_TANK_SANITY_VALUE 0xB791D542 // sanity not valid for american tank
@@ -100,10 +113,11 @@ static float onFootTotalAngle = CODFH_ONFOOT_TOTAL_ANGLE_UNSET;
 static uint32_t turretBase;
 static uint32_t tankBase;
 static int tankBaseArraySize = 3;
-static uint32_t tankBaseArray[] =  {CODFH_TANK_BASE_1,
-									CODFH_TANK_BASE_2,
-									CODFH_TANK_BASE_3};
+// static uint32_t tankBaseArray[] =  {CODFH_TANK_BASE_1,
+// 									CODFH_TANK_BASE_2,
+// 									CODFH_TANK_BASE_3};
 static uint32_t currentLevel = 0x9999;
+static uint32_t lastLevel = 0x9999;
 
 //==========================================================================
 // Purpose: return 1 if game is detected
@@ -166,16 +180,53 @@ static void PS2_CODFH_Inject(void)
 			turretBase = 0;
 	}
 
+	
 	tankBase = 0;
-	int i;
-	for (i = 0; i < tankBaseArraySize; ++i) // loop through addresses where valid tankBases may be held
-	{
-		tankBase = PS2_MEM_ReadPointer(tankBaseArray[i]);
-		if (PS2_MEM_ReadWord(tankBase + 0x44) == 0xFFFFFFFF && PS2_MEM_ReadWord(tankBase) != 0x0) // old tank base on lvl 16
-			continue;
-		if (PS2_MEM_ReadUInt(tankBase + CODFH_WHICH_TANK_BASE) != 0xFFFFFFFF && PS2_MEM_ReadUInt(tankBase + CODFH_WHICH_TANK_BASE) != 0x1) // check if base is not valid
-			break;
-	}
+	if (PS2_MEM_ReadUInt(CODFH_WHICH_TANK_PTR) == 4096)
+		tankBase = PS2_MEM_ReadPointer(CODFH_TANK_BASE_2);
+	else // ==0x0?
+		tankBase = PS2_MEM_ReadPointer(CODFH_TANK_BASE_1);
+
+	// if (PS2_MEM_ReadUInt(CODFH_WHICH_TANK_PTR) == 0x2)
+	// 	tankBase = PS2_MEM_ReadPointer(CODFH_TANK_BASE_2);
+	// else // ==0x3?
+	// 	tankBase = PS2_MEM_ReadPointer(CODFH_TANK_BASE_1);
+
+	// if (PS2_MEM_ReadUInt(CODFH_WHICH_TANK_PTR) == 0x1E)
+	// 	tankBase = PS2_MEM_ReadPointer(CODFH_TANK_BASE_2);
+	// else if (PS2_MEM_ReadUInt(CODFH_WHICH_TANK_PTR) == 0x14)
+	// 	tankBase = PS2_MEM_ReadPointer(CODFH_TANK_BASE_1);
+
+	// if (PS2_MEM_ReadUInt(CODFH_WHICH_TANK_PTR) == 0x3)
+	// 	tankBase = PS2_MEM_ReadPointer(CODFH_TANK_BASE + 0x38);
+	// else if (PS2_MEM_ReadUInt(CODFH_WHICH_TANK_PTR) == 0x5)
+	// 	tankBase = PS2_MEM_ReadPointer(CODFH_TANK_BASE + 0x3C);
+	
+	// if (PS2_MEM_ReadUInt(CODFH_TANK_BASE + 0x28))	
+	// 	tankBase = PS2_MEM_ReadPointer(CODFH_TANK_BASE + 0x3C);
+	// else
+	// {
+	// 	uint32_t sanity1 = PS2_MEM_ReadUInt(CODFH_TANK_BASE + 0x10);
+	// 	uint32_t sanity2 = PS2_MEM_ReadUInt(CODFH_TANK_BASE + 0x14);
+	// 	if (sanity1 == 0x2)
+	// 		tankBase = PS2_MEM_ReadPointer(CODFH_TANK_BASE + 0x3C);
+	// 	else if (sanity1 == 0x4 && sanity2 == 0x4)
+	// 		tankBase = PS2_MEM_ReadPointer(CODFH_TANK_BASE + 0x3C);
+	// 	else if (sanity1 == 0xA && sanity2 == 0xB)
+	// 		tankBase = PS2_MEM_ReadPointer(CODFH_TANK_BASE + 0x3C);
+	// 	else
+	// 		tankBase = PS2_MEM_ReadPointer(CODFH_TANK_BASE + 0x38);
+	// }
+
+	// int i;
+	// for (i = 0; i < tankBaseArraySize; ++i) // loop through addresses where valid tankBases may be held
+	// {
+	// 	tankBase = PS2_MEM_ReadPointer(tankBaseArray[i]);
+	// 	if (PS2_MEM_ReadWord(tankBase + 0x44) == 0xFFFFFFFF && PS2_MEM_ReadWord(tankBase) != 0x0) // old tank base on lvl 16
+	// 		continue;
+	// 	if (PS2_MEM_ReadUInt(tankBase + CODFH_WHICH_TANK_BASE) != 0xFFFFFFFF && PS2_MEM_ReadUInt(tankBase + CODFH_WHICH_TANK_BASE) != 0x1) // check if base is not valid
+	// 		break;
+	// }
 
 	// check tankBase sanity for one of two values
 	uint8_t tankIsValid = 0;
@@ -278,4 +329,6 @@ static void PS2_CODFH_Inject(void)
 		camY += (float)ymouse * looksensitivity / 2.f * fov; 
 		PS2_MEM_WriteFloat(onFootCamBase + CODFH_ONFOOT_CAMY, camY);
 	}
+
+	lastLevel = currentLevel;
 }

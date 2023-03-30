@@ -1,0 +1,5 @@
+gametitle=Ninja Assault SLUS-20492 0x785B28DA
+
+// Disable aim-lock
+patch=1,EE,00121070,word,00000000
+patch=1,EE,00121080,word,00000000

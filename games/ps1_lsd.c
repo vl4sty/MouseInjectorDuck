@@ -24,10 +24,16 @@
 #include "game.h"
 
 #define LSD_CAMX 0x91EC2
-#define LSD_CAMY 0x9B5E0
-#define LSD_CAMY_SIGN 0x9B5E2
+#define LSD_CAMY_BASE 0x9158C
+// offset from camY base
+#define LSD_CAMY 0x24
+
+#define LSD_IS_ON_STAIRS 0x91E38
+#define LSD_IS_TRANSITION 0x915A0
+#define LSD_IS_UNPAUSED 0x8DFC8
 
 static uint8_t PS1_LSD_Status(void);
+static uint8_t PS1_LSD_DetectCamYBase(void);
 static void PS1_LSD_Inject(void);
 
 static const GAMEDRIVER GAMEDRIVER_INTERFACE =
@@ -44,7 +50,7 @@ const GAMEDRIVER *GAME_PS1_LSDDREAMEMULATOR = &GAMEDRIVER_INTERFACE;
 static float xAccumulator = 0.f;
 static float yAccumulator = 0.f;
 static float scale = 20.f;
-static uint16_t sign = 0xFFFF;
+static uint32_t camBase = 0;
 
 //==========================================================================
 // Purpose: return 1 if game is detected
@@ -53,39 +59,70 @@ static uint8_t PS1_LSD_Status(void)
 {
 	return (PS1_MEM_ReadWord(0x9244) == 0x534C5053U && PS1_MEM_ReadWord(0x9248) == 0x5F303135U && PS1_MEM_ReadWord(0x924C) == 0x2E35363BU);
 }
+
+static uint8_t PS1_LSD_DetectCamYBase(void)
+{
+	uint32_t tempCamBase = PS1_MEM_ReadUInt(LSD_CAMY_BASE);
+	if (tempCamBase)
+	{
+		camBase = tempCamBase - 0x80000000;
+		return 1;
+	}
+	return 0;
+}
+
 //==========================================================================
 // Purpose: calculate mouse look and inject into current game
 //==========================================================================
 static void PS1_LSD_Inject(void)
 {
-	// TODO: disable on stairs
-	// TODO: clampY
-	// TODO: camBase
+	// TODO: disable during
+	//			FMV
+	//			stairs
+	//			results
+	//			main menu
 
 	if(xmouse == 0 && ymouse == 0) // if mouse is idle
 		return;
+	
+	if (!PS1_LSD_DetectCamYBase())
+		return;
+	
+	if (PS1_MEM_ReadUInt(LSD_IS_TRANSITION))
+		return;
 
-	uint16_t camX = PS1_MEM_ReadHalfword(LSD_CAMX);
-	uint16_t camY = PS1_MEM_ReadHalfword(LSD_CAMY);
-	float camXF = (float)camX;
-	float camYF = (float)camY;
+	if (!PS1_MEM_ReadUInt(LSD_IS_UNPAUSED))
+		return;
 
 	const float looksensitivity = (float)sensitivity;
 
-	float dx = (float)xmouse * looksensitivity / scale;
-	AccumulateAddRemainder(&camXF, &xAccumulator, xmouse, dx);
+	if (!PS1_MEM_ReadUInt(LSD_IS_ON_STAIRS))
+	{
+		uint16_t camX = PS1_MEM_ReadHalfword(LSD_CAMX);
+		float camXF = (float)camX;
 
-	// float ym = (float)(invertpitch ? -ymouse : ymouse);
-	// float dy = ym * looksensitivity / scale;
-	float dy = ((float)ymouse * looksensitivity / scale) * 8.f;
+		float dx = (float)xmouse * looksensitivity / scale;
+		AccumulateAddRemainder(&camXF, &xAccumulator, xmouse, dx);
+
+		while (camXF > 4096)
+			camXF -= 4096;	
+		while (camXF < 0)
+			camXF += 4096;
+		
+
+		PS1_MEM_WriteHalfword(LSD_CAMX, (uint16_t)camXF);
+	}
+
+	int32_t camY = PS1_MEM_ReadInt(camBase + LSD_CAMY);
+	float camYF = (float)camY;
+
+	float dy = (float)ymouse * looksensitivity / scale * 10.f;
 	AccumulateAddRemainder(&camYF, &yAccumulator, ymouse, dy);
-	// AccumulateAddRemainder(&camYF, &yAccumulator, ym, dy);
 
-	sign = 0xFFFF;
-	if (camYF < 32000)
-		sign = 0x0;
-	PS1_MEM_WriteHalfword(LSD_CAMY_SIGN, sign);
+	if (camYF > 16000)
+		camYF = 16000;
+	if (camYF < -11300)
+		camYF = -11300;
 
-	PS1_MEM_WriteHalfword(LSD_CAMX, (uint16_t)camXF);
-	PS1_MEM_WriteHalfword(LSD_CAMY, (uint16_t)camYF);
+	PS1_MEM_WriteInt(camBase + LSD_CAMY, (int32_t)camYF);
 }

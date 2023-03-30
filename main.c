@@ -38,6 +38,7 @@ uint8_t crosshair = 3;
 uint8_t invertpitch = 0;
 int isHooked = 0;
 uint8_t uncapTickrate = 0;
+uint8_t optionToggle = 0;
 
 float out = 0;
 float out2 = 0;
@@ -211,6 +212,11 @@ static void GUI_Interact(void)
 		invertpitch = !invertpitch;
 		updateinterface = 1;
 	}
+	if(K_8 && !locksettings && !updateinterface) // invert pitch toggle (7)
+	{
+		optionToggle = !optionToggle;
+		updateinterface = 1;
+	}
 	if(K_PLUS && !locksettings && !updateinterface) // numpad plus (+)
 	{
 		if(selectedoption == EDITINGSENSITIVITY && sensitivity < 200)
@@ -268,6 +274,8 @@ static void GUI_Update(void)
 			printf("Not Available For Game");
 		printf(selectedoption == EDITINGCROSSHAIR ? " [+/-]\n\n" : "\n\n");
 		printf(invertpitch ? "   [7] - [ON] Invert Pitch\n\n" : "   [7] - [OFF] Invert Pitch\n\n");
+		if (GAME_OptionSupported())
+			printf("   [8] - %s\n\n", GAME_OptionMessage());
 		printf("\n\n\n\n\n");
 		printf("   [CTRL+0] - Lock Settings\n\n");
 	}

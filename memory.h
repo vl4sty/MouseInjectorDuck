@@ -33,6 +33,8 @@
 #define SSWITHINMEMRANGE(X) (!SSNOTWITHINMEMRANGE(X))
 #define PS3NOTWITHINMEMRANGE(X) (X > 0xCC00000)
 #define PS3WITHINMEMRANGE(X) (!PS3NOTWITHINMEMRANGE(X))
+#define PSPNOTWITHINMEMRANGE(X) (X > 0x1F00000)
+#define PSPWITHINMEMRANGE(X) (!PSPNOTWITHINMEMRANGE(X))
 
 extern uint8_t MEM_Init(void);
 extern void MEM_Quit(void);
@@ -53,8 +55,10 @@ extern void ARAM_WriteFloat(const uint32_t addr, float value);
 extern uint32_t PS1_MEM_ReadPointer(const uint32_t addr);
 extern uint32_t PS1_MEM_ReadWord(const uint32_t addr);
 extern uint32_t PS1_MEM_ReadUInt(const uint32_t addr);
+extern int32_t PS1_MEM_ReadInt(const uint32_t addr);
 extern uint16_t PS1_MEM_ReadHalfword(const uint32_t addr);
 extern uint8_t PS1_MEM_ReadByte(const uint32_t addr);
+extern void PS1_MEM_WriteInt(const uint32_t addr, int32_t value);
 extern void PS1_MEM_WriteHalfword(const uint32_t addr, uint16_t value);
 extern void PS1_MEM_WriteWord(const uint32_t addr, uint32_t value);
 extern void PS1_MEM_WriteByte(const uint32_t addr, uint8_t value);
@@ -89,5 +93,12 @@ extern void SD_MEM_WriteFloat(const uint32_t addr, float value);
 extern uint32_t PS3_MEM_ReadUInt(const uint32_t addr);
 extern float PS3_MEM_ReadFloat(const uint32_t addr);
 extern void PS3_MEM_WriteFloat(const uint32_t addr, float value);
+
+extern uint32_t PSP_MEM_ReadWord(const uint32_t addr);
+extern uint32_t PSP_MEM_ReadPointer(const uint32_t addr);
+extern uint32_t PSP_MEM_ReadUInt(const uint32_t addr);
+extern uint16_t PSP_MEM_ReadUInt16(const uint32_t addr);
+extern float PSP_MEM_ReadFloat(const uint32_t addr);
+extern void PSP_MEM_WriteFloat(const uint32_t addr, float value);
 
 extern char hookedEmulatorName[80];

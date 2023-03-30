@@ -100,6 +100,14 @@ extern const GAMEDRIVER *GAME_N64_007WINE;
 extern const GAMEDRIVER *GAME_PS2_GEROGUEAGENT;
 extern const GAMEDRIVER *GAME_PS1_LSDDREAMEMULATOR;
 extern const GAMEDRIVER *GAME_PS1_DECEPTION;
+extern const GAMEDRIVER *GAME_PS1_AQUANAUTSHOLIDAY;
+extern const GAMEDRIVER *GAME_PS1_HELLNIGHT;
+extern const GAMEDRIVER *GAME_PS1_MEGAMANLEGENDS2;
+extern const GAMEDRIVER *GAME_PS2_TRIBESAA;
+extern const GAMEDRIVER *GAME_PSP_CODEDARMS;
+extern const GAMEDRIVER *GAME_SCD_JURASSICPARK;
+extern const GAMEDRIVER *GAME_PSP_NOVA;
+extern const GAMEDRIVER *GAME_PSP_GHOSTINTHESHELL;
 
 static const GAMEDRIVER **GAMELIST[] =
 {
@@ -180,7 +188,15 @@ static const GAMEDRIVER **GAMELIST[] =
 	&GAME_N64_007WINE,
 	&GAME_PS2_GEROGUEAGENT,
 	&GAME_PS1_LSDDREAMEMULATOR,
-	&GAME_PS1_DECEPTION
+	&GAME_PS1_DECEPTION,
+	&GAME_PS1_AQUANAUTSHOLIDAY,
+	&GAME_PS1_HELLNIGHT,
+	&GAME_PS1_MEGAMANLEGENDS2,
+	&GAME_PS2_TRIBESAA,
+	&GAME_PSP_CODEDARMS,
+	&GAME_SCD_JURASSICPARK,
+	&GAME_PSP_NOVA,
+	&GAME_PSP_GHOSTINTHESHELL
 };
 
 static const GAMEDRIVER *CURRENT_GAME = NULL;
@@ -246,3 +262,29 @@ uint8_t GAME_CrosshairSwaySupported(void)
 		return CURRENT_GAME->Crosshair;
 	return 1; // return 1 if no drivers are available, so user can edit crosshair sway while dolphin isn't playing a game
 }
+
+uint8_t GAME_OptionSupported(void)
+{
+	if (CURRENT_GAME != NULL)
+		if (CURRENT_GAME->Option != NULL)
+			return 1;
+	return 0;
+}
+
+const char *GAME_OptionMessage(void)
+{
+	if (CURRENT_GAME != NULL)
+	{
+		if (!optionToggle)
+			return CURRENT_GAME->Option;
+		else
+			return CURRENT_GAME->Option2;
+	}
+	return "Option not supported";
+}
+
+// const void *GAME_ChangeOptionMessage(char* newMessage)
+// {
+// 	if (CURRENT_GAME != NULL)
+// 		&CURRENT_GAME->Option = *newMessage;
+// }

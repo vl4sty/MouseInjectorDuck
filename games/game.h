@@ -24,6 +24,8 @@ typedef struct
 	void (*Inject)(void);
 	uint16_t Tickrate;
 	uint8_t Crosshair;
+	char *Option;
+	char *Option2;
 } GAMEDRIVER;
 
 extern uint8_t GAME_Status(void);
@@ -31,3 +33,5 @@ extern void GAME_Inject(void);
 extern const char *GAME_Name(void);
 extern uint16_t GAME_Tickrate(void);
 extern uint8_t GAME_CrosshairSwaySupported(void);
+extern uint8_t GAME_OptionSupported(void);
+extern const char *GAME_OptionMessage(void);

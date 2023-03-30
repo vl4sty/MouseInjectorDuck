@@ -1,0 +1,8 @@
+#group=MouseInjector
+#type=Gameshark
+#activation=EndFrame
+[*Disable CamY AutoCenter]
+80059890 0000
+80059892 0000
+800598DC 0000
+800598DE 0000
