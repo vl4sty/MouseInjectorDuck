@@ -25,27 +25,22 @@
 
 #define TAU 6.2831853f // 0x40C90FDB
 
-#define GITS_CAMYBASE 0x11670C0
-#define GITS_CAMYBASE2 0x11671F0
-// #define GITS_CAMYBASE2 0x14F0780
-#define GITS_SANITY_1_VALUE 0x5044AB08
-#define GITS_SANITY_2_VALUE 0x77777777
+#define GITS_CAMYBASE_PTR 0xAE8630
+#define GITS_SANITY_1_VALUE 0x378D2740
+#define GITS_SANITY_2_VALUE 0x1E36913F
 // offsets from camYBase
-#define GITS_SANITY_1 0x30
-#define GITS_SANITY_2 0x28
-#define GITS_CAMY -0x39C
-#define GITS_CAMXBASE -0x348
+#define GITS_SANITY_1 0x8
+#define GITS_SANITY_2 0x10
+#define GITS_CAMY 0x20
+#define GITS_CAMXBASE 0x74
 // offset from camXBase
-// #define GITS_CAMX 0x1A54
 #define GITS_CAMX 0x54
-// #define GITS_CAMY 0x1504CF4
-// #define GITS_CAMX 0x1506AE4
+
+#define GITS_FOV 0xAEA29C
 
 static uint8_t PSP_GITS_Status(void);
 static uint8_t PSP_GITS_DetectCambase(void);
 static void PSP_GITS_Inject(void);
-static uint32_t camBases[] = {GITS_CAMYBASE2, GITS_CAMYBASE};
-
 
 static const GAMEDRIVER GAMEDRIVER_INTERFACE =
 {
@@ -74,18 +69,18 @@ static uint8_t PSP_GITS_Status(void)
 
 static uint8_t PSP_GITS_DetectCambase(void)
 {
-	int i;
-	for (i = 0; i < 2; ++i)
-	{
-		uint32_t tempCamBase = PSP_MEM_ReadPointer(camBases[i]);
+	uint32_t camBasePtr = PSP_MEM_ReadPointer(GITS_CAMYBASE_PTR); // 01566C40
+	if (!camBasePtr)
+		return 0;
 
-		if (tempCamBase &&
-			PSP_MEM_ReadWord(tempCamBase + GITS_SANITY_1) == GITS_SANITY_1_VALUE &&
-			PSP_MEM_ReadWord(tempCamBase + GITS_SANITY_2) == GITS_SANITY_2_VALUE)
-		{
-			camYBase = tempCamBase;
-			return 1;
-		}
+	uint32_t tempCamBase = PSP_MEM_ReadPointer(camBasePtr - 0x46C);
+
+	if (tempCamBase &&
+		PSP_MEM_ReadWord(tempCamBase + GITS_SANITY_1) == GITS_SANITY_1_VALUE &&
+		PSP_MEM_ReadWord(tempCamBase + GITS_SANITY_2) == GITS_SANITY_2_VALUE)
+	{
+		camYBase = tempCamBase;
+		return 1;
 	}
 
 	return 0;
@@ -96,16 +91,12 @@ static uint8_t PSP_GITS_DetectCambase(void)
 //==========================================================================
 static void PSP_GITS_Inject(void)
 {
-	// TODO: sanity check that checks one camYBase
-	//			find all the possible cambases
-	//			or better find a pointer to cambase pointer
-	//			breaks when picking up different weapons? 
+	// TODO: disable during
+	//			in-game cutscene
+	//			pause
 
 	if (xmouse == 0 && ymouse == 0) // if mouse is idle
 		return;
-	
-	// camYBase = PSP_MEM_ReadPointer(GITS_CAMYBASE);
-	// camYBase = PSP_MEM_ReadPointer(GITS_CAMYBASE2);
 
 	if (!PSP_GITS_DetectCambase())
 		return;
@@ -117,10 +108,10 @@ static void PSP_GITS_Inject(void)
 
 	const float looksensitivity = (float)sensitivity / 20.f;
 	const float scale = 600.f;
-	const float zoom = 1.f;
+	const float fov = PSP_MEM_ReadFloat(GITS_FOV) / 47.f;
 
-	camX -= (float)xmouse * looksensitivity / scale / zoom;
-	camY += (float)(invertpitch ? -ymouse : ymouse) * looksensitivity / scale / zoom;
+	camX -= (float)xmouse * looksensitivity / scale * fov;
+	camY += (float)(invertpitch ? -ymouse : ymouse) * looksensitivity / scale * fov;
 
 	while (camX > TAU / 2)
 		camX -= TAU;

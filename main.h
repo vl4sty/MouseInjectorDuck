@@ -70,3 +70,4 @@ extern float totalAngleOut;
 extern uint32_t uIntOut1;
 extern uint32_t uIntOut2;
 extern char titleOut[256];
+extern uint64_t emuoffsetOut;

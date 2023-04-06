@@ -49,6 +49,7 @@ float totalAngleOut = 0;
 uint32_t uIntOut1 = 0x0;
 uint32_t uIntOut2 = 0x0;
 char titleOut[256];
+uint64_t emuoffsetOut = 0;
 
 int32_t main(void);
 static void quit(void);
@@ -295,6 +296,7 @@ static void GUI_Update(void)
 	// printf("pre cos: %f\n", preCosOut);
 	// printf("cos: %f\n", out3);
 	// printf("onFootTotalAngle: %f", totalAngleOut);
+	// printf("emuoffset: %llX", emuoffsetOut);
 }
 //==========================================================================
 // Purpose: print list of supported games

@@ -59,8 +59,8 @@ static const GAMEDRIVER GAMEDRIVER_INTERFACE =
 
 const GAMEDRIVER *GAME_PS2_GEROGUEAGENT = &GAMEDRIVER_INTERFACE;
 
-uint32_t camBase = 0;
-float angle = GERA_CAM_ANGLE_UNSET;
+static uint32_t camBase = 0;
+static float angle = GERA_CAM_ANGLE_UNSET;
 
 //==========================================================================
 // Purpose: return 1 if game is detected

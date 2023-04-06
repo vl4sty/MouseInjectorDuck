@@ -23,72 +23,72 @@
 #include "../mouse.h"
 #include "game.h"
 
-#define PS_CAMY 0x632AC
-#define PS_CAMX_INT 0x632A8
-#define PS_CAMX_FRAC 0x632AA
+#define TAU 6.2831853f // 0x40C90FDB
 
-static uint8_t SS_PS_Status(void);
-static void SS_PS_Inject(void);
+#define GMAXD_CAMY 0x17DCA60
+#define GMAXD_CAMXSIN 0x17DCA58
+#define GMAXD_CAMXCOS 0x17DCA5C
+
+#define GMAXD_IS_DEATH_CAM 0x1B82800
+
+static uint8_t PS2_GMAXD_Status(void);
+static void PS2_GMAXD_Inject(void);
 
 static const GAMEDRIVER GAMEDRIVER_INTERFACE =
 {
-	"PowerSlave",
-	SS_PS_Status,
-	SS_PS_Inject,
-	1, // 1000 Hz tickrate
-	0 // crosshair sway supported for driver
+	"Greg Hastings' Tournament Paintball Max'd",
+	PS2_GMAXD_Status,
+	PS2_GMAXD_Inject,
+	1,
+	0 // crosshair sway not supported for driver
 };
 
-const GAMEDRIVER *GAME_SS_POWERSLAVE = &GAMEDRIVER_INTERFACE;
-
-static float xAccumulator = 0.f;
-static float yAccumulator = 0.f;
+const GAMEDRIVER *GAME_PS2_GREGMAXD = &GAMEDRIVER_INTERFACE;
 
 //==========================================================================
 // Purpose: return 1 if game is detected
 //==========================================================================
-static uint8_t SS_PS_Status(void)
+static uint8_t PS2_GMAXD_Status(void)
 {
-	return (PS1_MEM_ReadWord(0x0) == 0x00064A09U && PS1_MEM_ReadWord(0x4) == 0x00064A09U);
+	return (PS2_MEM_ReadWord(0x00410CA8) == 0x534C5553U && 
+			PS2_MEM_ReadWord(0x00410CAC) == 0x5F323135U &&
+			PS2_MEM_ReadWord(0x00410CB0) == 0x2E33393BU);
 }
 //==========================================================================
 // Purpose: calculate mouse look and inject into current game
 //==========================================================================
-static void SS_PS_Inject(void)
+static void PS2_GMAXD_Inject(void)
 {
+	// FIXME: delta time/FPS dependent sensitivity?
+
 	if(xmouse == 0 && ymouse == 0) // if mouse is idle
+		return;
+	
+	if (PS2_MEM_ReadUInt(GMAXD_IS_DEATH_CAM) == 0x6)
 		return;
 
 	float looksensitivity = (float)sensitivity / 20.f;
-	float scale = 10000.f;
-	// float scale = 1.f;
-	
-	int16_t camXInt = PS1_MEM_ReadInt16(PS_CAMX_INT);
-	uint16_t camXFrac = PS1_MEM_ReadHalfword(PS_CAMX_FRAC);
-	float camXFracF = (float)camXFrac;
-	float camXF = (float)camXInt;
+	float scale = 400.f;
 
-	camXFracF -= (float)xmouse * looksensitivity * scale;
-	// float dx = -(float)xmouse * looksensitivity * scale;
-	// AccumulateAddRemainder(&camXFracF, &xAccumulator, -xmouse, dx);
+	float camY = PS2_MEM_ReadFloat(GMAXD_CAMY);
+	camY -= (float)(invertpitch ? -ymouse : ymouse) * looksensitivity / scale;
+	camY = ClampFloat(camY, -0.707106, 0.422618);
 
-	while (camXFracF > 65536)
-	{
-		camXFracF -= 65536;
-		camXF += 1;
-	}
-	while (camXFracF < 0)
-	{
-		camXFracF += 65536;
-		camXF -= 1;
-	}
 
-	while (camXF >= 180)
-		camXF -= 360;
-	while (camXF <= -180)
-		camXF += 360;
+	float camXSin = PS2_MEM_ReadFloat(GMAXD_CAMXSIN);
+	float camXCos = PS2_MEM_ReadFloat(GMAXD_CAMXCOS);
 
-	PS1_MEM_WriteInt16(PS_CAMX_INT, (int16_t)camXF);
-	PS1_MEM_WriteHalfword(PS_CAMX_FRAC, (uint16_t)camXFracF);
+	float angle = atan(camXSin / camXCos);
+	if (camXCos < 0)
+		angle += TAU / 2;
+
+	angle += (float)xmouse * looksensitivity / scale;
+
+	camXSin = sin(angle);
+	camXCos = cos(angle);
+
+	PS2_MEM_WriteFloat(GMAXD_CAMXSIN, camXSin);
+	PS2_MEM_WriteFloat(GMAXD_CAMXCOS, camXCos);
+	PS2_MEM_WriteFloat(GMAXD_CAMY, camY);
 
 }

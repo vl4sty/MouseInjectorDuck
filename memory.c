@@ -44,6 +44,9 @@ static int isMesenHandle = 0;
 static int isRPCS3Handle = 0;
 static int isPPSSPPHandle = 0;
 static int isBizHawkGenesisHandle = 0;
+static int isBizHawkSaturnHandle = 0;
+static int isBizHawkPlayStationHandle = 0;
+static int isNOMONEYPSXHandle = 0;
 char hookedEmulatorName[80];
 
 uint8_t MEM_Init(void);
@@ -67,9 +70,11 @@ uint32_t PS1_MEM_ReadPointer(const uint32_t addr);
 uint32_t PS1_MEM_ReadWord(const uint32_t addr);
 uint32_t PS1_MEM_ReadUInt(const uint32_t addr);
 int32_t PS1_MEM_ReadInt(const uint32_t addr);
+int16_t PS1_MEM_ReadInt16(const uint32_t addr);
 uint16_t PS1_MEM_ReadHalfword(const uint32_t addr);
 uint8_t PS1_MEM_ReadByte(const uint32_t addr);
 void PS1_MEM_WriteInt(const uint32_t addr, int32_t value);
+void PS1_MEM_WriteInt16(const uint32_t addr, int16_t value);
 void PS1_MEM_WriteWord(const uint32_t addr, uint32_t value);
 void PS1_MEM_WriteHalfword(const uint32_t addr, uint16_t value);
 void PS1_MEM_WriteByte(const uint32_t addr, uint8_t value);
@@ -224,6 +229,13 @@ uint8_t MEM_Init(void)
 			emuhandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_QUERY_INFORMATION, FALSE, pe32.th32ProcessID);
 			break;
 		}
+		if(strcmp(pe32.szExeFile, "NO$PSX.EXE") == 0) // if DuckStation was found
+		{
+			strcpy(hookedEmulatorName, "NO$PSX");
+			isNOMONEYPSXHandle = 1;
+			emuhandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_QUERY_INFORMATION, FALSE, pe32.th32ProcessID);
+			break;
+		}
 	}
 	while(Process32Next(processes, &pe32)); // loop continued until Process32Next deliver NULL or its interrupted with the "break" above
 	CloseHandle(processes);
@@ -282,6 +294,16 @@ uint8_t MEM_FindRamOffset(void)
 				strcpy(hookedEmulatorName, "BizHawk Genesis");
 				emuRegionSize = 0xE3000; 	// BizHawk 2.8 
 				isBizHawkGenesisHandle = 1;
+			}
+			else if (strstr(bizHawkTitle, "Saturn") != NULL) {
+				strcpy(hookedEmulatorName, "BizHawk Saturn");
+				emuRegionSize = 0x282000; 	// BizHawk 2.8 
+				isBizHawkSaturnHandle = 1;
+			}
+			else if (strstr(bizHawkTitle, "PlayStation") != NULL) {
+				strcpy(hookedEmulatorName, "BizHawk PlayStation");
+				emuRegionSize = 0xD902000; 	// BizHawk 2.8 
+				isBizHawkPlayStationHandle = 1;
 			}
 		}
 		else if (isRetroArchHandle == 1) {
@@ -348,24 +370,22 @@ uint8_t MEM_FindRamOffset(void)
 			emuRegionSize = 0xCC00000;
 		} else if (isPPSSPPHandle == 1) {
 			emuRegionSize = 0x1F00000;
+		} else if (isNOMONEYPSXHandle == 1) {
+			emuRegionSize = 0x459000;
 		}
 
+		// PCSX2: MEM_MAPPED
+		// PPSSPP: MEM_MAPPED
 		DWORD regionType = MEM_MAPPED; // Dolphin and DuckStation regions are type MEM_MAPPED
 		if (isN64handle == 1 || isKronosHandle == 1)
 			regionType = MEM_PRIVATE;  // All N64 emulator regions are type MEM_PRIVATE
 		if (isBSNEShandle == 1 || isBSNESMercuryHandle == 1)
 			regionType = MEM_IMAGE;
-		if (isPcsx2handle == 1)
+		if (isNOMONEYPSXHandle == 1)
 		{
 			// regionType = MEM_IMAGE;
-			// regionType = MEM_PRIVATE;
-			regionType = MEM_MAPPED;
-		}
-		if (isPPSSPPHandle == 1)
-		{
-			// regionType = MEM_IMAGE;
-			// regionType = MEM_PRIVATE;
-			regionType = MEM_MAPPED;
+			regionType = MEM_PRIVATE;
+			// regionType = MEM_MAPPED;
 		}
 
 
@@ -416,11 +436,22 @@ uint8_t MEM_FindRamOffset(void)
 				if (wsinfo.VirtualAttributes.Valid) { // check if the address space is valid
 					memcpy(&emuoffset, &(info.BaseAddress), sizeof(info.BaseAddress)); // copy the base address location to our emuoffset pointer
 
+					// output region start
+					// emuoffsetOut = emuoffset;
 
 					if (isBSNESMercuryHandle == 1) {
 						if (lastRegionSize != 0xB7000)
 							continue;
 						emuoffset += 0x7F1C;
+					}
+					else if (isNOMONEYPSXHandle == 1) {
+						emuoffset += 0x30100;
+					}
+					else if (isBizHawkPlayStationHandle == 1) {
+						emuoffset += 0x4FEAE0;
+					}
+					else if (isBizHawkSaturnHandle == 1) {
+						emuoffset += 0x81D60;
 					}
 					else if (isBizHawkSNESHandle == 1) {
 						emuoffset += 0x40;
@@ -654,6 +685,15 @@ int32_t PS1_MEM_ReadInt(const uint32_t addr)
 	return output;
 }
 
+int16_t PS1_MEM_ReadInt16(const uint32_t addr)
+{
+	if(!emuoffset || PS1NOTWITHINMEMRANGE(addr))
+		return 0;
+	int16_t output;
+	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &output, sizeof(output), NULL);
+	return output;
+}
+
 uint16_t PS1_MEM_ReadHalfword(const uint32_t addr)
 {
 	if(!emuoffset || PS1NOTWITHINMEMRANGE(addr))
@@ -674,6 +714,13 @@ uint8_t PS1_MEM_ReadByte(const uint32_t addr)
 }
 
 void PS1_MEM_WriteInt(const uint32_t addr, int32_t value)
+{
+	if(!emuoffset || PS1NOTWITHINMEMRANGE(addr))
+		return;
+	WriteProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &value, sizeof(value), NULL);
+}
+
+void PS1_MEM_WriteInt16(const uint32_t addr, int16_t value)
 {
 	if(!emuoffset || PS1NOTWITHINMEMRANGE(addr))
 		return;

@@ -79,6 +79,7 @@ avoid clicking off the window.
 | LSD: Dream Emulator (Japan) | SLPS-01556 | Good | <sup>Requires supplied cheat file, Not fully tested</sub> | **LSDDreamEmulator_SLPS-01556.cht** |
 | Hellnight (Europe) | SLES-01562 | Good | <sup>Requires supplied cheat file, Not fully tested</sub> | **Hellnight_SLES-10562.cht** |
 | Aquanaut's Holiday (USA) | SCUS-94603 | Good | <sup>Requires supplied cheat file, Very little testing</sub> | **AquanautsHoliday_SCUS-94603.cht** |
+| Future Cop: L.A.P.D. (USA) | SLUS-00739 | Fair | <sup>Not fully tested</sub> | |
 * NOTE: If DuckStation is not hooking, try restoring the default settings. 'Settings->General->Restore Defaults'
 * Importing cheat files in DuckStation: 'Tools->Cheat Manager->Cheat List->Import->From File'
 
@@ -129,7 +130,8 @@ avoid clicking off the window.
 ## Supported PPSSPP Titles
 | Game Title | Serial | Mouse Support | Issues | In-game Options |
 | ------ | --- | :---: | ----------- | ----------- |
-| Coded Arms (USA) | ULUS10019 | Good | <sup>Not fully tested</sub> | <sup>Free Look->Lock On: None</sub> |
+| Coded Arms (USA) | ULUS10019 | Fair | <sup>Not fully tested</sub> | <sup>Free Look->Lock On: None</sub> |
+| Ghost in the Shell: Stand Alone Complex (USA) | ULUS10020 | Fair | <sup>Not fully tested</sub> | |
 
 # ManyMouse
 

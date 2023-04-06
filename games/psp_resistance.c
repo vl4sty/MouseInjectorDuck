@@ -23,72 +23,53 @@
 #include "../mouse.h"
 #include "game.h"
 
-#define PS_CAMY 0x632AC
-#define PS_CAMX_INT 0x632A8
-#define PS_CAMX_FRAC 0x632AA
+#define TAU 6.2831853f // 0x40C90FDB
 
-static uint8_t SS_PS_Status(void);
-static void SS_PS_Inject(void);
+// Resistance: Retribution
+#define RR_CAMY 0x1C98920
+
+static uint8_t PSP_RR_Status(void);
+static void PSP_RR_Inject(void);
 
 static const GAMEDRIVER GAMEDRIVER_INTERFACE =
 {
-	"PowerSlave",
-	SS_PS_Status,
-	SS_PS_Inject,
+	"Resistance: Retribution",
+	PSP_RR_Status,
+	PSP_RR_Inject,
 	1, // 1000 Hz tickrate
 	0 // crosshair sway supported for driver
 };
 
-const GAMEDRIVER *GAME_SS_POWERSLAVE = &GAMEDRIVER_INTERFACE;
-
-static float xAccumulator = 0.f;
-static float yAccumulator = 0.f;
+const GAMEDRIVER *GAME_PSP_RESISTANCERETRIBUTION = &GAMEDRIVER_INTERFACE;
 
 //==========================================================================
 // Purpose: return 1 if game is detected
 //==========================================================================
-static uint8_t SS_PS_Status(void)
+static uint8_t PSP_RR_Status(void)
 {
-	return (PS1_MEM_ReadWord(0x0) == 0x00064A09U && PS1_MEM_ReadWord(0x4) == 0x00064A09U);
+	// UCUS98668
+	return (PSP_MEM_ReadWord(0x10AEAC0) == 0x55435553U &&
+			PSP_MEM_ReadWord(0x10AEAC4) == 0x39383636U && 
+			PSP_MEM_ReadWord(0x10AEAC8) == 0x38000000U);
 }
+
 //==========================================================================
 // Purpose: calculate mouse look and inject into current game
 //==========================================================================
-static void SS_PS_Inject(void)
+static void PSP_RR_Inject(void)
 {
-	if(xmouse == 0 && ymouse == 0) // if mouse is idle
+	if (xmouse == 0 && ymouse == 0) // if mouse is idle
 		return;
 
-	float looksensitivity = (float)sensitivity / 20.f;
-	float scale = 10000.f;
-	// float scale = 1.f;
-	
-	int16_t camXInt = PS1_MEM_ReadInt16(PS_CAMX_INT);
-	uint16_t camXFrac = PS1_MEM_ReadHalfword(PS_CAMX_FRAC);
-	float camXFracF = (float)camXFrac;
-	float camXF = (float)camXInt;
+	float camY = PSP_MEM_ReadFloat(RR_CAMY);
 
-	camXFracF -= (float)xmouse * looksensitivity * scale;
-	// float dx = -(float)xmouse * looksensitivity * scale;
-	// AccumulateAddRemainder(&camXFracF, &xAccumulator, -xmouse, dx);
+	const float looksensitivity = (float)sensitivity / 20.f;
+	const float scale = 2000.f;
+	const float zoom = 1.f;
 
-	while (camXFracF > 65536)
-	{
-		camXFracF -= 65536;
-		camXF += 1;
-	}
-	while (camXFracF < 0)
-	{
-		camXFracF += 65536;
-		camXF -= 1;
-	}
+	camY -= (float)(invertpitch ? -ymouse : ymouse) * looksensitivity / scale / zoom;
 
-	while (camXF >= 180)
-		camXF -= 360;
-	while (camXF <= -180)
-		camXF += 360;
+	// camY = ClampFloat(camY, -45.f, 45.f);
 
-	PS1_MEM_WriteInt16(PS_CAMX_INT, (int16_t)camXF);
-	PS1_MEM_WriteHalfword(PS_CAMX_FRAC, (uint16_t)camXFracF);
-
+	PSP_MEM_WriteFloat(RR_CAMY, (float)camY);
 }

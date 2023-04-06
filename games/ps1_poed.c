@@ -75,7 +75,14 @@ static float normalizeValue = 65536.f;
 //==========================================================================
 static uint8_t PS1_POED_Status(void)
 {
-	return (PS1_MEM_ReadWord(0x946C) == 0x534C5553U && PS1_MEM_ReadWord(0x9470) == 0x5F303030 && PS1_MEM_ReadWord(0x9474) == 0x2E39373BU); // SLUS_000.97;
+	return (PS1_MEM_ReadWord(0x946C) == 0x534C5553U && 
+			PS1_MEM_ReadWord(0x9470) == 0x5F303030U && 
+			PS1_MEM_ReadWord(0x9474) == 0x2E39373BU); // SLUS_000.97;
+
+	// for no$psx debugger
+	// return (PS1_MEM_ReadWord(0x0) == 0x03000000 && 
+	// 		PS1_MEM_ReadWord(0x4) == 0x800C5A27 && 
+	// 		PS1_MEM_ReadWord(0x8) == 0x08004003);
 }
 //==========================================================================
 // Purpose: calculate mouse look and inject into current game
@@ -104,8 +111,8 @@ static void PS1_POED_Inject(void)
 		int32_t camXCos = PS1_MEM_ReadInt(POED_CAMX_COS);
 		// if (camXSin == 0) camXSin = 1;
 		// if (camXCos == 0) camXCos = 1;
-		// float camXSinF = (float)camXSin / 65535.f;
-		// float camXCosF = (float)camXCos / 65535.f;
+		float camXSinF = (float)camXSin / 65536.f;
+		float camXCosF = (float)camXCos / 65536.f;
 
 		// if (camXCosF == 0)
 		// 	camXCosF = 1.f / 65536.f;
@@ -113,7 +120,8 @@ static void PS1_POED_Inject(void)
 		// 	camXSinF = 1.f / 65536.f;
 
 		// if (totalAngle == POED_TOTAL_ANGLE_UNSET)
-		totalAngle = (float)atan((float)camXSin / (float)camXCos);
+		// totalAngle = (float)atan((float)camXSin / (float)camXCos);
+		totalAngle = (float)atan((float)camXSinF / (float)camXCosF);
 
 		if (camXCos < 0)
 			totalAngle += PI;
@@ -133,12 +141,12 @@ static void PS1_POED_Inject(void)
 
 		// PS1_MEM_WriteInt(POED_CAMX_SIN, (int32_t)camXSinF);
 		// PS1_MEM_WriteInt(POED_CAMX_COS, (int32_t)camXCosF);
-		PS1_MEM_WriteInt(POED_CAMX_SIN, (int32_t)((float)sin(totalAngle) * 65535.f));
-		PS1_MEM_WriteInt(POED_CAMX_COS, (int32_t)((float)cos(totalAngle) * 65535.f));
+		PS1_MEM_WriteInt(POED_CAMX_SIN, (int32_t)((float)sin(totalAngle) * 65536.f));
+		PS1_MEM_WriteInt(POED_CAMX_COS, (int32_t)((float)cos(totalAngle) * 65536.f));
 	}
 
-	// if (ymouse)
-	if (0)
+	if (ymouse)
+	// if (0)
 	{
 		uint16_t camY = PS1_MEM_ReadHalfword(POED_CAMY2);
 		uint16_t camYSign = PS1_MEM_ReadHalfword(POED_CAMY2_SIGN);

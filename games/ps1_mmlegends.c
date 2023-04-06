@@ -24,8 +24,13 @@
 #include "game.h"
 
 #define MML_ROT_X 0xB5206
+#define MML_ROT_X2 0xB520E
+#define MML_ROT_X3 0x199578
+#define MML_ROT_X4 0x199582
 #define MML_CAMY 0xB52B8
 #define MML_CAMX_WALKING 0xA3968
+#define MML_CAMX_WALKING2 0x9868C
+#define MML_CAMX_WALKING3 0xA3A12
 #define MML_CAMY_WALKING 0xA396C
 #define MML_IS_BUSY 0x98A5B
 #define MML_IS_ROOM_TRANSITION 0x98824
@@ -89,9 +94,11 @@ static void PS1_MML_Inject(void)
 	// TODO: disable auto-aim
 	// TODO: fix when going from aiming to walking, camX is not changed but MM rotation is
 	//			so the camera will pop to the direction he is facing
+	// FIXME: don't disable during non-conversation/cutscene dialogue
+	//			junk guy yelling for help in first cave
 
-	if (PS1_MEM_ReadByte(MML_IS_BUSY))
-		return;
+	// if (PS1_MEM_ReadByte(MML_IS_BUSY))
+	// 	return;
 
 	if (PS1_MEM_ReadByte(MML_IS_MAP))
 		return;
@@ -123,13 +130,17 @@ static void PS1_MML_Inject(void)
 	if (camYF < 65000 && camYF > 32000)
 		camYF = 65000;
 	
-	// while (rotXF >= 4096)
-	// 	rotXF -= 4096;
+	while (rotXF >= 4096)
+		rotXF -= 4096;
+	while (rotXF < 0)
+		rotXF += 4096;
 
 	// camera follows rotation of MM
-	float cameraX = rotXF + 2048;
-	// while (cameraX > 4096)
-	// 	cameraX -= 4096;
+	float cameraX = rotXF - 2048;
+	while (cameraX > 4096)
+		cameraX -= 4096;
+	while (cameraX < 0)
+		cameraX += 4096;
 
 	PS1_MEM_WriteHalfword(MML_ROT_X, (uint16_t)rotXF);
 	PS1_MEM_WriteHalfword(MML_CAMX_WALKING, (uint16_t)cameraX);
