@@ -127,7 +127,7 @@ avoid clicking off the window.
 | Michigan: Report from Hell (Europe) | SLES-53073 | Fair | <sup>Door peek camera not supported, Not fully tested</sub> | | |
 | Ninja Assault (USA) | SLUS-20492 | Good | <sup>**Requires supplied cheat file to disable aim-lock**, Not fully tested</sub> | | **785B28DA.pnach** |
 | Robotech: Invasion (USA) | SLUS-20823 | Fair | <sup>Turrets not supported, Not fully tested</sub> | | |
-| Serious Sam: Next Encounter (USA) | SLUS-20907 | Good | <sup>Not fully tested</sub> | Auto Center: Off, Auto Aim: Off | |
+| Serious Sam: Next Encounter (USA) | SLUS-20907 | Good | <sup>Vehicles not supported, Not fully tested</sub> | Auto Center: Off, Auto Aim: Off | |
 * NOTE: PCSX2 will only hook with **BIOS versions 5XXXX and up**.
 * NOTE: Some aspects may break when a game is started with overclocking. Requires testing.
 * PCSX2 Settings: **Disable** *'Settings->Interface->Double-Click Toggles Fullscreen'* | **Enable** *'Settings->Interface->Hide Cursor In Fullscreen'*
