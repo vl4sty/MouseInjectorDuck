@@ -25,18 +25,15 @@
 
 #define JF_CAMBASE 0x1FFE7C
 #define JF_CAMBASE_SANITY_1_VALUE 0x450B0010
+#define JF_CAMBASE_SANITY_2_VALUE 0x17040010
 // offsets from cambase
 #define JF_CAMX 0x74
 #define JF_CAMY 0x78
 #define JF_CAMY_SIGN 0x7A
 #define JF_CAMBASE_SANITY_1 -0x30
-#define JF_DISABLE_CAMY 0xDD760
 
-// #define JF_CAMX 0x138144
-// #define JF_CAMY 0x138148
-// #define JF_CAMY_SIGN 0x13814A
-#define JF_AUTO_LOOK_BELOW 0x102724
 #define JF_IS_STAGE_CLEAR 0x1FDBE0
+#define JF_IS_PAUSED 0x47E54
 
 static uint8_t PS1_JF_Status(void);
 static uint8_t PS1_JF_IsCambaseValid(void);
@@ -63,12 +60,20 @@ static float yAccumulator = 0.f;
 //==========================================================================
 static uint8_t PS1_JF_Status(void)
 {
-	return (PS1_MEM_ReadWord(0x943C) == 0x53435553U && PS1_MEM_ReadWord(0x9440) == 0x5F393431U && PS1_MEM_ReadWord(0x9444) == 0x2E30333BU);
+	return (PS1_MEM_ReadWord(0x943C) == 0x53435553U && 
+			PS1_MEM_ReadWord(0x9440) == 0x5F393431U && 
+			PS1_MEM_ReadWord(0x9444) == 0x2E30333BU);
+
+	// for no$psx debugger
+	// return (PS1_MEM_ReadWord(0x0) == 0x03000000 && 
+	// 		PS1_MEM_ReadWord(0x4) == 0x800C5A27 && 
+	// 		PS1_MEM_ReadWord(0x8) == 0x08004003);
 }
 
 static uint8_t PS1_JF_IsCambaseValid(void)
 {
-	if (PS1_MEM_ReadWord(camBase + JF_CAMBASE_SANITY_1) == JF_CAMBASE_SANITY_1_VALUE){
+	if (PS1_MEM_ReadWord(camBase + JF_CAMBASE_SANITY_1) == JF_CAMBASE_SANITY_1_VALUE ||
+		PS1_MEM_ReadWord(camBase + JF_CAMBASE_SANITY_1) == JF_CAMBASE_SANITY_2_VALUE){
 		return 1;
 	}
 	return 0;
@@ -77,7 +82,8 @@ static uint8_t PS1_JF_IsCambaseValid(void)
 static uint8_t PS1_JF_DetectCambase(void)
 {
 	uint32_t tempCamBase = PS1_MEM_ReadPointer(JF_CAMBASE);
-	if (PS1_MEM_ReadWord(tempCamBase + JF_CAMBASE_SANITY_1) == JF_CAMBASE_SANITY_1_VALUE)
+	if (PS1_MEM_ReadWord(tempCamBase + JF_CAMBASE_SANITY_1) == JF_CAMBASE_SANITY_1_VALUE ||
+		PS1_MEM_ReadWord(tempCamBase + JF_CAMBASE_SANITY_1) == JF_CAMBASE_SANITY_2_VALUE)
 	{
 		camBase = tempCamBase;
 		return 1;
@@ -91,14 +97,7 @@ static uint8_t PS1_JF_DetectCambase(void)
 //==========================================================================
 static void PS1_JF_Inject(void)
 {
-	// TODO: find auto-center cheat/solution that doesn't wholly disable camY movement with controller
-	// TODO: disable mouse movement on stage clear, on platform, boss defeated
-	// TODO: disable mouse movement in menu/paused
-	// TODO: find cheat for Extra World 2
-
-	// PS1_MEM_WriteWord(JF_AUTO_LOOK_BELOW, 0x0);
-
-	// PS1_MEM_WriteWord(JF_DISABLE_CAMY, 0x0);
+	// TODO: find better camBase sanity
 
 	if(xmouse == 0 && ymouse == 0) // if mouse is idle
 		return;
@@ -112,9 +111,12 @@ static void PS1_JF_Inject(void)
 	
 	if (PS1_MEM_ReadWord(JF_IS_STAGE_CLEAR))
 		return;
+
+	if (PS1_MEM_ReadWord(JF_IS_PAUSED))
+		return;
 	
 	uint16_t camX = PS1_MEM_ReadHalfword(camBase + JF_CAMX);
-	uint16_t camY = PS1_MEM_ReadHalfword(camBase + JF_CAMY);
+	int16_t camY = PS1_MEM_ReadInt16(camBase + JF_CAMY);
 	float camXF = (float)camX;
 	float camYF = (float)camY;
 
@@ -128,26 +130,9 @@ static void PS1_JF_Inject(void)
 	float dy = -ym * looksensitivity * scale;
 	AccumulateAddRemainder(&camYF, &yAccumulator, -ym, dy);
 
-	camX = (uint16_t)camXF;
-	camY = (uint16_t)camYF;
-
-	// if (camYF < 0 || camY > 32000)
-	if (camY > 32000)
-		PS1_MEM_WriteHalfword(camBase + JF_CAMY_SIGN, 0xFFFF);
-	else
-		PS1_MEM_WriteHalfword(camBase + JF_CAMY_SIGN, 0x0);
-
-
 	// clamp y-axis
-	if (camY > 776 && camY < 32000)
-		camY = 776;
-	if (camY < 64640 && camY > 32000)
-		camY = 64640;
+	camYF = ClampFloat(camYF, -896, 896);
 
-	PS1_MEM_WriteHalfword(camBase + JF_CAMX, (uint16_t)camX);
-	PS1_MEM_WriteHalfword(camBase + JF_CAMY, (uint16_t)camY);
-
-	// PS1_MEM_WriteHalfword(JF_CAMX, (uint16_t)camXF);
-	// PS1_MEM_WriteHalfword(JF_CAMY, (uint16_t)camYF);
-	// PS1_MEM_WriteWord(JF_CAMY, (uint32_t)camYF);
+	PS1_MEM_WriteHalfword(camBase + JF_CAMX, (uint16_t)camXF);
+	PS1_MEM_WriteInt16(camBase + JF_CAMY, (int16_t)camYF);
 }

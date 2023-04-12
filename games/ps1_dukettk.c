@@ -44,6 +44,8 @@
 //	0808 climbing mount/dismount
 //	0909 jumping/falling
 
+#define TTK_CLIMB_MEDIUM 0xD71FD
+
 static uint8_t PS1_TTK_Status(void);
 static uint8_t PS1_TTK_CanRotate(void);
 static void PS1_TTK_Inject(void);
@@ -88,9 +90,17 @@ static uint8_t PS1_TTK_CanRotate(void)
 	switch (action) {
 		case TTK_ACTION_SWIMMING:
 		case TTK_ACTION_FLOATING:
-		case TTK_ACTION_CLIMBING:
 		case TTK_ACTION_JETPACK:
 			return 1;
+	}
+
+	if (action == TTK_ACTION_CLIMBING)
+	{
+		// on chain?
+		if (PS1_MEM_ReadByte(TTK_CLIMB_MEDIUM) == 0x9)
+			return 1;
+		else
+			return 0;
 	}
 
 	if (!action)
@@ -105,18 +115,17 @@ static uint8_t PS1_TTK_CanRotate(void)
 static void PS1_TTK_Inject(void)
 {
 	// TODO: disable 1st-person to previous 3rd-person snap
-	// TODO: disable rotation while on ladders but not chains
 
 	if(xmouse == 0 && ymouse == 0) // if mouse is idle
 		return;
 
-	const float scale = 250.f;
 	const float looksensitivity = (float)sensitivity / 20.f;
+	const float scale = 3.f;
 
 	int32_t camY = PS1_MEM_ReadInt(TTK_CAMY);
 	float camYF = (float)camY;
 	float ym = (float)(invertpitch ? -ymouse : ymouse);
-	camYF += ym * looksensitivity / (scale / (scale * 16.f));
+	camYF += ym * looksensitivity / 0.5f * scale;
 
 	camYF = ClampFloat(camYF, -4070.f, 4070.f);
 
@@ -129,7 +138,7 @@ static void PS1_TTK_Inject(void)
 	if (camXCosF < 0)
 		angle -= TAU / 2.f;
 
-	angle += (float)xmouse * looksensitivity / (scale / (scale * 0.0025f));
+	angle += (float)xmouse * looksensitivity / 2592.f * scale;
 
 	camXSinF = sin(angle) * 4096;
 	camXCosF = cos(angle) * 4096;
@@ -138,7 +147,7 @@ static void PS1_TTK_Inject(void)
 	{
 		uint16_t camXRot = PS1_MEM_ReadHalfword(TTK_CAMX_ROT);
 		float camXRotF = (float)camXRot;
-		float dx = (float)xmouse * looksensitivity * (scale / (scale * 0.95f));
+		float dx = (float)xmouse * looksensitivity / 4.f * scale;
 		AccumulateAddRemainder(&camXRotF, &xAccumulator, (float)xmouse, dx);
 
 		while (camXRotF > 4096)
@@ -154,7 +163,7 @@ static void PS1_TTK_Inject(void)
 	{
 		int16_t camYRot = PS1_MEM_ReadInt16(TTK_CAMY_ROT);
 		float camYRotF = (float)camYRot;
-		float dy = -(float)ymouse * looksensitivity * (scale / (scale * 0.95));
+		float dy = -(float)ymouse * looksensitivity / 4.5f * scale;
 		AccumulateAddRemainder(&camYRotF, &yAccumulator, -(float)ymouse, dy);
 
 		camYRotF = ClampFloat(camYRotF, -900.f, 900.f);

@@ -1,0 +1,8 @@
+#group=MouseInjector
+#type=Gameshark
+#activation=EndFrame
+[*Disable Rotate X]
+E00092D4 0053
+80057ADC 0000
+E00092D4 0053
+80057ADE 0000

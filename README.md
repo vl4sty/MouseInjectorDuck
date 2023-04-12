@@ -20,10 +20,13 @@ An external app that injects cursor input into game memory.
 | :---: | :---: | :---: |
 | N64 | Mupen64Plus-Next | 2.4-Vulkan bc24153 |
 | PS1 | Beetle PSX HW | 0.9.44.1 234433f |
+| PS1 | Beetle PSX | 0.9.44.1 6ed5790 |
+| PS1 | PCSX-ReARMed | r23l 4373e29 |
 | PS1 | DuckStation | |
 | PS1 | SwanStation | 1.00 bc5f6c8 |
 | SNES | bsnes-mercury Balanced | v094 |
 * NOTE: For RetroArch the window needs to be focused for it to hook initially.
+* NOTE: All cores have not been tested exhaustively
 
 ## How to Use
 1. Start emulator first
@@ -80,6 +83,8 @@ avoid clicking off the window.
 | Hellnight (Europe) | SLES-01562 | Good | <sup>Requires supplied cheat file, Not fully tested</sub> | **Hellnight_SLES-10562.cht** |
 | Aquanaut's Holiday (USA) | SCUS-94603 | Good | <sup>Requires supplied cheat file, Very little testing</sub> | **AquanautsHoliday_SCUS-94603.cht** |
 | Future Cop: L.A.P.D. (USA) | SLUS-00739 | Fair | <sup>Not fully tested</sub> | |
+| Duke Nukem: Time to Kill (USA) | SLUS-00583 | Fair | <sup>Requires supplied cheat file, Not fully tested</sub> | **DukeNukemTimeToKill_SLUS-00583.cht** |
+| Jumping Flash (USA) | SCUS-94103 | Good | <sup>Requires supplied cheat file</sub> | **JumpingFlash_SCUS-94103.cht** |
 * NOTE: If DuckStation is not hooking, try restoring the default settings. 'Settings->General->Restore Defaults'
 * Importing cheat files in DuckStation: 'Tools->Cheat Manager->Cheat List->Import->From File'
 
@@ -121,6 +126,8 @@ avoid clicking off the window.
 | Resident Evil: Dead Aim (USA) | SLUS-20669 | Good | <sup>**Requires supplied cheat file**, Third-person camera y-axis not supported</sub> | | **FBB5290C.pnach** |
 | Michigan: Report from Hell (Europe) | SLES-53073 | Fair | <sup>Door peek camera not supported, Not fully tested</sub> | | |
 | Ninja Assault (USA) | SLUS-20492 | Good | <sup>**Requires supplied cheat file to disable aim-lock**, Not fully tested</sub> | | **785B28DA.pnach** |
+| Robotech: Invasion (USA) | SLUS-20823 | Fair | <sup>Turrets not supported, Not fully tested</sub> | | |
+| Serious Sam: Next Encounter (USA) | SLUS-20907 | Good | <sup>Not fully tested</sub> | Auto Center: Off, Auto Aim: Off | |
 * NOTE: PCSX2 will only hook with **BIOS versions 5XXXX and up**.
 * NOTE: Some aspects may break when a game is started with overclocking. Requires testing.
 * PCSX2 Settings: **Disable** *'Settings->Interface->Double-Click Toggles Fullscreen'* | **Enable** *'Settings->Interface->Hide Cursor In Fullscreen'*

@@ -331,6 +331,10 @@ uint8_t MEM_FindRamOffset(void)
 				strcpy(hookedEmulatorName, "RetroArch Beetle PSX");
 				emuRegionSize = 0x200000;
 			}
+			else if (strstr(retroArchTitle, "PCSX-ReARMed") != NULL) {
+				strcpy(hookedEmulatorName, "RetroArch PCSX-ReARMed");
+				emuRegionSize = 0x210000;
+			}
 			else if (strstr(retroArchTitle, "DuckStation") != NULL) {
 				strcpy(hookedEmulatorName, "RetroArch DuckStation");
 				emuRegionSize = 0x200000;
