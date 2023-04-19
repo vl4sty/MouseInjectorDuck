@@ -23,72 +23,76 @@
 #include "../mouse.h"
 #include "game.h"
 
-#define TD_CAMX 0xA387A
-#define TD_CAMY 0xA3880
+#define MH_CAMX 0x499998
+#define MH_CAMX_LAST 0x499928
+#define MH_CAMY 0x499934
+#define MH_CAMY_LOW 0x499964
 
-static uint8_t PS1_TD_Status(void);
-static void PS1_TD_Inject(void);
+static uint8_t PS2_MH_Status(void);
+static void PS2_MH_Inject(void);
 
 static const GAMEDRIVER GAMEDRIVER_INTERFACE =
 {
-	"Tecmo's Deception - Invitation to Darkness",
-	PS1_TD_Status,
-	PS1_TD_Inject,
-	1, // 1000 Hz tickrate
-	0 // crosshair sway supported for driver
+	"Monster Hunter",
+	PS2_MH_Status,
+	PS2_MH_Inject,
+	1,
+	0 // crosshair sway not supported for driver
 };
 
-const GAMEDRIVER *GAME_PS1_DECEPTION = &GAMEDRIVER_INTERFACE;
+const GAMEDRIVER *GAME_PS2_MONSTERHUNTER = &GAMEDRIVER_INTERFACE;
 
 static float xAccumulator = 0.f;
-static float yAccumulator = 0.f;
-static float scale = 30.f;
 
 //==========================================================================
 // Purpose: return 1 if game is detected
 //==========================================================================
-static uint8_t PS1_TD_Status(void)
+static uint8_t PS2_MH_Status(void)
 {
-	return (PS1_MEM_ReadWord(0x928C) == 0x534C5553U && PS1_MEM_ReadWord(0x9290) == 0x5F303033U && PS1_MEM_ReadWord(0x9294) == 0x2E34303BU);
+	// SLUS_208.96
+	return (PS2_MEM_ReadWord(0x0047874C) == 0x534C5553U && 
+			PS2_MEM_ReadWord(0x00478750) == 0x5F323038U &&
+			PS2_MEM_ReadWord(0x00478754) == 0x2E39363BU);
 }
 //==========================================================================
 // Purpose: calculate mouse look and inject into current game
 //==========================================================================
-static void PS1_TD_Inject(void)
+static void PS2_MH_Inject(void)
 {
-	// TODO: bird's-eye map cam
-	// TODO: disable auto center
+	// TODO: camY base?
+	// TODO: clamp camY based on ground?
 	// TODO: disable during
+	//			in town
 	//			pause
-	//			conversation
-	//			examine
-	//			map
-	// TODO: determine if crooked camera is caused by cheats?
+	//			item selection
+	//			in-game cutscenes
+
+	// clamp camY when moved due to walking on slope
+	float camY = PS2_MEM_ReadFloat(MH_CAMY);
+	float camYLow = PS2_MEM_ReadFloat(MH_CAMY_LOW);
+	camY = ClampFloat(camY, camYLow, camYLow + 380.f);
+	PS2_MEM_WriteFloat(MH_CAMY, (float)camY);
 
 	if(xmouse == 0 && ymouse == 0) // if mouse is idle
 		return;
 
-	uint16_t camX = PS1_MEM_ReadHalfword(TD_CAMX);
-	uint16_t camY = PS1_MEM_ReadHalfword(TD_CAMY);
+	float looksensitivity = (float)sensitivity / 40.f;
+	float scale = 40.f;
+
+	uint16_t camX = PS2_MEM_ReadUInt(MH_CAMX);
 	float camXF = (float)camX;
-	float camYF = (float)camY;
+	float dx = -(float)xmouse * looksensitivity * scale;
+	AccumulateAddRemainder(&camXF, &xAccumulator, -xmouse, dx);
+	while (camXF > 65535)
+		camXF -= 65535;
+	while (camXF < 0)
+		camXF += 65535;
 
-	const float looksensitivity = (float)sensitivity;
+	camY += (float)(invertpitch ? -ymouse : ymouse) * looksensitivity * (scale / 30.f);
+	camY = ClampFloat(camY, camYLow, camYLow + 380.f);
 
-	float dx = (float)xmouse * looksensitivity / scale;
-	AccumulateAddRemainder(&camXF, &xAccumulator, xmouse, dx);
+	PS2_MEM_WriteUInt16(MH_CAMX, (uint16_t)camXF);
+	PS2_MEM_WriteUInt16(MH_CAMX_LAST, (uint16_t)camXF);
+	PS2_MEM_WriteFloat(MH_CAMY, (float)camY);
 
-	float dy = -(float)ymouse * looksensitivity / scale;
-	AccumulateAddRemainder(&camYF, &yAccumulator, -ymouse, dy);
-
-	while (camXF >= 4096)
-		camXF -= 4096;
-
-	if (camYF > 768 && camYF < 32000)
-		camYF = 768;
-	if (camYF < 65024 && camYF > 32000)
-		camYF = 65024;
-
-	PS1_MEM_WriteHalfword(TD_CAMX, (uint16_t)camXF);
-	PS1_MEM_WriteHalfword(TD_CAMY, (uint16_t)camYF);
 }

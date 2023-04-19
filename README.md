@@ -106,28 +106,31 @@ avoid clicking off the window.
 
 ## Supported PCSX2 Titles
 | Game Title | Serial | Mouse Support | Issues | In-game Options | Cheat File |
-| ------ | --- | :---: | ----------- | ----------- | --- |
-| Red Dead Revolver (USA) | SLUS-20500 | Fair | <sup>Gatling guns and final scene may break if game is loaded from memory card after a shutdown.  **Fix below*</sub> | <sup>Target Mode: Toggle</sub> | |
-| Time Crisis II (USA) | SLUS-20219 | Good | <sup>Not fully tested</sub> | | |
-| Vampire Night (USA) | SLUS-20221 | Good | <sup>Not fully tested</sub> | | |
-| Gunslinger Girl Vol. 1 (Japan)| SLPS-25343 | Fair | <sup>Not fully tested</sub> | | |
-| Darkwatch (USA) | SLUS-21043 | Good | <sup>**Requires supplied cheat file**, Horse aiming is not quite right but is usable.</sub> | | **327052E8.pnach** |
-| Black (USA) | SLUS-21376 | Good | <sup>Not fully tested</sub> | | |
-| Urban Chaos: Riot Response (USA) | SLUS-21390 | Good | <sup>Not fully tested</sub> | <sup>Auto-Center: No</sub> | |
-| 007: Agent Under Fire (USA) | SLUS-20265 | Good | <sup>Mouse movement warps camera while paused and during in-game cutscenes, aim-lock not disabled on auto-scroller levels</sub> | | |
-| Quake III: Revolution (USA) | SLUS-20167 | Good | <sup>None</sub> | <sup>Auto Center: No, Auto Aiming: no (only available from main menu options) | |
-| 50 Cent: Bulletproof (USA) | SLUS-21315 | Good | <sup>Not fully tested</sub> | <sup>Camera->Aim Assist: Off</sub> | |
-| Call of Duty: Finest Hour (USA) | SLUS-20725 | Good | <sup>None</sub> | <sup>Aim Assist: Off</sub> | |
-| Cold Winter (USA) | SLUS-20845 | Good | <sup>Split-screen mode not supported</sub> | <sup>Profile options - Aim Assist: Off</sub> | |
-| Medal of Honor: Vanguard (USA) | SLUS-21597 | Good | <sup>Multiplayer mode not supported</sub> | | |
-| Mercenaries: Playground of Destruction (USA) | SLUS-20932 | Fair | <sup>**Requires cheat file disable aim-assist**, x-axis in normal vehicles not supported</sub> | | **23510F99.pnach** |
-| King's Field IV: The Ancient City (USA) | SLUS-20318 | Good | <sup>Not fully tested</sub> | |
-| Eternal Ring (USA) | SLUS-20015 | Good | <sup>Not fully tested</sub> | |
-| Resident Evil: Dead Aim (USA) | SLUS-20669 | Good | <sup>**Requires supplied cheat file**, Third-person camera y-axis not supported</sub> | | **FBB5290C.pnach** |
-| Michigan: Report from Hell (Europe) | SLES-53073 | Fair | <sup>Door peek camera not supported, Not fully tested</sub> | | |
-| Ninja Assault (USA) | SLUS-20492 | Good | <sup>**Requires supplied cheat file to disable aim-lock**, Not fully tested</sub> | | **785B28DA.pnach** |
-| Robotech: Invasion (USA) | SLUS-20823 | Fair | <sup>Turrets not supported, Not fully tested</sub> | | |
-| Serious Sam: Next Encounter (USA) | SLUS-20907 | Good | <sup>Vehicles not supported, Not fully tested</sub> | Auto Center: Off, Auto Aim: Off | |
+| ---------- | :----: | :-----------: | :----: | :-------------: | :--------: |
+| Red Dead Revolver (USA) | SLUS-20500 | Fair | <sup>Gatling guns and final scene may break if game is loaded from memory card after a shutdown.  **Fix below*</sub> | <sup>Target Mode: Toggle</sub> | - |
+| Time Crisis II (USA) | SLUS-20219 | Good | <sup>Not fully tested</sub> | - | - |
+| Vampire Night (USA) | SLUS-20221 | Good | <sup>Not fully tested</sub> | - | - |
+| Gunslinger Girl Vol. 1 (Japan)| SLPS-25343 | Fair | <sup>Not fully tested</sub> | - | - |
+| Darkwatch (USA) | SLUS-21043 | Good | <sup>**Requires supplied cheat file**</br>Horse aiming is not quite right but is usable.</sub> | - | **327052E8.pnach** |
+| Black (USA) | SLUS-21376 | Good | <sup>Not fully tested</sub> | - | - |
+| Urban Chaos: Riot Response (USA) | SLUS-21390 | Good | <sup>Not fully tested</sub> | <sup>Auto-Center: No</sub> | - |
+| 007: Agent Under Fire (USA) | SLUS-20265 | Good | <sup>Mouse movement warps camera while paused and during in-game cutscenes</br>Aim-lock not disabled on auto-scroller levels</sub> | - | - |
+| Quake III: Revolution (USA) | SLUS-20167 | Good | <sup>None</sub> | <sup>Auto Center: No <br> Auto Aiming: No (only available from main menu options) | - |
+| 50 Cent: Bulletproof (USA) | SLUS-21315 | Good | <sup>Not fully tested</sub> | <sup>Camera->Aim Assist: Off</sub> | - |
+| Call of Duty: Finest Hour (USA) | SLUS-20725 | Good | <sup>None</sub> | <sup>Aim Assist: Off</sub> | - |
+| Cold Winter (USA) | SLUS-20845 | Good | <sup>Split-screen mode not supported</sub> | <sup>Profile options - Aim Assist: Off</sub> | - |
+| Medal of Honor: Vanguard (USA) | SLUS-21597 | Good | <sup>Multiplayer mode not supported</sub> | - | - |
+| Mercenaries: Playground of Destruction (USA) | SLUS-20932 | Fair | <sup>**Requires cheat file to disable aim-assist**</br> X-axis in normal vehicles not supported</sub> | - | **23510F99.pnach** |
+| King's Field IV: The Ancient City (USA) | SLUS-20318 | Good | <sup>Not fully tested</sub> | - | - |
+| Eternal Ring (USA) | SLUS-20015 | Good | <sup>Not fully tested</sub> | - | - |
+| Resident Evil: Dead Aim (USA) | SLUS-20669 | Good | <sup>**Requires supplied cheat file**</br>Third-person camera y-axis not supported</sub> | - | **FBB5290C.pnach** |
+| Michigan: Report from Hell (Europe) | SLES-53073 | Fair | <sup>Door peek camera not supported</br>Not fully tested</sub> | - | - |
+| Ninja Assault (USA) | SLUS-20492 | Good | <sup>**Requires supplied cheat file to disable aim-lock**</br>Not fully tested</sub> | - | **785B28DA.pnach** |
+| Robotech: Invasion (USA) | SLUS-20823 | Fair | <sup>Turrets not supported</br>Not fully tested</sub> | - | - |
+| Serious Sam: Next Encounter (USA) | SLUS-20907 | Good | <sup>Vehicles not supported</br>Not fully tested</sub> | <sup>Auto Center: Off</br>Auto Aim: Off</sub> | - |
+| Armored Core 2 (USA) | SLUS-20014 | Good | <sup>Arena replays broken</br>Not fully tested</sub> | - | - |
+| Global Defence Force (PAL) / Chikyū Bōeigun 2 (Japan) | SLES-54464 / SLPM-62652 | Good | <sup>Vehicle mouse control is experimental</br>Not fully tested</sub> | Control Type: Technical | - |
+| Jurassic: The Hunted (USA) | SLUS-21907 | Good | <sup>**Requires supplied cheat file**</br>Optional 60FPS cheat recommended</sub> | Aim Assist: Off | **EFE4448F.pnach** |
 * NOTE: PCSX2 will only hook with **BIOS versions 5XXXX and up**.
 * NOTE: Some aspects may break when a game is started with overclocking. Requires testing.
 * PCSX2 Settings: **Disable** *'Settings->Interface->Double-Click Toggles Fullscreen'* | **Enable** *'Settings->Interface->Hide Cursor In Fullscreen'*
@@ -136,7 +139,7 @@ avoid clicking off the window.
 
 ## Supported PPSSPP Titles
 | Game Title | Serial | Mouse Support | Issues | In-game Options |
-| ------ | --- | :---: | ----------- | ----------- |
+| ---------- | ------ | :-----------: | ------ | --------------- |
 | Coded Arms (USA) | ULUS10019 | Fair | <sup>Not fully tested</sub> | <sup>Free Look->Lock On: None</sub> |
 | Ghost in the Shell: Stand Alone Complex (USA) | ULUS10020 | Fair | <sup>Not fully tested</sub> | |
 

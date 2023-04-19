@@ -94,6 +94,7 @@ extern void SD_MEM_WriteFloat(const uint32_t addr, float value);
 
 extern uint32_t PS3_MEM_ReadUInt(const uint32_t addr);
 extern float PS3_MEM_ReadFloat(const uint32_t addr);
+extern uint32_t PS3_MEM_ReadPointer(const uint32_t addr);
 extern void PS3_MEM_WriteFloat(const uint32_t addr, float value);
 
 extern uint32_t PSP_MEM_ReadWord(const uint32_t addr);

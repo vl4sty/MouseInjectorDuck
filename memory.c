@@ -107,6 +107,7 @@ void SD_MEM_WriteFloat(const uint32_t addr, float value);
 
 uint32_t PS3_MEM_ReadUInt(const uint32_t addr);
 float PS3_MEM_ReadFloat(const uint32_t addr);
+uint32_t PS3_MEM_ReadPointer(const uint32_t addr);
 void PS3_MEM_WriteFloat(const uint32_t addr, float value);
 
 uint32_t PSP_MEM_ReadWord(const uint32_t addr);
@@ -371,7 +372,9 @@ uint8_t MEM_FindRamOffset(void)
 		} else if (isMesenHandle == 1) {
 			emuRegionSize = 0x1BF000;
 		} else if (isRPCS3Handle == 1) {
-			emuRegionSize = 0xCC00000;
+			// TODO: if rpcs3 just set offset to 0x330000000 since it seems to be static?
+			// emuRegionSize = 0xCC00000; // Killzone HD
+			emuRegionSize = 0x100000; // HAZE
 		} else if (isPPSSPPHandle == 1) {
 			emuRegionSize = 0x1F00000;
 		} else if (isNOMONEYPSXHandle == 1) {
@@ -447,6 +450,10 @@ uint8_t MEM_FindRamOffset(void)
 						if (lastRegionSize != 0xB7000)
 							continue;
 						emuoffset += 0x7F1C;
+					}
+					else if (isRPCS3Handle == 1) {
+						if (lastRegionSize != 0xFF70000)
+							continue;
 					}
 					else if (isNOMONEYPSXHandle == 1) {
 						emuoffset += 0x30100;
@@ -958,6 +965,18 @@ uint32_t PS3_MEM_ReadUInt(const uint32_t addr)
 	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &output, sizeof(output), NULL);
 	MEM_ByteSwap32((uint32_t *)&output); // byteswap
 	return output;
+}
+
+uint32_t PS3_MEM_ReadPointer(const uint32_t addr)
+{
+	if(!emuoffset || PS3NOTWITHINMEMRANGE(addr))
+		return 0;
+	uint32_t output; // temp var used for output of function
+	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &output, sizeof(output), NULL);
+	MEM_ByteSwap32((uint32_t *)&output); // byteswap
+	if (output < 0x30000000)
+		return 0; // not a pointer
+	return output - 0x30000000;
 }
 
 float PS3_MEM_ReadFloat(const uint32_t addr)

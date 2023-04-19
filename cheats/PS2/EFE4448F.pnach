@@ -1,0 +1,12 @@
+gametitle=Jurassic The Hunted SLUS-21907 0xEFE4448F
+
+// 60 FPS
+patch=1,EE,2017D480,word,2C420001
+
+// write camBase to free address (required to use MouseInjector)
+patch=1,EE,20214B78,word,AF84FF00 // write camBase to 006BE670 | sw a0,-0x100(gp)
+patch=1,EE,20214B7C,word,0C06E7AA // move other opcodes down by one
+patch=1,EE,20214B80,word,8C4400E0
+patch=1,EE,20214B84,word,DFBF0000
+patch=1,EE,20214B88,word,03E00008
+patch=1,EE,20214B8C,word,27BD0010
