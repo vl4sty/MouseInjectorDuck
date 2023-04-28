@@ -58,6 +58,7 @@ avoid clicking off the window.
 | Die Hard: Vendetta | Fair | <sup>Sentry mode not supported</sub> |
 | Trigger Man | Good | <sup>None</sub> |
 | Geist | Fair | <sup> ** *Requires MMU be disabled for game in Dolphin* ** <br />Camera broken on elevators, truck sentry on motorcycle level broken</sub> |
+| Turok: Evolution | Good | <sup>Optional cheats/patches in **'cheats/TurokEvolutionGTKE51.txt'**</sub> |
 
 ## Supported PS1 Titles
 | Game Title | Serial | Mouse Support | Issues | Cheat File |
@@ -129,8 +130,10 @@ avoid clicking off the window.
 | Robotech: Invasion (USA) | SLUS-20823 | Fair | <sup>Turrets not supported</br>Not fully tested</sub> | - | - |
 | Serious Sam: Next Encounter (USA) | SLUS-20907 | Good | <sup>Vehicles not supported</br>Not fully tested</sub> | <sup>Auto Center: Off</br>Auto Aim: Off</sub> | - |
 | Armored Core 2 (USA) | SLUS-20014 | Good | <sup>Arena replays broken</br>Not fully tested</sub> | - | - |
-| Global Defence Force (PAL) / Chikyū Bōeigun 2 (Japan) | SLES-54464 / SLPM-62652 | Good | <sup>Vehicle mouse control is experimental</br>Not fully tested</sub> | Control Type: Technical | - |
-| Jurassic: The Hunted (USA) | SLUS-21907 | Good | <sup>**Requires supplied cheat file**</br>Optional 60FPS cheat recommended</sub> | Aim Assist: Off | **EFE4448F.pnach** |
+| Global Defence Force (PAL) / Chikyū Bōeigun 2 (Japan) | SLES-54464, SLPM-62652 | Good | <sup>Vehicle mouse control is experimental</br>Not fully tested</sub> | <sup>Control Type: Technical</sub> | - |
+| Jurassic: The Hunted (USA) | SLUS-21907 | Good | <sup>**Requires supplied cheat file**</br>Optional 60FPS cheat recommended</sub> | <sup>Aim Assist: Off</sub> | **EFE4448F.pnach** |
+| Monster Attack (PAL) / Chikyū Bōeigun (Japan) | SLES-51856, SLPM-62344 | Good | <sup>Vehicle mouse control is experimental</br>Not fully tested</sub> | <sup>Control Type: Technical</sub> | - |
+| No One Lives Forever (USA) | SLUS-20028 | Good | <sup>Not fully tested</sub> | <sup>Auto-targeting: Off</sub> | - |
 * NOTE: PCSX2 will only hook with **BIOS versions 5XXXX and up**.
 * NOTE: Some aspects may break when a game is started with overclocking. Requires testing.
 * PCSX2 Settings: **Disable** *'Settings->Interface->Double-Click Toggles Fullscreen'* | **Enable** *'Settings->Interface->Hide Cursor In Fullscreen'*

@@ -1,0 +1,21 @@
+Turok: Evolution Mouse Injector cheats/patches
+
+**Game must be restarted for cheats and patches to take effect**
+
+=== CHEATS ===
+-OPTIONAL- For better mouse flying control
+Disable Flying Roll Speed Auto-Center (disables max yaw speed w/ controller)
+0C1C0E4C D01F0B4C
+041C0E4C 60000000
+
+=== PATCHES ===
+-OPTIONAL- adds ability to look around freely while climbing vertically
+Disable Climbing Camera Rebound (disables analog-stick control while climbing)
+
+Type: 32-bit
+Address: 801cbebc
+Value: 60000000
+
+Type: 32-bit
+Address: 801cbec4
+Value: 60000000
