@@ -23,6 +23,9 @@
 #define BUILDINFO "(v0.31 - "__DATE__")"
 #define LINE "__________________________________________________________________"
 // input for interface
+#define K_1 GetAsyncKeyState(0x31) // key '1'
+#define K_2 GetAsyncKeyState(0x32) // key '2'
+#define K_3 GetAsyncKeyState(0x33) // key '3'
 #define K_4 GetAsyncKeyState(0x34) // key '4'
 #define K_5 GetAsyncKeyState(0x35) // key '5'
 #define K_6 GetAsyncKeyState(0x36) // key '6'
