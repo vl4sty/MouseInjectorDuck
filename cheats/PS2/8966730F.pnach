@@ -1,0 +1,4 @@
+gametitle=TimeSplitters(v2.00) SLUS-20090 0x8966730F
+
+// Always display crosshair
+//patch=1,EE,202817FC,word,AE270320

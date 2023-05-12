@@ -134,6 +134,10 @@ avoid clicking off the window.
 | Jurassic: The Hunted (USA) | SLUS-21907 | Good | <sup>**Requires supplied cheat file**</br>Optional 60FPS cheat recommended</sub> | <sup>Aim Assist: Off</sub> | **EFE4448F.pnach** |
 | Monster Attack (PAL) / Chikyū Bōeigun (Japan) | SLES-51856, SLPM-62344 | Good | <sup>Vehicle mouse control is experimental</br>Not fully tested</sub> | <sup>Control Type: Technical</sub> | - |
 | No One Lives Forever (USA) | SLUS-20028 | Good | <sup>Not fully tested</sub> | <sup>Auto-targeting: Off</sub> | - |
+| Call of Duty 3 (USA) | SLUS-21426 | Good | <sup>3rd-Person Jeep camera not supported</br>Not fully tested</sub> | - | - |
+| TimeSplitters (v1.10, v2.00) (USA) | SLUS-20090 | Good | <sup>**Optional cheat to always show crosshair**</br>Not fully tested</sub> | <sup>Auto Lookahead: No</br>Auto Aim: Off</sub> | **B4A004F2.pnach (v1.10)</br>8966730F.pnach (v2.00)** |
+| Return to Castle Wolfenstein: Operation Resurrection (USA) | SLUS-20297 | Good | <sup>Not fully tested</sub> | <sup>Auto Center View: Off</br>Always Aim: Off</sub> | - |
+| Beverly Hills Cop (USA) | SLES-54456 | Fair | <sup>Not fully tested</sub> | - | - |
 * NOTE: PCSX2 will only hook with **BIOS versions 5XXXX and up**.
 * NOTE: Some aspects may break when a game is started with overclocking. Requires testing.
 * PCSX2 Settings: **Disable** *'Settings->Interface->Double-Click Toggles Fullscreen'* | **Enable** *'Settings->Interface->Hide Cursor In Fullscreen'*
