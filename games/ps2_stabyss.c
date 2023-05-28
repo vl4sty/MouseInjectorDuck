@@ -102,9 +102,9 @@ static void PS2_STA_Inject(void)
 	// PS2_MEM_WriteFloat(STA_CAMX_SIN4, (float)sin(camX));
 
 	PS2_MEM_WriteFloat(STA_CAMX, (float)camX);
-	PS2_MEM_WriteFloat(STA_CAMX2, (float)camX2);
+	// PS2_MEM_WriteFloat(STA_CAMX2, (float)camX2);
 	// PS2_MEM_WriteFloat(STA_CAMX2, (float)camX);
-	PS2_MEM_WriteFloat(STA_CAMY, (float)camY);
+	// PS2_MEM_WriteFloat(STA_CAMY, (float)camY);
 	// PS2_MEM_WriteFloat(STA_CAMY2, (float)camY2);
 	// PS2_MEM_WriteFloat(STA_CAMY2, (float)camY);
 }

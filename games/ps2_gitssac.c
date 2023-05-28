@@ -18,6 +18,7 @@
 // along with this program; if not, visit http://www.gnu.org/licenses/gpl-2.0.html
 //==========================================================================
 #include <stdint.h>
+#include <math.h>
 #include "../main.h"
 #include "../memory.h"
 #include "../mouse.h"
@@ -25,18 +26,32 @@
 
 #define TAU 6.2831853f // 0x40C90FDB
 
-#define GITS_CAMBASE 0x343CC0
-// offsets from cambase
-#define GITS_CAMX_COS 0x360
-#define GITS_CAMX_SIN 0x368
-#define GITS_CAM_TRANSFORM_C 0x370
-#define GITS_CAM_TRANSFORM_D 0x374
-#define GITS_CAM_TRANSFORM_E 0x378
-#define GITS_CAM_TRANSFORM_F 0x380
-#define GITS_CAMY 0x384
-#define GITS_CAM_TRANSFORM_H 0x388
-
+#define GITS_PLAYERBASE 0x343CC0
+// offsets from playerBase
+#define GITS_CAMBASE 0x8010
 #define GITS_CAM_ZOOM 0x80F0
+// offsets from camBase
+#define GITS_CAMX_COS 0x60
+#define GITS_CAMX_SIN 0x68
+#define GITS_CAM_TRANSFORM_C 0x70
+#define GITS_CAM_TRANSFORM_D 0x74
+#define GITS_CAM_TRANSFORM_E 0x78
+#define GITS_CAM_TRANSFORM_F 0x80
+#define GITS_CAMY 0x84
+#define GITS_CAM_TRANSFORM_H 0x88
+
+// #define GITS_CAMX_COS 0x360
+// #define GITS_CAMX_SIN 0x368
+// #define GITS_CAM_TRANSFORM_C 0x370
+// #define GITS_CAM_TRANSFORM_D 0x374
+// #define GITS_CAM_TRANSFORM_E 0x378
+// #define GITS_CAM_TRANSFORM_F 0x380
+// #define GITS_CAMY 0x384
+// #define GITS_CAM_TRANSFORM_H 0x388
+
+
+
+// #define GITS_CAM_ZOOM 0x80F0
 
 #define GITS_CAN_MOVE_CAMERA 0x472D84
 
@@ -58,6 +73,7 @@ static const GAMEDRIVER GAMEDRIVER_INTERFACE =
 
 const GAMEDRIVER *GAME_PS2_GHOSTINTHESHELL = &GAMEDRIVER_INTERFACE;
 
+static uint32_t playerBase = 0;
 static uint32_t camBase = 0;
 static float lastCos = 0;
 static float lastSin = 0;
@@ -76,15 +92,6 @@ static uint8_t PS2_GITS_Status(void)
 //==========================================================================
 static void PS2_GITS_Inject(void)
 {
-	// TODO: camBase sanity
-	// TODO: hacked entity cam base
-	//			enemy soldiers
-	//			camera
-	//			based on playerBase?
-	// TODO: disable during
-	//			tutorial message
-	//			hacking
-	// 			calls
 	// TODO: set turn animation for camX movement
 	// TODO: clamp camX on ladders and ledges
 
@@ -94,13 +101,15 @@ static void PS2_GITS_Inject(void)
 	if (!PS2_MEM_ReadUInt(GITS_CAN_MOVE_CAMERA))
 		return;
 
-	camBase = PS2_MEM_ReadPointer(GITS_CAMBASE);
+	playerBase = PS2_MEM_ReadUInt(GITS_PLAYERBASE);
+	camBase = PS2_MEM_ReadUInt(playerBase + GITS_CAMBASE);
 
+	float scale = 300.f;
 	float looksensitivity = (float)sensitivity / 40.f;
-	float zoom = 1 / PS2_MEM_ReadFloat(camBase + GITS_CAM_ZOOM);
+	float zoom = 1 / PS2_MEM_ReadFloat(playerBase + GITS_CAM_ZOOM);
 
 	float camY = PS2_MEM_ReadFloat(camBase + GITS_CAMY);
-	camY += (float)ymouse * looksensitivity / 200.f * zoom;
+	camY += (float)ymouse * looksensitivity / scale * zoom;
 	camY = ClampFloat(camY, -0.94f, 0.98f);
 
 	float camXSin = PS2_MEM_ReadFloat(camBase + GITS_CAMX_SIN);
@@ -113,7 +122,7 @@ static void PS2_GITS_Inject(void)
 
 	float angle = atan(camXSin / camXCos);
 
-	angle -= (float)xmouse * looksensitivity / 200.f * zoom;
+	angle -= (float)xmouse * looksensitivity / scale * zoom;
 	if (camXCos < 0)
 		angle += TAU / 2;
 	// if other quadrants add pi
