@@ -3,13 +3,15 @@
 An external app that injects cursor input into game memory.
 
 ### *If you have a game request, please go to the 'Discussions' tab and post it!*
+### _Scroll to bottom for_ <font color="red"> *FREQUENTLY ASKED QUESTIONS* </font>
+
 
 ## Supported Emulators
 | Emulator/Frontend | Version | Executable name (case sensitive) |
 | --- | :---: | :---: |
 | Dolphin | 5.0 and up | dolphin.exe |
 | DuckStation | 0.1-5485 | duckstation-qt-x64-ReleaseLTCG.exe |
-| PCSX2 Nightly | 1.7.4126 | pcsx2-qtx64-avx2.exe |
+| PCSX2 Nightly | latest | pcsx2-qt.exe<br>pcsx2-qtx64.exe<br>pcsx2-qtx64-avx2.exe |
 | RetroArch (see cores below) | 1.14.0 | retroarch.exe |
 | PPSSPP | 1.14.4 | PPSSPPWindows.exe / PPSSPPWindows64.exe |
 * NOTE: Versions given are the latest that have been tested working, may work with newer
@@ -86,7 +88,8 @@ avoid clicking off the window.
 | Future Cop: L.A.P.D. (USA) | SLUS-00739 | Fair | <sup>Not fully tested</sub> | |
 | Duke Nukem: Time to Kill (USA) | SLUS-00583 | Fair | <sup>Requires supplied cheat file, Not fully tested</sub> | **DukeNukemTimeToKill_SLUS-00583.cht** |
 | Jumping Flash (USA) | SCUS-94103 | Good | <sup>Requires supplied cheat file</sub> | **JumpingFlash_SCUS-94103.cht** |
-| Hybrid (Japan, Europe) | SLPS-01102, SLES-03531 | Fair | <sup>Requires supplied cheat file</sub> | **Hybrid_SLPS-01102.cht (Japan)<br>Hybrid_SLES-03531.cht (Europe)** |
+| Hybrid (Japan, Europe) | SLPS-01102, SLES-03531 | Fair | <sup>Requires supplied cheat file<br>Not fully tested</sub> | **Hybrid_SLPS-01102.cht (Japan)<br>Hybrid_SLES-03531.cht (Europe)** |
+| Powerslave (USA) | SLUS-00102 | Good | <sup>Requires supplied cheat file<br>Not fully tested</sub> | **Powerslave_SLUS-00102.cht** |
 * NOTE: If DuckStation is not hooking, try restoring the default settings. 'Settings->General->Restore Defaults'
 * Importing cheat files in DuckStation: 'Tools->Cheat Manager->Cheat List->Import->From File'
 
@@ -152,6 +155,36 @@ avoid clicking off the window.
 | ---------- | ------ | :-----------: | ------ | --------------- |
 | Coded Arms (USA) | ULUS10019 | Fair | <sup>Not fully tested</sub> | <sup>Free Look->Lock On: None</sub> |
 | Ghost in the Shell: Stand Alone Complex (USA) | ULUS10020 | Fair | <sup>Not fully tested</sub> | |
+
+# **|  FREQUENTLY ASKED QUESTIONS  |**
+### Q: How do I install?
+  - The program has no installation and will work from any directory. Just download the <br>
+  **latest release**, extract the contents of the archive to a convenient location and run<br>
+  the executable.
+### Q: Why is game not hooking?
+  - If the game is not hooking there are a few things to check:
+    - Only one supported emulator is running
+    - Emulator is supported and version matches what is listed in this README<br>
+    (Newer or older versions may work, but the listed version is tested working)
+    - ROM/ISO match the version/serial listed in this README
+    - **PCSX2**: PS2 BIOS version is **5XXXX or higher**
+    - **RetroArch**: RA window must be **focused** for it to hook initially
+  - Some emulator settings prevent hooking so you can also try **restoring the default emulator settings**:
+    - **PCSX2**: *Settings->Interface->Restore Defaults*
+    - **DuckStation**: *Settings->General->Restore Defaults*
+  - **NOTE**: The program has only been tested on **Windows 10** and may not be compatible<br>
+  with other versions of Windows
+  - **NOTE**: If emulator is restarted, the injector must be restarted as well
+### Q: Game hooks but is not listed as supported?
+  - There are many games that hook but aren't listed as supported as they are unfinished<br>
+  hacks. A game is added to the supported list when enough testing has been done to assume<br>
+  that the core game can be completed without any major issues.
+### Q: Where is the controller input profile?
+  - The releases don't include input profiles but I've added my controller profiles to the<br>
+  project if you would like to use the same configuration. Although you should probably just<br>
+  make your own.
+### Q: Will this work with netplay/online?
+  - Most likely **NO**, single-player only.
 
 # ManyMouse
 

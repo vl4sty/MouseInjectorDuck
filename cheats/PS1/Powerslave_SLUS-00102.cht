@@ -1,0 +1,9 @@
+#group=MouseInjector
+#type=Gameshark
+#activation=EndFrame
+[*Disable Auto-lookahead]
+E000934C 0053
+80027910 0000
+E000934C 0053
+80027912 0000
+

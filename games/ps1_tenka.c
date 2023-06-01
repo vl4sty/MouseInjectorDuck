@@ -62,7 +62,8 @@ static uint8_t PS1_TENKA_Status(void)
 //==========================================================================
 static uint8_t PS1_TENKA_CameraExists(void)
 {
-	if(PS1_MEM_ReadWord(TENKA_cam_sanity) == 0xE6001800) // value near static camera pointer that is unchanging while a camera exists
+	if(PS1_MEM_ReadWord(TENKA_cam_sanity) == 0xE6001800 ||
+	   PS1_MEM_ReadWord(TENKA_cam_sanity) == 0xE6000800) // value near static camera pointer that is unchanging while a camera exists
 		return 1;
 
 	return 0;

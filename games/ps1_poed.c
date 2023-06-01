@@ -98,12 +98,14 @@ static void PS1_POED_Inject(void)
 
 	// TODO: prevent writing to camx sin/cos
 
+	// TODO: look for redundant or negative cos/sin values like delta force
+
 	const float looksensitivity = (float)sensitivity / 200.f;
 
 	if(xmouse == 0 && ymouse == 0) // if mouse is idle
 		return;
 	
-	PS1_MEM_WriteHalfword(POED_ALLOW_MOUSE_MOVEMENT, 0xFFFF);
+	// PS1_MEM_WriteHalfword(POED_ALLOW_MOUSE_MOVEMENT, 0xFFFF);
 
 	if (xmouse)
 	{
@@ -111,19 +113,14 @@ static void PS1_POED_Inject(void)
 		int32_t camXCos = PS1_MEM_ReadInt(POED_CAMX_COS);
 		// if (camXSin == 0) camXSin = 1;
 		// if (camXCos == 0) camXCos = 1;
-		float camXSinF = (float)camXSin / 65536.f;
-		float camXCosF = (float)camXCos / 65536.f;
-
-		// if (camXCosF == 0)
-		// 	camXCosF = 1.f / 65536.f;
-		// if (camXSinF == 0)
-		// 	camXSinF = 1.f / 65536.f;
+		float camXSinF = (float)(camXSin / 65535.f);
+		float camXCosF = (float)(camXCos / 65535.f);
 
 		// if (totalAngle == POED_TOTAL_ANGLE_UNSET)
 		// totalAngle = (float)atan((float)camXSin / (float)camXCos);
 		totalAngle = (float)atan((float)camXSinF / (float)camXCosF);
 
-		if (camXCos < 0)
+		if (camXCosF < 0)
 			totalAngle += PI;
 
 		totalAngle += (float)xmouse * looksensitivity / 20.f;
@@ -134,15 +131,15 @@ static void PS1_POED_Inject(void)
 		while (totalAngle < 0)
 			totalAngle += TAU;
 		
-		totalAngleOut = totalAngle;
+		// totalAngleOut = totalAngle;
 
 		// camXSinF = (float)sin(totalAngle) * 65535.f;
 		// camXCosF = (float)cos(totalAngle) * 65535.f;
 
 		// PS1_MEM_WriteInt(POED_CAMX_SIN, (int32_t)camXSinF);
 		// PS1_MEM_WriteInt(POED_CAMX_COS, (int32_t)camXCosF);
-		PS1_MEM_WriteInt(POED_CAMX_SIN, (int32_t)((float)sin(totalAngle) * 65536.f));
-		PS1_MEM_WriteInt(POED_CAMX_COS, (int32_t)((float)cos(totalAngle) * 65536.f));
+		PS1_MEM_WriteInt(POED_CAMX_SIN, (int32_t)(sin(totalAngle) * 65535.f));
+		PS1_MEM_WriteInt(POED_CAMX_COS, (int32_t)(cos(totalAngle) * 65535.f));
 	}
 
 	if (ymouse)

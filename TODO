@@ -10,17 +10,11 @@ Find better checks for N64 status
 *DONE* Different time/sleep implementation for more consistent tickrate
     Some PS2 titles (or all?) seem to be affected
 Options stuct defined in each game
-Frequently Asked Questions at top of README
-    Tested working on Windows 10 only
-    Downloaded source files and there's no exe, not the release
-    Restore Defaults
-    Restart emulator and injector
-    Proper BIOS
-    Keybinds/Controller Setup is not provided
-    Unlisted games
-    Explain no installation/works from any directory
 PCSX2 | use pointer to PS2 RAM? "pcsx2-qtx64-avx2.exe"+342CDD0
     seems to be static
+Help discussion with small questionaire
+    Read the FAQ before posting
+    Do other games/emulators work?
 
 -- Long term --
 Add auto-updater
