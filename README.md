@@ -89,7 +89,6 @@ avoid clicking off the window.
 | Duke Nukem: Time to Kill (USA) | SLUS-00583 | Fair | <sup>Requires supplied cheat file, Not fully tested</sub> | **DukeNukemTimeToKill_SLUS-00583.cht** |
 | Jumping Flash (USA) | SCUS-94103 | Good | <sup>Requires supplied cheat file</sub> | **JumpingFlash_SCUS-94103.cht** |
 | Hybrid (Japan, Europe) | SLPS-01102, SLES-03531 | Fair | <sup>Requires supplied cheat file<br>Not fully tested</sub> | **Hybrid_SLPS-01102.cht (Japan)<br>Hybrid_SLES-03531.cht (Europe)** |
-| Powerslave (USA) | SLUS-00102 | Good | <sup>Requires supplied cheat file<br>Not fully tested</sub> | **Powerslave_SLUS-00102.cht** |
 * NOTE: If DuckStation is not hooking, try restoring the default settings. 'Settings->General->Restore Defaults'
 * Importing cheat files in DuckStation: 'Tools->Cheat Manager->Cheat List->Import->From File'
 
