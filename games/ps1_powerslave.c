@@ -94,7 +94,7 @@ static void PS1_PS_Inject(void)
 
 	float ym = -(float)(invertpitch ? -ymouse : ymouse);
 	float dy = ym * looksensitivity;
-	AccumulateAddRemainder(&camYF, &yAccumulator, -ym, dy);
+	AccumulateAddRemainder(&camYF, &yAccumulator, ym, dy);
 	if (camYF > 1024 && camYF < 2200)
 		camYF = 1024;
 	if (camYF < 3072 && camYF > 2200)
