@@ -96,6 +96,7 @@ uint32_t PS2_MEM_ReadWord(const uint32_t addr);
 uint32_t PS2_MEM_ReadUInt(const uint32_t addr);
 uint32_t PS2_MEM_ReadUInt16(const uint32_t addr);
 int16_t PS2_MEM_ReadInt16(const uint32_t addr);
+uint8_t PS2_MEM_ReadUInt8(const uint32_t addr);
 float PS2_MEM_ReadFloat(const uint32_t addr);
 void PS2_MEM_WriteWord(const uint32_t addr, uint32_t value);
 void PS2_MEM_WriteUInt(const uint32_t addr, uint32_t value);
@@ -882,6 +883,16 @@ int16_t PS2_MEM_ReadInt16(const uint32_t addr)
 	if(!emuoffset || PS2NOTWITHINMEMRANGE(addr)) // if ps2 memory has not been init by emulator or reading from outside of memory range
 		return 0;
 	int16_t output; // temp var used for output of function
+	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + (addr - 0x80000)), &output, sizeof(output), NULL);
+	// printdebug(1); // debug
+	return output;
+}
+
+uint8_t PS2_MEM_ReadUInt8(const uint32_t addr)
+{
+	if(!emuoffset || PS2NOTWITHINMEMRANGE(addr)) // if ps2 memory has not been init by emulator or reading from outside of memory range
+		return 0;
+	uint8_t output; // temp var used for output of function
 	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + (addr - 0x80000)), &output, sizeof(output), NULL);
 	// printdebug(1); // debug
 	return output;

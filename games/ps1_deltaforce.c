@@ -43,6 +43,8 @@
 // offset from FOVBase
 #define DFUW_FOV 0x3C
 
+#define DFUW_IS_MID_LVL_LOADING 0xC1D5C
+
 // #define DFUW_CAMY 0x10276C
 // #define DFUW_CAMX_SIN 0x101050
 // #define DFUW_CAMX_COS 0x101058
@@ -101,6 +103,9 @@ static void PS1_DFUW_Inject(void)
 		return;
 	
 	if (PS1_MEM_ReadUInt(DFUW_IS_PAUSED))
+		return;
+	
+	if (PS1_MEM_ReadUInt(DFUW_IS_MID_LVL_LOADING) != 1)
 		return;
 	
 	camYBase = PS1_MEM_ReadPointer(DFUW_CAMY_BASE_PTR);

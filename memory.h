@@ -82,6 +82,7 @@ extern uint32_t PS2_MEM_ReadUInt(const uint32_t addr);
 extern float PS2_MEM_ReadFloat(const uint32_t addr);
 extern uint32_t PS2_MEM_ReadUInt16(const uint32_t addr);
 extern int16_t PS2_MEM_ReadInt16(const uint32_t addr);
+extern uint8_t PS2_MEM_ReadUInt8(const uint32_t addr);
 extern void PS2_MEM_WriteWord(const uint32_t addr, uint32_t value);
 extern void PS2_MEM_WriteUInt(const uint32_t addr, uint32_t value);
 extern void PS2_MEM_WriteUInt16(const uint32_t addr, uint16_t value);
