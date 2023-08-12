@@ -18,77 +18,63 @@
 // along with this program; if not, visit http://www.gnu.org/licenses/gpl-2.0.html
 //==========================================================================
 #include <stdint.h>
+#include <stdio.h>
+#include <math.h>
 #include "../main.h"
 #include "../memory.h"
 #include "../mouse.h"
 #include "game.h"
 
-#define TAA_CAMBASE 0x33A038
-// #define TAA_CAM_Y 0x1E4AE8C
-// #define TAA_CAM_X 0x1E4AE90
-#define TAA_CAM_Y 0xBFC
-#define TAA_CAM_X 0xC00
+#define DF_CAMY 0x1D917D0
+#define DF_CAMX 0x1D917D4
 
-static uint8_t PS2_TAA_Status(void);
-static uint8_t PS2_TAA_DetectCam(void);
-static void PS2_TAA_Inject(void);
+static uint8_t PS2_DF_Status(void);
+static void PS2_DF_Inject(void);
 
 static const GAMEDRIVER GAMEDRIVER_INTERFACE =
 {
-	"Tribes: Aerial Assault",
-	PS2_TAA_Status,
-	PS2_TAA_Inject,
+	"Delta Force: Black Hawk Down",
+	PS2_DF_Status,
+	PS2_DF_Inject,
 	1, // 1000 Hz tickrate
 	0 // crosshair sway not supported for driver
 };
 
-const GAMEDRIVER *GAME_PS2_TRIBESAA = &GAMEDRIVER_INTERFACE;
+const GAMEDRIVER *GAME_PS2_DELTAFORCE = &GAMEDRIVER_INTERFACE;
 
-static uint32_t camBase = 0;
+static float xAccumulator = 0.;
+static float yAccumulator = 0.;
+static float scale = 0.005f;
 
 //==========================================================================
 // Purpose: return 1 if game is detected
 //==========================================================================
-static uint8_t PS2_TAA_Status(void)
+static uint8_t PS2_DF_Status(void)
 {
-	return (PS2_MEM_ReadWord(0x00093390) == 0x534C5553U && 
-			PS2_MEM_ReadWord(0x00093394) == 0x5F323031U &&
-			PS2_MEM_ReadWord(0x00093398) == 0x2E34393BU);
+	// SLUS_211.24
+	return (PS2_MEM_ReadWord(0x003FA550) == 0x534C5553U && 
+			PS2_MEM_ReadWord(0x003FA554) == 0x5F323131U &&
+			PS2_MEM_ReadWord(0x003FA558) == 0x2E323400U);
 }
-
-static uint8_t PS2_TAA_DetectCam(void)
+//==========================================================================
+// Purpose: calculate mouse look and inject into current game
+//==========================================================================
+static void PS2_DF_Inject(void)
 {
-	uint32_t tempCamBase = PS2_MEM_ReadUInt(TAA_CAMBASE);
-	if (tempCamBase)
-	{
-		camBase = tempCamBase;
-		return 1;
-	}
-	return 0;
-}
-
-static void PS2_TAA_Inject(void)
-{
-	// TODO: find fov
-	// TODO: disable auto-aim
-	// FIXME: camY snaps down?
+	// TODO: camX clamp when in helicopter gun
 
 	if(xmouse == 0 && ymouse == 0) // if mouse is idle
 		return;
-	
-	if (!PS2_TAA_DetectCam())
-		return;
 
-	// float fov = PS2_MEM_ReadFloat(cambase + RDR_camFov);
-	float looksensitivity = (float)sensitivity / 40.f;
-	float scale = 300.f;
+	const float looksensitivity = (float)sensitivity / 40.f;
 
-	float camX = PS2_MEM_ReadFloat(camBase + TAA_CAM_X);
-	camX -= (float)xmouse * looksensitivity / scale;
-	PS2_MEM_WriteFloat(camBase + TAA_CAM_X, (float)camX);
+	float camX = PS2_MEM_ReadFloat(DF_CAMX);
+	float camY = PS2_MEM_ReadFloat(DF_CAMY);
 
-	float camY = PS2_MEM_ReadFloat(camBase + TAA_CAM_Y);
-	camY += (float)(invertpitch ? -ymouse : ymouse) * looksensitivity / scale;
-	PS2_MEM_WriteFloat(camBase + TAA_CAM_Y, (float)camY);
+	camX += (float)xmouse * looksensitivity * scale;
+	camY -= (float)(invertpitch ? -ymouse : ymouse) * looksensitivity * scale;
+	camY = ClampFloat(camY, -1.299999952f, 1.299999952f);
 
+	PS2_MEM_WriteFloat(DF_CAMX, camX);
+	PS2_MEM_WriteFloat(DF_CAMY, camY);
 }

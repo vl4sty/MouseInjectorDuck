@@ -23,13 +23,28 @@
 #include "../mouse.h"
 #include "game.h"
 
-#define TWINE_CAMY 0xB60F8
-#define TWINE_CAMY_AIM 0xB7148
-#define TWINE_CAMX 0x16BB62
-#define TWINE_CAMX_AIM 0xB7140
+#define TWINE_CAM_AIM_BASE_POINTER 0x84E0
+#define TWINE_BASE_SANITY_1_VALUE 0x000B
+#define TWINE_BASE_SANITY_2_VALUE 0x800B
+// offsets from camAimBase
+#define TWINE_BASE_SANITY_1 0x12
+#define TWINE_BASE_SANITY_2 0x46
+#define TWINE_CAM_IS_AIMING -0x8124 // actually control bits
+#define TWINE_CAM_ZOOM -0x82F4
+#define TWINE_CAMX_AIM -0x830C
+#define TWINE_CAMY_AIM -0x8304
+#define TWINE_CAMY_BASE_POINTER -0x833C
+// offset from camYBase
+#define TWINE_CAMY 0x50
 
-#define TWINE_IS_IN_GAME_CUTSCENE 0xA118C
-#define TWINE_IS_INTERACTION 0xA0F34
+#define TWINE_ROTX_BASE_POINTER -0x8468 // offset from camAimBase
+// offset from rotXBase
+#define TWINE_ROTX -0x102E
+
+#define TWINE_IS_PAUSED_BASE_POINTER 0x8570
+// offset from isPausedBase
+#define TWINE_IS_PAUSED 0x73A4
+#define TWINE_IS_CUTSCENE 0x75FC
 
 static uint8_t PS1_TWINE_Status(void);
 static void PS1_TWINE_Inject(void);
@@ -47,6 +62,12 @@ const GAMEDRIVER *GAME_PS1_007THEWORLDISNOTENOUGH = &GAMEDRIVER_INTERFACE;
 
 static float xAccumulator = 0.f;
 static float yAccumulator = 0.f;
+static uint32_t camAimBase = 0;
+static uint32_t camYBase = 0;
+static uint32_t rotXBase = 0;
+static uint8_t isAiming = 0;
+static uint8_t isAimingLast = 0;
+static float aimingCenter = 0;
 
 //==========================================================================
 // Purpose: return 1 if game is detected
@@ -63,56 +84,75 @@ static uint8_t PS1_TWINE_Status(void)
 //==========================================================================
 static void PS1_TWINE_Inject(void)
 {
-	// TODO: disable during
-	//			pause
-	//			in-game cutscenes
-	// TODO: camBase
-	// TODO: cheats for each level?
-	//			look for cheat base
-	// FIXME: camY popping?
 	// TODO: use menu (60 FPS) to find FPS cheat
-
-	// disable camY rebound level 1?, only works on level reset
-	// needs to be a cheat but keep here as reference for cheat base search
-	// PS1_MEM_WriteWord(0x52120, 0x0);
-	// PS1_MEM_WriteWord(0x5236C, 0x0);
-	// PS1_MEM_WriteWord(0x527FC, 0x0);
-	// PS1_MEM_WriteWord(0x52A58, 0x0);
+	// TODO: lean aim boundaries
 
 	if(xmouse == 0 && ymouse == 0) // if mouse is idle
 		return;
-	
-	if (PS1_MEM_ReadHalfword(TWINE_IS_IN_GAME_CUTSCENE))
-		return;
 
-	if (PS1_MEM_ReadHalfword(TWINE_IS_INTERACTION))
+	uint32_t isPausedBase = PS1_MEM_ReadPointer(TWINE_IS_PAUSED_BASE_POINTER);
+	if (PS1_MEM_ReadHalfword(isPausedBase + TWINE_IS_PAUSED))
+		return;
+	if (PS1_MEM_ReadHalfword(isPausedBase + TWINE_IS_CUTSCENE))
 		return;
 	
-	uint16_t camX = PS1_MEM_ReadHalfword(TWINE_CAMX);
-	int16_t camY = PS1_MEM_ReadInt16(TWINE_CAMY);
-	float camXF = (float)camX;
+	camAimBase = PS1_MEM_ReadPointer(TWINE_CAM_AIM_BASE_POINTER);
+	if (PS1_MEM_ReadHalfword(camAimBase + TWINE_BASE_SANITY_1) != TWINE_BASE_SANITY_1_VALUE &&
+		PS1_MEM_ReadHalfword(camAimBase + TWINE_BASE_SANITY_2) != TWINE_BASE_SANITY_2_VALUE)
+	{
+		return;
+	}
+	camYBase = PS1_MEM_ReadPointer(camAimBase + TWINE_CAMY_BASE_POINTER);
+	rotXBase = PS1_MEM_ReadPointer(camAimBase + TWINE_ROTX_BASE_POINTER);
+	
+	uint16_t rotX = PS1_MEM_ReadHalfword(rotXBase + TWINE_ROTX);
+	int16_t camY = PS1_MEM_ReadInt16(camYBase + TWINE_CAMY);
+	uint16_t zoom = PS1_MEM_ReadHalfword(camAimBase + TWINE_CAM_ZOOM);
+	if (!zoom) zoom = 1;
+	float rotXF = (float)rotX;
 	float camYF = (float)camY;
+	float zoomF = (float)zoom / 4000.f;
+	if (zoom == 1) zoomF = 1.f;
 
 	const float looksensitivity = (float)sensitivity / 20.f;
-	const float scale = 1.f;
+	float scale = 1.f / zoomF;
 
-	float dx = (float)xmouse * looksensitivity * scale;
-	AccumulateAddRemainder(&camXF, &xAccumulator, xmouse, dx);
+	// isAiming = PS1_MEM_ReadByte(camAimBase + TWINE_CAM_IS_AIMING);
 
-	while (camXF > 4096)
-		camXF -= 4096;
-	while (camXF < 0)
-		camXF += 4096;
+	// if (isAimingLast != isAiming)
+	// {
+	// 	// save rotX when started aiming
+	// 	aimingCenter = rotXF;
+	// }
+
+	float dx = (float)xmouse * looksensitivity * scale * zoomF;
+	AccumulateAddRemainder(&rotXF, &xAccumulator, xmouse, dx);
+
+	// if (isAiming)
+	// 	rotXF = ClampFloat(rotXF, aimingCenter - 340.f, aimingCenter + 340.f);
+
+	// isAimingLast = isAiming;
+
+
+	while (rotXF > 4096)
+		rotXF -= 4096;
+	while (rotXF < 0)
+		rotXF += 4096;
 
 	float ym = (float)(invertpitch ? -ymouse : ymouse);
-	float dy = -ym * looksensitivity * scale;
+	float dy = -ym * looksensitivity * scale * zoomF;
 	AccumulateAddRemainder(&camYF, &yAccumulator, -ym, dy);
 
-	// TODO: only clamp when in-game, not during in-game cutscenes
+	// camY should be on a scale from -2048 to 2048
+	while (camYF > 2048)
+		camYF -= 4096;
+	while (camYF < -2048)
+		camYF += 4096;
+
 	camYF = ClampFloat(camYF, -640.f, 800.f);
 
-	PS1_MEM_WriteHalfword(TWINE_CAMX, (uint16_t)camXF);
-	PS1_MEM_WriteHalfword(TWINE_CAMX_AIM, (uint16_t)camXF);
-	PS1_MEM_WriteInt16(TWINE_CAMY, (int16_t)camYF);
-	PS1_MEM_WriteInt(TWINE_CAMY_AIM, (int32_t)camYF);
+	PS1_MEM_WriteHalfword(rotXBase + TWINE_ROTX, (uint16_t)rotXF);
+	PS1_MEM_WriteHalfword(camAimBase + TWINE_CAMX_AIM, (uint16_t)rotXF);
+	PS1_MEM_WriteInt16(camYBase + TWINE_CAMY, (int16_t)camYF);
+	PS1_MEM_WriteInt(camAimBase + TWINE_CAMY_AIM, (int32_t)camYF);
 }

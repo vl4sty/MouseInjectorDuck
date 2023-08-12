@@ -38,12 +38,19 @@
 #define DFUW_CAMX_COS 0x18
 #define DFUW_CAMX_COS_NEG 0x28
 #define DFUW_CAMX_SIN_2 0x30
+#define DFUW_SNIPER_X 0x9C0
+#define DFUW_SNIPER_Y 0x9C4
+#define DFUW_SNIPER_SANITY 0x9D8
+#define DFUW_SNIPER_SANITY_VALUE 0xAF0CFFFF
 
 #define DFUW_FOV_BASE_PTR 0xE50A8
 // offset from FOVBase
 #define DFUW_FOV 0x3C
 
 #define DFUW_IS_MID_LVL_LOADING 0xC1D5C
+
+#define DFUW_IS_BUSY 0xC0ACC
+#define DFUW_NOT_BUSY 0x2530
 
 // #define DFUW_CAMY 0x10276C
 // #define DFUW_CAMX_SIN 0x101050
@@ -60,7 +67,7 @@ static void PS1_DFUW_Inject(void);
 
 static const GAMEDRIVER GAMEDRIVER_INTERFACE =
 {
-	"Delta Force Urban Warfare",
+	"Delta Force: Urban Warfare",
 	PS1_DFUW_Status,
 	PS1_DFUW_Inject,
 	1, // 1000 Hz tickrate
@@ -91,22 +98,20 @@ static uint8_t PS1_DFUW_Status(void)
 //==========================================================================
 static void PS1_DFUW_Inject(void)
 {
-	// TODO: test base sanities
-	// TODO: sniping level
-
-	// TODO: disable during
-	//			dialogue pause?
-	//			mid-mission loading
-
+	// TODO: test isBusy flag
+	//			continue at isBusyTestContinueHERE.sav
 
 	if(xmouse == 0 && ymouse == 0) // if mouse is idle
 		return;
 	
 	if (PS1_MEM_ReadUInt(DFUW_IS_PAUSED))
 		return;
-	
-	if (PS1_MEM_ReadUInt(DFUW_IS_MID_LVL_LOADING) != 1)
+
+	if (PS1_MEM_ReadHalfword(DFUW_IS_BUSY) != DFUW_NOT_BUSY)
 		return;
+	
+	// if (PS1_MEM_ReadUInt(DFUW_IS_MID_LVL_LOADING) != 1)
+	// 	return;
 	
 	camYBase = PS1_MEM_ReadPointer(DFUW_CAMY_BASE_PTR);
 	camXBase = PS1_MEM_ReadPointer(DFUW_CAMX_BASE_PTR);
@@ -114,8 +119,28 @@ static void PS1_DFUW_Inject(void)
 
 	const float scale = 5.f;
 	const float looksensitivity = (float)sensitivity / 200.f;
-
 	float fov = (float)PS1_MEM_ReadInt(fovBase + DFUW_FOV) / 853.f;
+
+	if (PS1_MEM_ReadWord(camXBase + DFUW_SNIPER_SANITY) == DFUW_SNIPER_SANITY_VALUE)
+	{
+		const float sniperScale = 200.f;
+		// do the sniper	
+		int32_t sniperX = PS1_MEM_ReadInt(camXBase + DFUW_SNIPER_X);
+		int32_t sniperY = PS1_MEM_ReadInt(camXBase + DFUW_SNIPER_Y);
+		float sniperXF = (float)sniperX;
+		float sniperYF = (float)sniperY;
+
+		float dx = (float)xmouse * sniperScale / 8.f * fov;
+		AccumulateAddRemainder(&sniperXF, &xAccumulator, xmouse, dx);
+
+		float ym = (float)(invertpitch ? -ymouse : ymouse);
+		float dy = ym * looksensitivity * sniperScale * fov;
+		AccumulateAddRemainder(&sniperYF, &yAccumulator, ym, dy);
+
+		PS1_MEM_WriteInt(camXBase + DFUW_SNIPER_X, (int32_t)sniperXF);
+		PS1_MEM_WriteInt(camXBase + DFUW_SNIPER_Y, (int32_t)sniperYF);
+	}
+
 	int32_t camXSin = PS1_MEM_ReadInt(camXBase + DFUW_CAMX_SIN);
 	int32_t camXCos = PS1_MEM_ReadInt(camXBase + DFUW_CAMX_COS);
 	float camXSinF = (float)(floor(camXSin)) / 65535.f;

@@ -1,0 +1,13 @@
+#group=MouseInjector
+#type=Gameshark
+#activation=EndFrame
+[*Disable Cruise Missile Pitch/Roll Auto-Center]
+E00A803C 3241
+8005F97C 0000
+E00A803C 3241
+8005F97E 0000
+E00A803C 3241
+8005F99C 0000
+E00A803C 3241
+8005F99E 0000
+
