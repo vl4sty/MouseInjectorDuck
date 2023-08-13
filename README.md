@@ -64,38 +64,38 @@ avoid clicking off the window.
 
 ## Supported PS1 Titles
 | Game Title | Serial | Mouse Support | Issues | In-game Options | Cheat/Patch File |
-| --- | --- | :---: | :-----------: | :---: | :---: |
-| 007: The World Is Not Enough (USA) | SLUS-01272 | Fair | <sup>Requires patch be applied to disc image (**See below**)</br>No clamp on lean aiming</br>Not fully tested</sub> | <sup>Auto Assist: Off</sub> | **007TWINE_SLUS-01272_patch.xdelta** |
-| Alien Trilogy (USA) | SLUS-00007 | Good | <sup>Requires supplied cheat file</br>Not fully tested</sub> | - | **AlienTrilogy_SLUS-00007.cht** |
-| Aquanaut's Holiday (USA) | SCUS-94603 | Good | <sup>Requires supplied cheat file</br>Very little testing</sub> | - | **AquanautsHoliday_SCUS-94603.cht** |
-| Armored Core (USA) | SCUS-94182 / SLUS-01323 | Fair | <sup>VS Mode not supported</br>Not fully tested</sub> | - | - |
-| Armorines: Project S.W.A.R.M. (USA) | SLUS-01022 | Fair | <sup>Not fully tested</sub> | <sup>Look Spring: Off</br>Auto Aim: Off</sub> | - |
-| Baroque - Yuganda Mousou (Japan) | SLPM-86328 | Fair | <sup>Supplied cheat required to prevent camera y-axis from being reset on hit</br>Not fully tested</sub> | - | **Baroque_SLPM-86328.cht** |
-| Brahma Force: The Assault on Beltlogger 9 (USA) | SLUS-00444 | Good | <sup>Not fully tested</sub> | - | - |
-| Codename: Tenka (USA) | SCUS-94409 | Fair | <sup>Strafe/Lean must be set to R2 in-game for strafe to work without holding the button</sub> | - | - |
-| Delta Force: Urban Warfare (USA) | SLUS-01429 | Good | <sup>Not fully tested</sub> | <sup>Aiming Mode: Manual</br>Auto Center: Off</sub> | - |
-| Disruptor (USA) | SLUS-00224 | Good | <sup>Requires supplied cheat file</br>Not fully tested</sub> | - | **Disruptor_SLUS-00224.cht** |
-| Duke Nukem: Time to Kill (USA) | SLUS-00583 | Fair | <sup>Requires supplied cheat file</br>Not fully tested</sub> | - | **DukeNukemTimeToKill_SLUS-00583.cht** |
-| Echo Night (USA) | SLUS-00820 | Good | <sup>Not fully tested</sub> | - | - |
-| Future Cop: L.A.P.D. (USA) | SLUS-00739 | Fair | <sup>Not fully tested</sub> | - | - |
-| G-Police (USA) | SLUS_005.44/SLUS_005.56 | Good | <sup>Not full tested</sub> | - | - |
-| Hellnight (Europe) | SLES-01562 | Good | <sup>Requires supplied cheat file</br>Not fully tested</sub> | - | **Hellnight_SLES-10562.cht** |
-| Hybrid (Japan, Europe) | SLPS-01102, SLES-03531 | Fair | <sup>Requires supplied cheat file<br>Not fully tested</sub> | - | **Hybrid_SLPS-01102.cht (Japan)<br>Hybrid_SLES-03531.cht (Europe)** |
-| Iron Soldier 3 (USA) | SLUS-01061 | Good | <sup>Advanced Controls not supported</br>Requires supplied cheat file</br>Not fully tested</sub> | - | **IronSoldier3_SLUS-01061.cht** |
-| Jumping Flash (USA) | SCUS-94103 | Good | <sup>Requires supplied cheat file</sub> | - | **JumpingFlash_SCUS-94103.cht** |
-| King's Field (II) (USA) | SLUS-00158 | Good | <sup>Not fully tested</sub> | - | - |
-| King's Field (Japan) | SLPS-00017 | Good | <sup>Not fully tested, Will not hook until in-game</sub> | - | - |
-| King's Field II (III) (USA) | SLUS-00255 | Good | <sup>Not fully tested</sub> | - | - |
-| LSD: Dream Emulator (Japan) | SLPS-01556 | Good | <sup>Requires supplied cheat file</br>Not fully tested</sub> | - | **LSDDreamEmulator_SLPS-01556.cht** |
-| Medal of Honor: Underground (USA) | SLUS-01270 | Fair | <sup>Machine Gun sentry doesn't always work (depends on objects in line of sight). Sidecar gun in 6-3 not supported. Precise aim not supported (holding trigger aiming). Controller type must be Analog/DualShock or else auto-center will be enabled. </sub> | - | - |
-| Men in Black: The Series - Crashdown (NTSC) | SLUS-01387 | Good | <sup>None</sub> | <sup>Auto Aim: Off</sub> | - |
-| Note, The (Europe) | SLES-00749 | Good | <sup>Not fully tested</sub> | - | - |
-| Powerslave (USA) | SLUS-00102 | Good | <sup>Requires supplied cheat file</br>Not fully tested</sub> | - | **Powerslave_SLUS-00102.cht** |
-| Resident Evil: Survivor (USA) | SLUS-01087 | Good | <sup>None</sub> | - | - |
-| Revolution X (USA) | SLUS-00012 | Good | <sup>None</sub> | - | - |
-| Shadow Tower (USA) | SLUS-00863 | Good | <sup>Not fully tested</sub> | - | - |
-| South Park (USA) | SLUS-00936 | Good | <sup>Supplied cheats recommended</br>Not fully tested</sub> | - | **SouthPark_SLUS-00936.cht** |
-| Uprising X (USA) | SLUS-00686 | Fair | <sup>None</sub> | - | - |
+| --- | :---: | :---: | :---: | :---: | :---: |
+| <sup>007: The World Is Not Enough (USA) | <sup>SLUS-01272</sub> | <sup>Fair | <sup>Requires patch be applied to disc image (**See below**)</br>No clamp on lean aiming</br>Not fully tested</sub> | <sup>Auto Assist: Off</sub> | <sup>**007TWINE_SLUS-01272_patch.xdelta** |
+| <sup>Alien Trilogy (USA) | <sup>SLUS-00007</sub> | <sup>Good | <sup>Requires supplied cheat file</br>Not fully tested</sub> | - | <sup>**AlienTrilogy_SLUS-00007.cht** |
+| <sup>Aquanaut's Holiday (USA) | <sup>SCUS-94603</sub> | <sup>Good | <sup>Requires supplied cheat file</br>Very little testing</sub> | - | <sup>**AquanautsHoliday_SCUS-94603.cht** |
+| <sup>Armored Core (USA) | <sup>SCUS-94182</br>SLUS-01323 | <sup>Fair | <sup>VS Mode not supported</br>Not fully tested</sub> | - | - |
+| <sup>Armorines: Project S.W.A.R.M. (USA) | <sup>SLUS-01022 | <sup>Fair | <sup>Not fully tested</sub> | <sup>Look Spring: Off</br>Auto Aim: Off</sub> | - |
+| <sup>Baroque - Yuganda Mousou (Japan) | <sup>SLPM-86328 | <sup>Fair | <sup>Supplied cheat required to prevent camera y-axis from being reset on hit</br>Not fully tested</sub> | - | <sup>**Baroque_SLPM-86328.cht** |
+| <sup>Brahma Force: The Assault on Beltlogger 9 (USA) | <sup>SLUS-00444 | <sup>Good | <sup>Not fully tested</sub> | - | - |
+| <sup>Codename: Tenka (USA) | <sup>SCUS-94409 | <sup>Fair | <sup>Strafe/Lean must be set to R2 in-game for strafe to work without holding the button</sub> | - | - |
+| <sup>Delta Force: Urban Warfare (USA) | <sup>SLUS-01429 | <sup>Good | <sup>Not fully tested</sub> | <sup>Aiming Mode: Manual</br>Auto Center: Off</sub> | - |
+| <sup>Disruptor (USA) | <sup>SLUS-00224 | <sup>Good | <sup>Requires supplied cheat file</br>Not fully tested</sub> | - | <sup>**Disruptor_SLUS-00224.cht** |
+| <sup>Duke Nukem: Time to Kill (USA) | <sup>SLUS-00583 | <sup>Fair | <sup>Requires supplied cheat file</br>Not fully tested</sub> | - | <sup>**DukeNukemTimeToKill_SLUS-00583.cht** |
+| <sup>Echo Night (USA) | <sup>SLUS-00820 | <sup>Good | <sup>Not fully tested</sub> | - | - |
+| <sup>Future Cop: L.A.P.D. (USA) | <sup>SLUS-00739 | <sup>Fair | <sup>Not fully tested</sub> | - | - |
+| <sup>G-Police (USA) | <sup>SLUS-00544</br>SLUS-00556 | <sup>Good | <sup>Not full tested</sub> | - | - |
+| <sup>Hellnight (Europe) | <sup>SLES-01562 | <sup>Good | <sup>Requires supplied cheat file</br>Not fully tested</sub> | - | <sup>**Hellnight_SLES-10562.cht** |
+| <sup>Hybrid (Japan, Europe) | <sup>SLPS-01102</br>SLES-03531 | <sup>Fair | <sup>Requires supplied cheat file<br>Not fully tested</sub> | - | <sup>**Hybrid_SLPS-01102.cht (Japan)<br>Hybrid_SLES-03531.cht (Europe)** |
+| <sup>Iron Soldier 3 (USA) | <sup>SLUS-01061 | <sup>Good | <sup>Advanced Controls not supported</br>Requires supplied cheat file</br>Not fully tested</sub> | - | **IronSoldier3_SLUS-01061.cht** |
+| <sup>Jumping Flash (USA) | <sup>SCUS-94103 | <sup>Good | <sup>Requires supplied cheat file</sub> | - | <sup>**JumpingFlash_SCUS-94103.cht** |
+| <sup>King's Field (II) (USA) | <sup>SLUS-00158 | <sup>Good | <sup>Not fully tested</sub> | - | - |
+| <sup>King's Field (Japan) | <sup>SLPS-00017 | <sup>Good | <sup>Not fully tested, Will not hook until in-game</sub> | - | - |
+| <sup>King's Field II (III) (USA) | <sup>SLUS-00255 | <sup>Good | <sup>Not fully tested</sub> | - | - |
+| <sup>LSD: Dream Emulator (Japan) | <sup>SLPS-01556 | <sup>Good | <sup>Requires supplied cheat file</br>Not fully tested</sub> | - | <sup>**LSDDreamEmulator_SLPS-01556.cht** |
+| <sup>Medal of Honor: Underground (USA) | <sup>SLUS-01270 | <sup>Fair | <sup>Machine Gun sentry doesn't always work (depends on objects in line of sight). Sidecar gun in 6-3 not supported. Precise aim not supported (holding trigger aiming). Controller type must be Analog/DualShock or else auto-center will be enabled. </sub> | - | - |
+| <sup>Men in Black: The Series - Crashdown (NTSC) | <sup>SLUS-01387 | <sup>Good | <sup>None</sub> | <sup>Auto Aim: Off</sub> | - |
+| <sup>Note, The (Europe) | <sup>SLES-00749 | <sup>Good | <sup>Not fully tested</sub> | - | - |
+| <sup>Powerslave (USA) | <sup>SLUS-00102 | <sup>Good | <sup>Requires supplied cheat file</br>Not fully tested</sub> | - | <sup>**Powerslave_SLUS-00102.cht** |
+| <sup>Resident Evil: Survivor (USA) | <sup>SLUS-01087 | <sup>Good | <sup>None</sub> | - | - |
+| <sup>Revolution X (USA) | <sup>SLUS-00012 | <sup>Good | <sup>None</sub> | - | - |
+| <sup>Shadow Tower (USA) | <sup>SLUS-00863 | <sup>Good | <sup>Not fully tested</sub> | - | - |
+| <sup>South Park (USA) | <sup>SLUS-00936 | <sup>Good | <sup>Supplied cheats recommended</br>Not fully tested</sub> | - | <sup>**SouthPark_SLUS-00936.cht** |
+| <sup>Uprising X (USA) | <sup>SLUS-00686 | <sup>Fair | <sup>None</sub> | - | - |
 * NOTE: If DuckStation is not hooking, try restoring the default settings. 'Settings->General->Restore Defaults'
 * Importing cheat files in DuckStation: 'Tools->Cheat Manager->Cheat List->Import->From File'
 
