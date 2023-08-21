@@ -70,7 +70,7 @@ avoid clicking off the window.
 | <sup>Alien Trilogy (USA) | <sup>SLUS-00007</sub> | <sup>Good | <sup>Requires supplied cheat file</br>Not fully tested</sub> | - | <sup>**AlienTrilogy_SLUS-00007.cht** |
 | <sup>Aquanaut's Holiday (USA) | <sup>SCUS-94603</sub> | <sup>Good | <sup>Requires supplied cheat file</br>Very little testing</sub> | - | <sup>**AquanautsHoliday_SCUS-94603.cht** |
 | <sup>Armored Core (USA) | <sup>SCUS-94182</br>SLUS-01323 | <sup>Fair | <sup>VS Mode not supported</br>Not fully tested</sub> | - | - |
-| <sup>Armored Core: Project Phantasma (USA) | <sup>SLUS-00670 | <sup>Fair | <sup>VS Mode not supported</br>Not fully tested</sub> | - | - |
+| <sup>Armored Core: Project Phantasma (USA) | <sup>SLUS-00670 | <sup>Fair | <sup>VS Mode not supported</br>Replays not working</br>Very little testing</sub> | - | - |
 | <sup>Armorines: Project S.W.A.R.M. (USA) | <sup>SLUS-01022 | <sup>Fair | <sup>Not fully tested</sub> | <sup>Look Spring: Off</br>Auto Aim: Off</sub> | - |
 | <sup>Baroque - Yuganda Mousou (Japan) | <sup>SLPM-86328 | <sup>Fair | <sup>Supplied cheat required to prevent camera y-axis from being reset on hit</br>Not fully tested</sub> | - | <sup>**Baroque_SLPM-86328.cht** |
 | <sup>Brahma Force: The Assault on Beltlogger 9 (USA) | <sup>SLUS-00444 | <sup>Good | <sup>Not fully tested</sub> | - | - |

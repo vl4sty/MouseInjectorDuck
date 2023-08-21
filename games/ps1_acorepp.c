@@ -25,6 +25,9 @@
 
 #define ACPP_CAMY 0x42708
 #define ACPP_CAMX 0x1E2DF2
+#define ACPP_ARENA_CAMX 0x1D1D32
+#define ACPP_ARENA_CAMX_SANITY 0x1D1D20
+#define ACPP_ARENA_CAMX_SANITY_VALUE 0x801D1CC8
 #define ACPP_IS_NOT_BUSY 0x1A7FAC
 #define ACPP_IS_NOT_PAUSED 0x3BA14
 #define ACPP_IS_MAP_OPEN 0x1555EB
@@ -63,13 +66,20 @@ static uint8_t PS1_ACPP_Status(void)
 //==========================================================================
 static void PS1_ACPP_Inject(void)
 {
-	if (!PS1_MEM_ReadByte(ACPP_IS_NOT_BUSY))
+	// TODO: find new values for abort prompt
+	// TODO: find arena isBusy
+
+	uint8_t isArena = 0;
+	if (PS1_MEM_ReadUInt(ACPP_ARENA_CAMX_SANITY) == ACPP_ARENA_CAMX_SANITY_VALUE)
+		isArena = 1;
+
+	if (!PS1_MEM_ReadByte(ACPP_IS_NOT_BUSY) && !isArena)
 		return;
 	
 	if (!PS1_MEM_ReadByte(ACPP_IS_NOT_PAUSED))
 		return;
 	
-	if (PS1_MEM_ReadByte(ACPP_IS_MAP_OPEN))
+	if (PS1_MEM_ReadByte(ACPP_IS_MAP_OPEN) && !isArena)
 		return;
 
 	// if (PS1_MEM_ReadByte(ACPP_IS_ABORT_PROMPT) == 0x4)
@@ -78,7 +88,12 @@ static void PS1_ACPP_Inject(void)
 	if(xmouse == 0 && ymouse == 0) // if mouse is idle
 		return;
 	
-	uint16_t camX = PS1_MEM_ReadHalfword(ACPP_CAMX);
+	// uint16_t camX = PS1_MEM_ReadHalfword(ACPP_CAMX);
+	uint16_t camX;
+	if (isArena)
+		camX = PS1_MEM_ReadHalfword(ACPP_ARENA_CAMX);
+	else
+		camX = PS1_MEM_ReadHalfword(ACPP_CAMX);
 	uint16_t camY = PS1_MEM_ReadHalfword(ACPP_CAMY);
 	float camXF = (float)camX;
 	float camYF = (float)camY;
@@ -93,6 +108,9 @@ static void PS1_ACPP_Inject(void)
 	float dy = ym * looksensitivity * scale;
 	AccumulateAddRemainder(&camYF, &yAccumulator, ym, dy);
 
-	PS1_MEM_WriteHalfword(ACPP_CAMX, (uint16_t)camXF);
+	if (isArena)
+		PS1_MEM_WriteHalfword(ACPP_ARENA_CAMX, (uint16_t)camXF);
+	else
+		PS1_MEM_WriteHalfword(ACPP_CAMX, (uint16_t)camXF);
 	PS1_MEM_WriteHalfword(ACPP_CAMY, (uint16_t)camYF);
 }
