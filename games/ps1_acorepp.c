@@ -63,10 +63,10 @@ static uint8_t PS1_ACPP_Status(void)
 //==========================================================================
 static void PS1_ACPP_Inject(void)
 {
-	if (!PS1_MEM_ReadHalfword(ACPP_IS_NOT_BUSY))
+	if (!PS1_MEM_ReadByte(ACPP_IS_NOT_BUSY))
 		return;
 	
-	if (!PS1_MEM_ReadHalfword(ACPP_IS_NOT_PAUSED))
+	if (!PS1_MEM_ReadByte(ACPP_IS_NOT_PAUSED))
 		return;
 	
 	if (PS1_MEM_ReadByte(ACPP_IS_MAP_OPEN))
