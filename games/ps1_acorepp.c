@@ -28,7 +28,7 @@
 #define ACPP_IS_NOT_BUSY 0x1A7FAC
 #define ACPP_IS_NOT_PAUSED 0x3BA14
 #define ACPP_IS_MAP_OPEN 0x1555EB
-#define ACPP_IS_ABORT_PROMPT 0x1FBF5A
+#define ACPP_IS_ABORT_PROMPT 0x1FE06C
 
 
 static uint8_t PS1_ACPP_Status(void);
@@ -72,8 +72,8 @@ static void PS1_ACPP_Inject(void)
 	if (PS1_MEM_ReadByte(ACPP_IS_MAP_OPEN))
 		return;
 
-	if (PS1_MEM_ReadByte(ACPP_IS_ABORT_PROMPT) == 0x1A)
-		return;
+	// if (PS1_MEM_ReadByte(ACPP_IS_ABORT_PROMPT) == 0x4)
+	// 	return;
 
 	if(xmouse == 0 && ymouse == 0) // if mouse is idle
 		return;
