@@ -66,8 +66,10 @@ extern void PS1_MEM_WriteWord(const uint32_t addr, uint32_t value);
 extern void PS1_MEM_WriteByte(const uint32_t addr, uint8_t value);
 
 extern uint32_t N64_MEM_ReadUInt(const uint32_t addr);
+extern int16_t N64_MEM_ReadInt16(const uint32_t addr);
 extern float N64_MEM_ReadFloat(const uint32_t addr);
 extern void N64_MEM_WriteUInt(const uint32_t addr, uint32_t value);
+extern void N64_MEM_WriteInt16(const uint32_t addr, int16_t value);
 extern void N64_MEM_WriteFloat(const uint32_t addr, float value);
 extern void N64_MEM_WriteByte(const uint32_t addr, uint8_t value);
 

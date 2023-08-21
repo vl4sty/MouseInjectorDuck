@@ -113,23 +113,23 @@ static void PS1_POED_Inject(void)
 		int32_t camXCos = PS1_MEM_ReadInt(POED_CAMX_COS);
 		// if (camXSin == 0) camXSin = 1;
 		// if (camXCos == 0) camXCos = 1;
-		float camXSinF = (float)(camXSin / 65535.f);
-		float camXCosF = (float)(camXCos / 65535.f);
+		float camXSinF = (float)(camXSin) / 65535.f;
+		float camXCosF = (float)(camXCos) / 65535.f;
 
 		// if (totalAngle == POED_TOTAL_ANGLE_UNSET)
 		// totalAngle = (float)atan((float)camXSin / (float)camXCos);
 		totalAngle = (float)atan((float)camXSinF / (float)camXCosF);
 
 		if (camXCosF < 0)
-			totalAngle += PI;
+			totalAngle += TAU / 2;
 
 		totalAngle += (float)xmouse * looksensitivity / 20.f;
 
 
-		while (totalAngle > TAU)
-			totalAngle -= TAU;
-		while (totalAngle < 0)
-			totalAngle += TAU;
+		// while (totalAngle > TAU)
+		// 	totalAngle -= TAU;
+		// while (totalAngle < 0)
+		// 	totalAngle += TAU;
 		
 		// totalAngleOut = totalAngle;
 

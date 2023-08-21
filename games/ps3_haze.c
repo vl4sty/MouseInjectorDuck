@@ -25,15 +25,34 @@
 
 #define TAU 6.2831853f // 0x40C90FDB
 
-#define HAZE_CAMBASE 0x7FC0108
+#define HAZE_CAMBASE_POINTER_POINTER 0X77DE9A8
+#define HAZE_CAMBASE_POINTER 0x1F4 // offset from camBasePointer
+// offset from camBase
 #define HAZE_CAMBASE_SANITY_1_VALUE 0x00001BB1
-#define HAZE_CAMBASE_SANITY_2_VALUE 0x40933333
-// offsets from camBase
-#define HAZE_CAMBASE_SANITY_1 0x30
-#define HAZE_CAMBASE_SANITY_2 0x80
-#define HAZE_CAMY 0x104
-#define HAZE_CAMX 0x108
-#define HAZE_FOV 0xD0
+// #define HAZE_CAMBASE_SANITY_1 -0x28 // look for new sanity from new camBase
+#define HAZE_CAMY 0xAC
+#define HAZE_CAMX 0xB0
+#define HAZE_FOV 0x78
+
+// #define HAZE_PLAYERBASE_POINTER 0x7FC1228
+// // offsets from playerBase
+// #define HAZE_CAMBASE_POINTER_POINTER 0XC48
+// #define HAZE_CAMBASE_POINTER 0x184 // offset from camBasePointer
+// #define HAZE_CAMBASE_SANITY_1_VALUE 0x00001BB1
+// #define HAZE_CAMBASE_SANITY_1 -0x28 // look for new sanity from new camBase
+// #define HAZE_CAMY 0xAC
+// #define HAZE_CAMX 0xB0
+// #define HAZE_FOV 0x78
+
+// #define HAZE_CAMBASE 0x7FC0108
+// #define HAZE_CAMBASE_SANITY_1_VALUE 0x00001BB1
+// #define HAZE_CAMBASE_SANITY_2_VALUE 0x40933333
+// // offsets from camBase
+// #define HAZE_CAMBASE_SANITY_1 0x30
+// #define HAZE_CAMBASE_SANITY_2 0x80
+// #define HAZE_CAMY 0x104
+// #define HAZE_CAMX 0x108
+// #define HAZE_FOV 0xD0
 
 // #define HAZE_CAMY 0x802F48C
 // #define HAZE_CAMX 0x802F490
@@ -54,7 +73,8 @@ static const GAMEDRIVER GAMEDRIVER_INTERFACE =
 
 const GAMEDRIVER *GAME_PS3_HAZE = &GAMEDRIVER_INTERFACE;
 
-uint32_t camBase = 0;
+static uint32_t playerBase = 0;
+static uint32_t camBase = 0;
 
 //==========================================================================
 // Purpose: return 1 if game is detected
@@ -68,9 +88,10 @@ static uint8_t PS3_HAZE_Status(void)
 
 static uint8_t PS3_HAZE_DetectCambase(void)
 {
-	uint32_t tempCamBase = PS3_MEM_ReadPointer(HAZE_CAMBASE);
-	if (tempCamBase &&
-		PS3_MEM_ReadUInt(tempCamBase + HAZE_CAMBASE_SANITY_1) == HAZE_CAMBASE_SANITY_1_VALUE)// &&)
+	uint32_t tempCamBase = PS3_MEM_ReadPointer(HAZE_CAMBASE_POINTER_POINTER);
+	tempCamBase = PS3_MEM_ReadPointer(tempCamBase + HAZE_CAMBASE_POINTER);
+	if (tempCamBase)// &&
+		// PS3_MEM_ReadUInt(tempCamBase + HAZE_CAMBASE_SANITY_1) == HAZE_CAMBASE_SANITY_1_VALUE)// &&)
 		// PS3_MEM_ReadUInt(tempCamBase + HAZE_CAMBASE_SANITY_2) == HAZE_CAMBASE_SANITY_2_VALUE)
 	{
 		camBase = tempCamBase;
@@ -91,12 +112,19 @@ static void PS3_HAZE_Inject(void)
 	// TODO: disable during
 	//			pause
 	//			lever pull/contextual action animation
+	//			loading
 	// TODO: shake mouse to put out flames
 	//			need to use DS3/4 and check for value
 	// FIXME: camBase broken on buggy level when on fire?
+	//			breaks on level reset? need new sanity?
+	// TODO: detect playerBase instead of cameraBase
+	// FIXME: FOV too slow on zoom
+	// TODO: find an rpcs3 version that can load savestates
 
 	if(xmouse == 0 && ymouse == 0) // if mouse is idle
 		return;
+
+	// playerBase = PS3_MEM_ReadPointer(HAZE_PLAYERBASE_POINTER);
 
 	if (!PS3_HAZE_DetectCambase())
 		return;

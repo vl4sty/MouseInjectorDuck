@@ -24,15 +24,20 @@
 #include "../mouse.h"
 #include "game.h"
 
-#define WINE_CAMBASE 0x800E1718
-#define WINE_CAMBASE_SANITY_VALUE 0x3FDDB3D7
+#define WINE_CAMBASE_POINTER 0x80102CD0
+#define WINE_CAMBASE_SANITY_VALUE_1 0x0007D000
+#define WINE_CAMBASE_SANITY_VALUE_2 0xFFFFFFFF
 // -- offsets from cambase --
-#define WINE_CAMBASE_SANITY_1 0x64
-#define WINE_CAMBASE_SANITY_2 0xF4
-#define WINE_CAMX 0xD0
-#define WINE_CAMY 0x148
-#define WINE_CAM_ZOOM 0x150
-#define WINE_AUTO_LEVEL 0x291
+#define WINE_CAMBASE_SANITY_1 0x0
+#define WINE_CAMBASE_SANITY_2 0xC
+// offsets from camValueBasePointer
+#define WINE_CAMX -0x44
+#define WINE_CAMY 0x34
+#define WINE_CAM_ZOOM 0x3C
+#define WINE_AUTO_LEVEL 0x17D
+
+#define WINE_STATUS 0x8022CFE8
+#define WINE_STATUS_NOT_BUSY 0xDE000000
 
 static uint8_t N64_WINE_Status(void);
 static uint8_t N64_WINE_DetectCam(void);
@@ -50,6 +55,7 @@ static const GAMEDRIVER GAMEDRIVER_INTERFACE =
 const GAMEDRIVER *GAME_N64_007WINE = &GAMEDRIVER_INTERFACE;
 
 static uint32_t camBase = 0;
+static uint32_t camValueBase = 0;
 
 static uint8_t N64_WINE_Status(void)
 {
@@ -58,10 +64,10 @@ static uint8_t N64_WINE_Status(void)
 
 static uint8_t N64_WINE_DetectCam(void)
 {
-	uint32_t tempCamBase = N64_MEM_ReadUInt(WINE_CAMBASE);
+	uint32_t tempCamBase = N64_MEM_ReadUInt(WINE_CAMBASE_POINTER);
 	if (tempCamBase &&
-		N64_MEM_ReadUInt(tempCamBase + WINE_CAMBASE_SANITY_1) == WINE_CAMBASE_SANITY_VALUE &&
-		N64_MEM_ReadUInt(tempCamBase + WINE_CAMBASE_SANITY_2) == WINE_CAMBASE_SANITY_VALUE)
+		N64_MEM_ReadUInt(tempCamBase + WINE_CAMBASE_SANITY_1) == WINE_CAMBASE_SANITY_VALUE_1)// &&
+		// N64_MEM_ReadUInt(tempCamBase + WINE_CAMBASE_SANITY_2) == WINE_CAMBASE_SANITY_VALUE_2)
 	{
 		camBase = tempCamBase;
 		return 1;
@@ -71,13 +77,12 @@ static uint8_t N64_WINE_DetectCam(void)
 
 static void N64_WINE_Inject(void)
 {
-	// TODO: fix auto-level/lookahead not turning off until camY manually moved with controller
-	// TODO: disable while
-	//			paused
-	//			cutscene
+	if (N64_MEM_ReadUInt(WINE_STATUS) != WINE_STATUS_NOT_BUSY)
+		return;
 
 	if (!N64_WINE_DetectCam())
 		return;
+	// camBase = N64_MEM_ReadUInt(WINE_CAMBASE);
 	
 	N64_MEM_WriteByte(camBase + WINE_AUTO_LEVEL - 0x1, 0x1);
 	N64_MEM_WriteByte(camBase + WINE_AUTO_LEVEL, 0x1);
@@ -86,7 +91,7 @@ static void N64_WINE_Inject(void)
 		return;
 
 	const float looksensitivity = (float)sensitivity;
-	const float scale = 30000.f;
+	const float scale = 20000.f;
 	const float zoom = 1 / N64_MEM_ReadFloat(camBase + WINE_CAM_ZOOM);
 
 	float camX = N64_MEM_ReadFloat(camBase + WINE_CAMX);
@@ -94,16 +99,8 @@ static void N64_WINE_Inject(void)
 
 	camX -= (float)xmouse * looksensitivity / scale * 1024.f * zoom;
 	camY -= (float)ymouse * looksensitivity / scale * zoom;
-
-	// if (camY > 1)
-	// 	camY = 1;
-	// if (camY < -1)
-	// 	camY = -1;
 	
 	camY = ClampFloat(camY, -1.f, 1.f);
-
-	// cursorx = ClampFloat(cursorx, -144.f, 144.f);
-	// cursory = ClampFloat(cursory, -104.f, 104.f);
 
 	N64_MEM_WriteFloat(camBase + WINE_CAMX, camX);
 	N64_MEM_WriteFloat(camBase + WINE_CAMY, camY);

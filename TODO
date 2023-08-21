@@ -5,8 +5,9 @@ Add game serials to README
 Check the BIOS version to make sure it is 5XXXX or higher
 Find better checks for N64 status
     After switching games in RetroArch, the last game's status is still valid?
-    so the injector must be closed and reopened
+     so the injector must be closed and reopened
     Might be a problem with RA in general
+    Try looking for lastRegionSize
 *DONE* Different time/sleep implementation for more consistent tickrate
     Some PS2 titles (or all?) seem to be affected
 Options stuct defined in each game
@@ -24,3 +25,5 @@ Support for mapping keyboard keys to in-game functions
     Change the keys and toggle them on/off
 Ability to enable/disable features like aim-assist from GUI
 Select emulator to hook to from drop-down menu
+Select input device
+Multiple input devices for multiplayer

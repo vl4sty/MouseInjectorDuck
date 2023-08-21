@@ -14,6 +14,7 @@ An external app that injects cursor input into game memory.
 | PCSX2 Nightly | latest | pcsx2-qt.exe<br>pcsx2-qtx64.exe<br>pcsx2-qtx64-avx2.exe |
 | RetroArch (see cores below) | 1.14.0 | retroarch.exe |
 | PPSSPP | 1.14.4 | PPSSPPWindows.exe / PPSSPPWindows64.exe |
+| Project64 | >=3.0.1 | Project64.exe |
 * NOTE: Versions given are the latest that have been tested working, may work with newer
 * NOTE: PCSX2 will only hook with **BIOS versions 5XXXX and up**.
 
@@ -69,6 +70,7 @@ avoid clicking off the window.
 | <sup>Alien Trilogy (USA) | <sup>SLUS-00007</sub> | <sup>Good | <sup>Requires supplied cheat file</br>Not fully tested</sub> | - | <sup>**AlienTrilogy_SLUS-00007.cht** |
 | <sup>Aquanaut's Holiday (USA) | <sup>SCUS-94603</sub> | <sup>Good | <sup>Requires supplied cheat file</br>Very little testing</sub> | - | <sup>**AquanautsHoliday_SCUS-94603.cht** |
 | <sup>Armored Core (USA) | <sup>SCUS-94182</br>SLUS-01323 | <sup>Fair | <sup>VS Mode not supported</br>Not fully tested</sub> | - | - |
+| <sup>Armored Core: Project Phantasma (USA) | <sup>SLUS-00670 | <sup>Fair | <sup>VS Mode not supported</br>Not fully tested</sub> | - | - |
 | <sup>Armorines: Project S.W.A.R.M. (USA) | <sup>SLUS-01022 | <sup>Fair | <sup>Not fully tested</sub> | <sup>Look Spring: Off</br>Auto Aim: Off</sub> | - |
 | <sup>Baroque - Yuganda Mousou (Japan) | <sup>SLPM-86328 | <sup>Fair | <sup>Supplied cheat required to prevent camera y-axis from being reset on hit</br>Not fully tested</sub> | - | <sup>**Baroque_SLPM-86328.cht** |
 | <sup>Brahma Force: The Assault on Beltlogger 9 (USA) | <sup>SLUS-00444 | <sup>Good | <sup>Not fully tested</sub> | - | - |
@@ -86,6 +88,7 @@ avoid clicking off the window.
 | <sup>King's Field (II) (USA) | <sup>SLUS-00158 | <sup>Good | <sup>Not fully tested</sub> | - | - |
 | <sup>King's Field (Japan) | <sup>SLPS-00017 | <sup>Good | <sup>Not fully tested, Will not hook until in-game</sub> | - | - |
 | <sup>King's Field II (III) (USA) | <sup>SLUS-00255 | <sup>Good | <sup>Not fully tested</sub> | - | - |
+| <sup>King's Field III: Pilot Style (Japan) | <sup>SLPM-80029 | <sup>Good | <sup>None</sub> | - | - |
 | <sup>LSD: Dream Emulator (Japan) | <sup>SLPS-01556 | <sup>Good | <sup>Requires supplied cheat file</br>Not fully tested</sub> | - | <sup>**LSDDreamEmulator_SLPS-01556.cht** |
 | <sup>Medal of Honor: Underground (USA) | <sup>SLUS-01270 | <sup>Fair | <sup>Machine Gun sentry doesn't always work (depends on objects in line of sight). Sidecar gun in 6-3 not supported. Precise aim not supported (holding trigger aiming). Controller type must be Analog/DualShock or else auto-center will be enabled. </sub> | - | - |
 | <sup>Men in Black: The Series - Crashdown (NTSC) | <sup>SLUS-01387 | <sup>Good | <sup>None</sub> | <sup>Auto Aim: Off</sub> | - |
@@ -115,11 +118,12 @@ avoid clicking off the window.
 * Open '.cue' file in a text editor and change first line to match patched file
     * *FILE "007 The World Is Not Enough (USA) (MouseInjector).bin" BINARY"*
 
-## Supported Mupen64Plus(RetroArch)
-| Game Title | Mouse Support | Issues |
-| --- | :---: | ----------- |
-| GoldenEye: 007 (NTSC) | Fair | <sup>None</sub> |
-| Sin and Punishment (J) | Good | <sup>Not fully tested</sub> |
+## Supported N64 Titles
+| Game Title | Mouse Support | Issues | In-game Options | Cheat File |
+| --- | :---: | :-----------: | :---: | :---: |
+| GoldenEye: 007 (USA) | Fair | <sup>None</sub> | - | - |
+| Sin and Punishment (J) | Good | <sup>Not fully tested</sub> | - | - |
+| 007: The World Is Not Enough (USA) | Good | <sup>Requires cheat for 'Cold Reception' mission</br>(disable cheat for multiplayer, may require restart)</br>Not fully tested</sub> | <sup>Auto Aim: Off</br>Look Ahead: Off</br>Auto Level: Off</sub>| <sup>**007 - The World Is Not Enough (USA).cht**</sub> |
 
 ## Supported SNES Titles
 | Game Title | Mouse Support | Issues |

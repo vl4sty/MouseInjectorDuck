@@ -47,6 +47,7 @@ static int isBizHawkGenesisHandle = 0;
 static int isBizHawkSaturnHandle = 0;
 static int isBizHawkPlayStationHandle = 0;
 static int isNOMONEYPSXHandle = 0;
+static int isProject64Handle = 0;
 char hookedEmulatorName[80];
 
 uint8_t MEM_Init(void);
@@ -81,9 +82,11 @@ void PS1_MEM_WriteByte(const uint32_t addr, uint8_t value);
 // static void MEM_ByteSwap16(uint16_t *input);
 
 uint32_t N64_MEM_ReadUInt(const uint32_t addr);
+int16_t N64_MEM_ReadInt16(const uint32_t addr);
 float N64_MEM_ReadFloat(const uint32_t addr);
 void N64_MEM_WriteFloat(const uint32_t addr, float value);
 void N64_MEM_WriteUInt(const uint32_t addr, uint32_t value);
+void N64_MEM_WriteInt16(const uint32_t addr, int16_t value);
 void N64_MEM_WriteByte(const uint32_t addr, uint8_t value);
 
 uint8_t SNES_MEM_ReadByte(const uint32_t addr);
@@ -240,6 +243,13 @@ uint8_t MEM_Init(void)
 			emuhandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_QUERY_INFORMATION, FALSE, pe32.th32ProcessID);
 			break;
 		}
+		if(strcmp(pe32.szExeFile, "Project64.exe") == 0) // if DuckStation was found
+		{
+			strcpy(hookedEmulatorName, "Project64");
+			isProject64Handle = 1;
+			emuhandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_QUERY_INFORMATION, FALSE, pe32.th32ProcessID);
+			break;
+		}
 	}
 	while(Process32Next(processes, &pe32)); // loop continued until Process32Next deliver NULL or its interrupted with the "break" above
 	CloseHandle(processes);
@@ -382,6 +392,9 @@ uint8_t MEM_FindRamOffset(void)
 			emuRegionSize = 0x1F00000;
 		} else if (isNOMONEYPSXHandle == 1) {
 			emuRegionSize = 0x459000;
+		} else if (isProject64Handle == 1) {
+			// emuRegionSize = 0x5BDED000;
+			emuRegionSize = 0x800000;
 		}
 
 		// PCSX2: MEM_MAPPED
@@ -397,6 +410,8 @@ uint8_t MEM_FindRamOffset(void)
 			regionType = MEM_PRIVATE;
 			// regionType = MEM_MAPPED;
 		}
+		if (isProject64Handle == 1)
+			regionType = MEM_PRIVATE;
 
 
 		// if (isBSNEShandle == 1)
@@ -453,6 +468,10 @@ uint8_t MEM_FindRamOffset(void)
 						if (lastRegionSize != 0xB7000)
 							continue;
 						emuoffset += 0x7F1C;
+					}
+					else if (isProject64Handle == 1) {
+						if (lastRegionSize != 0xE000)
+							continue;
 					}
 					else if (isRPCS3Handle == 1) {
 						if (lastRegionSize != 0xFF70000)
@@ -774,6 +793,15 @@ uint32_t N64_MEM_ReadUInt(const uint32_t addr)
 	return output;
 }
 
+int16_t N64_MEM_ReadInt16(const uint32_t addr)
+{
+	if(!emuoffset || N64NOTWITHINMEMRANGE(addr)) // if n64 memory has not been init by emulator or reading from outside of memory range
+		return 0;
+	int16_t output; // temp var used for output of function
+	ReadProcessMemory(emuhandle, (LPVOID)(emuoffset + (addr - 0x80000000)), &output, sizeof(output), NULL);
+	return output;
+}
+
 float N64_MEM_ReadFloat(const uint32_t addr)
 {
 	if(!emuoffset || N64NOTWITHINMEMRANGE(addr)) // if n64 memory has not been init by emulator or reading from outside of memory range
@@ -784,6 +812,13 @@ float N64_MEM_ReadFloat(const uint32_t addr)
 }
 
 void N64_MEM_WriteUInt(const uint32_t addr, uint32_t value)
+{
+	if(!emuoffset || N64NOTWITHINMEMRANGE(addr)) // if n64 memory has not been init by emulator or writing to outside of memory range
+		return;
+	WriteProcessMemory(emuhandle, (LPVOID)(emuoffset + (addr - 0x80000000)), &value, sizeof(value), NULL);
+}
+
+void N64_MEM_WriteInt16(const uint32_t addr, int16_t value)
 {
 	if(!emuoffset || N64NOTWITHINMEMRANGE(addr)) // if n64 memory has not been init by emulator or writing to outside of memory range
 		return;
