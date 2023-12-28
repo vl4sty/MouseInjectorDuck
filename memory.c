@@ -434,8 +434,8 @@ uint8_t MEM_FindRamOffset(void)
 			emuRegionSize = 0x1BF000;
 		} else if (isRPCS3Handle == 1) {
 			// TODO: if rpcs3 just set offset to 0x330000000 since it seems to be static?
-			// emuRegionSize = 0xCC00000; // Killzone HD
-			emuRegionSize = 0x100000; // HAZE
+			emuRegionSize = 0xCC00000; // Killzone HD
+			// emuRegionSize = 0x100000; // HAZE
 		} else if (isPPSSPPHandle == 1) {
 			emuRegionSize = 0x1F00000;
 		} else if (isNOMONEYPSXHandle == 1) {
