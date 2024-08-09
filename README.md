@@ -11,7 +11,7 @@ An external app that injects cursor input into game memory.
 | --- | :---: | :---: |
 | Dolphin | 5.0 and up | dolphin.exe |
 | DuckStation | 0.1-5943 | duckstation-qt-x64-ReleaseLTCG.exe |
-| PCSX2 Nightly | latest | pcsx2-qt.exe<br>pcsx2-qtx64.exe<br>pcsx2-qtx64-avx2.exe |
+| PCSX2 Nightly | Stable 2.0.0, latest untested | pcsx2-qt.exe<br>pcsx2-qtx64.exe<br>pcsx2-qtx64-avx2.exe |
 | RetroArch (see cores below) | 1.14.0 | retroarch.exe |
 | PPSSPP | 1.14.4 | PPSSPPWindows.exe / PPSSPPWindows64.exe |
 | Project64 | >=3.0.1 | Project64.exe |
