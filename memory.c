@@ -297,7 +297,6 @@ uint8_t MEM_FindRamOffset(void)
     	CloseHandle(snapshot);
     	DWORD_PTR offset = 0x1C8E230; //offset from EEmem to different copy of RAM, that does not cause issues with some games, seems static since the latest 1.7., not perfect, fallback to EEmem value needs to be coded just in case
 		uint64_t PS2_Address = addr;
-		printdebug(PS2_Address);
     	if (addr != 0) {
         	DWORD_PTR pointerAddress = PS2_Address + offset;
         	uint64_t foundValue;
