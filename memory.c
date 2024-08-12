@@ -111,7 +111,7 @@ void PS2_MEM_WriteUInt(const uint32_t addr, uint32_t value);
 void PS2_MEM_WriteUInt16(const uint32_t addr, uint16_t value);
 void PS2_MEM_WriteInt16(const uint32_t addr, int16_t value);
 void PS2_MEM_WriteFloat(const uint32_t addr, float value);
-DWORD PS2_Process_ID = 0;
+DWORD Process_ID = 0;
 char PS2_EXE_Name[64];
 FARPROC RemoteAddress(HANDLE hProc, HMODULE hMod, const char* procName);
 HMODULE RemoteHandle(DWORD ProcessPID, const TCHAR* modName);
@@ -160,6 +160,7 @@ uint8_t MEM_Init(void)
 			strcpy(hookedEmulatorName, "DuckStation");
 			isPS1handle = 1;
 			emuhandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_QUERY_INFORMATION, FALSE, pe32.th32ProcessID);
+			Process_ID = pe32.th32ProcessID;
 			break;
 		}
 		if(strcmp(pe32.szExeFile, "EmuHawk.exe") == 0) // if EmuHawk was found, 2.8 oldest tested working - 2.9 not supported
@@ -211,7 +212,7 @@ uint8_t MEM_Init(void)
         		hookedEmulatorName[strlen(pcsx2Executables[i]) - 4] = '\0';
 			isPcsx2handle = 1;
         	emuhandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_QUERY_INFORMATION, FALSE, pe32.th32ProcessID);
-			PS2_Process_ID = pe32.th32ProcessID;
+			Process_ID = pe32.th32ProcessID;
 			strncpy(PS2_EXE_Name, pe32.szExeFile, sizeof(PS2_EXE_Name) - 1);
         	break;
     		}
@@ -281,6 +282,27 @@ uint8_t MEM_FindRamOffset(void)
 	uint32_t lastRegionSize = 0;
 	uint32_t lastlastRegionSize = 0;
 
+	//--------------------Duckstation RAM export pointer-----------------------
+	if (isPS1handle == 1) {
+    	const TCHAR* processName = "duckstation-qt-x64-ReleaseLTCG.exe";
+    	const TCHAR* moduleName = processName;
+    	const char* symbol = "RAM";
+
+    	HANDLE snapshot = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, Process_ID);
+    	HMODULE hMod = RemoteHandle(Process_ID, moduleName);
+		if (!hMod) {
+    		return;
+		}
+		FARPROC addr = RemoteAddress(snapshot, hMod, symbol);
+    	CloseHandle(snapshot);
+    	if (addr != 0) {
+        	uint64_t pointerAddress = addr;
+        	uint64_t foundValue;
+        	ReadProcessMemory(emuhandle, (LPCVOID)pointerAddress, &foundValue, sizeof(foundValue), NULL);
+            emuoffset = foundValue;
+   		}
+	}
+	//-----------------------------------------------------------------------
 	//--------------------PCSX2 static pointer RAM offset--------------------
 	//Using EEmem address causes some sort out of sync value updating in some games, seems like a PCSX2 thing or something with the injector?? -> use of a pointer to a different copy of PS2 virtual memory
 	if (isPcsx2handle == 1) {
@@ -288,8 +310,8 @@ uint8_t MEM_FindRamOffset(void)
     	const TCHAR* moduleName = processName;
     	const char* symbol = "EEmem";
 
-    	HANDLE snapshot = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, PS2_Process_ID);
-    	HMODULE hMod = RemoteHandle(PS2_Process_ID, moduleName);
+    	HANDLE snapshot = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, Process_ID);
+    	HMODULE hMod = RemoteHandle(Process_ID, moduleName);
 		if (!hMod) {
     		return;
 		}
@@ -435,12 +457,12 @@ uint8_t MEM_FindRamOffset(void)
 				isBSNESMercuryHandle = 1;
 			}
 		}
-		else if (isPS1handle == 1) {
+		/*else if (isPS1handle == 1) {
 			// emuRegionSize = 0x200000; 		// DuckStation
 			emuRegionSize = 0x800000;		// DuckStation, newer version 0.1-5943 (unsure which version changed region size)
 			// TODO: check version and set region size
 			//		 maybe look for a pointer to the right region and get size from that?
-		} else if (isN64handle == 1) {
+		}*/ else if (isN64handle == 1) {
 			if (isMupenhandle)
 				emuRegionSize = 0x20011000; // RetroArch(Mupen64Plus core)/simple64/RMG
 			else
@@ -1252,11 +1274,11 @@ void printdebug(uint64_t val) //hexadecimal addresses debug
 // =============================================================================================================================
 //	Functions to look for specified symbol in the modules of a remote process, DLL injection would be much, much, much simpler
 // =============================================================================================================================
-HMODULE RemoteHandle(DWORD PS2_Process_ID, const TCHAR* modName) {
+HMODULE RemoteHandle(DWORD Process_ID, const TCHAR* modName) {
 	HMODULE hMods[1024];
     DWORD cbNeeded;
     
-    HANDLE snapshot = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, PS2_Process_ID);
+    HANDLE snapshot = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, Process_ID); //well this needs to be different for duckstation
     if (!snapshot) return NULL;
     if (EnumProcessModulesEx(snapshot, hMods, sizeof(hMods), &cbNeeded, LIST_MODULES_ALL)) {
         for (unsigned int i = 0; i < (cbNeeded / sizeof(HMODULE)); i++) {

@@ -83,7 +83,10 @@ static uint8_t PS2_MOHR_DetectCamera(void)
 // Purpose: calculate mouse look and inject into current game
 //==========================================================================
 static void PS2_MOHR_Inject(void)
-{
+{	
+	if (!PS2_MOHR_DetectCamera())
+		return;
+
 	if(xmouse == 0 && ymouse == 0) // if mouse is idle
 		return;
 	
@@ -91,7 +94,6 @@ static void PS2_MOHR_Inject(void)
 	float looksensitivity = (float)sensitivity;
 	float scale = 10000.f;
 
-	camBase = PS2_MEM_ReadPointer(PS2_MOHR_CAMERA_BASE_POINTER);
 	MG_FLAG = PS2_MEM_ReadUInt16(camBase + PS2_MOHR_IS_MMG_FLAG_OFFSET);
 	float fov = PS2_MEM_ReadFloat(camBase + PS2_MOHR_CAMERA_BASE_OFFSET_FOV);
 	

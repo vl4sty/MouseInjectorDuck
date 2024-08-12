@@ -86,6 +86,9 @@ static uint8_t PS2_MOHF_DetectCamera(void)
 //==========================================================================
 static void PS2_MOHF_Inject(void)
 {
+	if (!PS2_MOHF_DetectCamera())
+		return;
+	
 	if(xmouse == 0 && ymouse == 0) // if mouse is idle
 		return;
 	
@@ -93,7 +96,6 @@ static void PS2_MOHF_Inject(void)
 	float looksensitivity = (float)sensitivity;
 	float scale = 10000.f;
 
-	camBase = PS2_MEM_ReadPointer(PS2_MOHF_CAMERA_BASE_POINTER);
 	T_Flag = PS2_MEM_ReadUInt16(PS2_MOHF_IS_MMG_FLAG);
 	fov16 = PS2_MEM_ReadUInt16(PS2_MOHF_GLOBAL_FOV);//read the last 16 bit part of the fov op
 	fov32 = fov16 << 16;//move the 16 bits
