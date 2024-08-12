@@ -1,6 +1,15 @@
 # Mouse Injector for Dolphin 5.0, DuckStation, PCSX2, and other emulators
 
-An external app that injects cursor input into game memory.
+An external app that injects cursor input into game memory. 
+
+### !This fork is focused only on Duckstation and PCSX2 emulators!
+## Additional games for PS2:
+| Game Title | Issues |
+| --------- | ------------------ |
+| 007: Quantum of Solace | <sup>Needs a cheat file enabled to fix aiming in a cover: [5A6A935D.pnach](https://github.com/vl4sty/MouseInjectorDolphinDuck/blob/master/cheats/PS2/5A6A935D.pnach)</sub> |
+| Medal of Honor: Frontline | <sup>None.</sub> |
+| Medal of Honor: Rising Sun | <sup>X-axis while ADS is not working in the truck section in the mission "The Fall of the Philippines".</sub> |
+
 
 ### *If you have a game request, please go to the 'Discussions' tab and post it!*
 ### _Scroll to bottom for_ <font color="red"> *FREQUENTLY ASKED QUESTIONS* </font>
