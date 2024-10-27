@@ -284,47 +284,84 @@ uint8_t MEM_FindRamOffset(void)
 
 	//--------------------Duckstation RAM export pointer-----------------------
 	if (isPS1handle == 1) {
-    	const TCHAR* processName = "duckstation-qt-x64-ReleaseLTCG.exe";
-    	const TCHAR* moduleName = processName;
-    	const char* symbol = "RAM";
+		const TCHAR* processName = "duckstation-qt-x64-ReleaseLTCG.exe";
+		const TCHAR* moduleName = processName;
+		const char* symbol = "RAM";
 
-    	HANDLE snapshot = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, Process_ID);
-    	HMODULE hMod = RemoteHandle(Process_ID, moduleName);
+		HANDLE snapshot = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, Process_ID);
+		HMODULE hMod = RemoteHandle(Process_ID, moduleName);
 		if (!hMod) {
-    		return;
+			return;
 		}
 		FARPROC addr = RemoteAddress(snapshot, hMod, symbol);
-    	CloseHandle(snapshot);
-    	if (addr != 0) {
-        	uint64_t pointerAddress = addr;
-        	uint64_t foundValue;
-        	ReadProcessMemory(emuhandle, (LPCVOID)pointerAddress, &foundValue, sizeof(foundValue), NULL);
-            emuoffset = foundValue;
-   		}
+		CloseHandle(snapshot);
+
+		if (addr != 0) {
+			uint64_t pointerAddress = addr;
+			uint64_t foundValue;
+			ReadProcessMemory(emuhandle, (LPCVOID)pointerAddress, &foundValue, sizeof(foundValue), NULL);
+			emuoffset = foundValue;
+		}
 	}
 	//-----------------------------------------------------------------------
-	//--------------------PCSX2 static pointer RAM offset--------------------
-	//Using EEmem address causes some sort out of sync value updating in some games, seems like a PCSX2 thing or something with the injector?? -> use of a pointer to a different copy of PS2 virtual memory
+	//--------------------PCSX2 RAM export pointer---------------------------
+	//Using EEmem address causes some sort out of sync value updating in some games, seems like a PCSX2 thing or something with the injector?? -> use of a pointer to a different copy of PS2 virtual memory (hotfixed below)
 	if (isPcsx2handle == 1) {
-    	const TCHAR* processName = PS2_EXE_Name;
-    	const TCHAR* moduleName = processName;
-    	const char* symbol = "EEmem";
+		const TCHAR* processName = PS2_EXE_Name;
+		const TCHAR* moduleName = processName;
+		const char* symbol = "EEmem";
+		int chunk_size = 256;
 
-    	HANDLE snapshot = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, Process_ID);
-    	HMODULE hMod = RemoteHandle(Process_ID, moduleName);
+		HANDLE snapshot = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, Process_ID);
+		HMODULE hMod = RemoteHandle(Process_ID, moduleName);
 		if (!hMod) {
-    		return;
+			return;
 		}
 		FARPROC addr = RemoteAddress(snapshot, hMod, symbol);
-    	CloseHandle(snapshot);
-    	DWORD_PTR offset = 0x1C8E230; //offset from EEmem to different copy of RAM, that does not cause issues with some games, seems static since the latest 1.7., not perfect, fallback to EEmem value needs to be coded just in case
+		CloseHandle(snapshot);
+		//search from EEmem SLUS string offset to different copy of virtual PS2 RAM
 		uint64_t PS2_Address = addr;
-    	if (addr != 0) {
-        	DWORD_PTR pointerAddress = PS2_Address + offset;
-        	uint64_t foundValue;
-        	ReadProcessMemory(emuhandle, (LPCVOID)pointerAddress, &foundValue, sizeof(foundValue), NULL);
-            emuoffset = foundValue;
-   		}
+		if (addr != 0) {
+			uint64_t pointerAddress = addr;
+			uint64_t EEmem;
+			uint64_t AddressCopy;
+			uint64_t OtherCopyBase;
+			BYTE* buffer;
+			SIZE_T bytesRead;
+			LPCVOID address = 0;
+
+        	ReadProcessMemory(emuhandle, (LPCVOID)pointerAddress, &EEmem, sizeof(EEmem), NULL); //EEmem is now set > offset this by 93390 > load up a chunk of data > loop to find ram copy that does not cause issues with injector, substract the 0x93390 and set emuoffset
+			
+			unsigned char* chunk = (unsigned char*)malloc(chunk_size);
+			DWORD_PTR offset = EEmem + 0x93390;
+			LPCVOID remotePtr = (LPCVOID)offset;
+			ReadProcessMemory(emuhandle, remotePtr, chunk, chunk_size, &bytesRead); // array gets loaded up correctly
+
+			printf("Scanning memory.\n");
+			while (VirtualQueryEx(emuhandle, address, &info, sizeof(info)) && info.RegionSize > 0) { //memory scan loop
+				if (info.State == MEM_COMMIT && (info.Protect == PAGE_READONLY || info.Protect == PAGE_READWRITE)) {
+					buffer = (BYTE*)malloc(info.RegionSize);
+					if (buffer && ReadProcessMemory(emuhandle, info.BaseAddress, buffer, info.RegionSize, &bytesRead)) {
+						for (SIZE_T i = 0; i <= bytesRead - chunk_size; i++) {
+							if (memcmp(buffer + i, chunk, chunk_size) == 0) { // if found match, exit, break out of the nested loop on the first match
+								printf("DEBUG - PCSX2 MEMORY FOUND: %p\n", (BYTE*)info.BaseAddress + i);
+								AddressCopy = (uint64_t*)((BYTE*)info.BaseAddress + i);
+								goto breakout;
+							}
+						}
+					}
+				}
+				address = (BYTE*)info.BaseAddress + info.RegionSize;
+			}
+			breakout:
+			free(chunk);// free the memory
+			free(buffer);
+
+			OtherCopyBase = AddressCopy - 0x93390; // this is the offset where SLUS string is located, SLES is hopefully at a similiar place, it is based on the BIOS version, need to check and test
+			emuoffset = OtherCopyBase;
+
+			// TODO: code failback to EEmem, check the hotfix, clean up the code etc
+		}
 	}
 	//------------------------------------------------------------------------
 
@@ -1278,7 +1315,7 @@ HMODULE RemoteHandle(DWORD Process_ID, const TCHAR* modName) {
 	HMODULE hMods[1024];
     DWORD cbNeeded;
     
-    HANDLE snapshot = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, Process_ID); //well this needs to be different for duckstation
+    HANDLE snapshot = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, Process_ID);
     if (!snapshot) return NULL;
     if (EnumProcessModulesEx(snapshot, hMods, sizeof(hMods), &cbNeeded, LIST_MODULES_ALL)) {
         for (unsigned int i = 0; i < (cbNeeded / sizeof(HMODULE)); i++) {
