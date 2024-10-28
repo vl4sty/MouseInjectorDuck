@@ -3,7 +3,7 @@
 An external app that injects cursor input into game memory. 
 
 ### !This fork is focused only on Duckstation and PCSX2 emulators!
-## Additional games for PS2:
+## Additional games for PS2 - NTSC ONLY:
 | Game Title | Issues |
 | --------- | ------------------ |
 | 007: Quantum of Solace | <sup>Needs a cheat file enabled to fix aiming in a cover: [5A6A935D.pnach](https://github.com/vl4sty/MouseInjectorDolphinDuck/blob/master/cheats/PS2/5A6A935D.pnach)</sub> |
@@ -15,15 +15,11 @@ An external app that injects cursor input into game memory.
 ### _Scroll to bottom for_ <font color="red"> *FREQUENTLY ASKED QUESTIONS* </font>
 
 
-## Supported Emulators
+## This fork maintains only these emulators, thus they will work
 | Emulator/Frontend | Version | Executable name (case sensitive) |
 | --- | :---: | :---: |
-| Dolphin | 5.0 and up | dolphin.exe |
 | DuckStation | 0.1-5943 | duckstation-qt-x64-ReleaseLTCG.exe |
-| PCSX2 | Stable 2.0.0, latest untested | pcsx2-qt.exe<br>pcsx2-qtx64.exe<br>pcsx2-qtx64-avx2.exe |
-| RetroArch (see cores below) | 1.14.0 | retroarch.exe |
-| PPSSPP | 1.14.4 | PPSSPPWindows.exe / PPSSPPWindows64.exe |
-| Project64 | >=3.0.1 | Project64.exe |
+| PCSX2 | Stable 2.0.0, nightly| pcsx2-qt.exe<br>pcsx2-qtx64.exe<br>pcsx2-qtx64-avx2.exe |
 * NOTE: Versions given are the latest that have been tested working, may work with newer
 * NOTE: PCSX2 will only hook with **BIOS versions 5XXXX and up**.
 

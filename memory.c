@@ -288,6 +288,7 @@ uint8_t MEM_FindRamOffset(void)
 		const TCHAR* moduleName = processName;
 		const char* symbol = "RAM";
 
+		printf("Scanning memory.\n");
 		HANDLE snapshot = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, Process_ID);
 		HMODULE hMod = RemoteHandle(Process_ID, moduleName);
 		if (!hMod) {
