@@ -330,7 +330,7 @@ uint8_t MEM_FindRamOffset(void)
 			SIZE_T bytesRead;
 			LPCVOID address = 0;
 
-        	ReadProcessMemory(emuhandle, (LPCVOID)pointerAddress, &EEmem, sizeof(EEmem), NULL); //EEmem is now set > offset this by 93390 > load up a chunk of data > loop to find ram copy that does not cause issues with injector, substract the 0x93390 and set emuoffset
+			ReadProcessMemory(emuhandle, (LPCVOID)pointerAddress, &EEmem, sizeof(EEmem), NULL); //EEmem is now set > offset this by 93390 > load up a chunk of data > loop to find ram copy that does not cause issues with injector, substract the 0x93390 and set emuoffset
 			
 			unsigned char* chunk = (unsigned char*)malloc(chunk_size);
 			DWORD_PTR offset = EEmem + 0x93390;
@@ -343,8 +343,7 @@ uint8_t MEM_FindRamOffset(void)
 					buffer = (BYTE*)malloc(info.RegionSize);
 					if (buffer && ReadProcessMemory(emuhandle, info.BaseAddress, buffer, info.RegionSize, &bytesRead)) {
 						for (SIZE_T i = 0; i <= bytesRead - chunk_size; i++) {
-							if (memcmp(buffer + i, chunk, chunk_size) == 0) { // if found match, exit, break out of the nested loop on the first match
-								printf("DEBUG - PCSX2 MEMORY FOUND: %p\n", (BYTE*)info.BaseAddress + i);
+							if (memcmp(buffer + i, chunk, chunk_size) == 0) { // if found match, exit, break out of the nested loop on the first match, will find EEmem if it wont find other memory
 								AddressCopy = (uint64_t*)((BYTE*)info.BaseAddress + i);
 								goto breakout;
 							}
@@ -353,14 +352,16 @@ uint8_t MEM_FindRamOffset(void)
 				}
 				address = (BYTE*)info.BaseAddress + info.RegionSize;
 			}
+
 			breakout:
 			free(chunk);// free the memory
 			free(buffer);
 
 			OtherCopyBase = AddressCopy - 0x93390; // this is the offset where SLUS string is located, SLES is hopefully at a similiar place, it is based on the BIOS version, need to check and test
+			printf("DEBUG - PCSX2 MEMORY BASE FOUND: %p\n",OtherCopyBase);
 			emuoffset = OtherCopyBase;
 
-			// TODO: code failback to EEmem, check the hotfix, clean up the code etc
+			// TODO: check the hotfix, clean up the code etc
 		}
 	}
 	//------------------------------------------------------------------------
@@ -1313,7 +1314,7 @@ void printdebug(uint64_t val) //hexadecimal addresses debug
 // =============================================================================================================================
 HMODULE RemoteHandle(DWORD Process_ID, const TCHAR* modName) {
 	HMODULE hMods[1024];
-    DWORD cbNeeded;
+	DWORD cbNeeded;
     
     HANDLE snapshot = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, Process_ID);
     if (!snapshot) return NULL;
