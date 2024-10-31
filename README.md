@@ -18,9 +18,8 @@ An external app that injects cursor input into game memory.
 ## This fork maintains only these emulators, thus they will work
 | Emulator/Frontend | Version | Executable name (case sensitive) |
 | --- | :---: | :---: |
-| DuckStation | 0.1-5943 | duckstation-qt-x64-ReleaseLTCG.exe |
-| PCSX2 | Stable 2.0.0, nightly| pcsx2-qt.exe<br>pcsx2-qtx64.exe<br>pcsx2-qtx64-avx2.exe |
-* NOTE: Versions given are the latest that have been tested working, may work with newer
+| DuckStation | stable, latest | duckstation-qt-x64-ReleaseLTCG.exe |
+| PCSX2 | stable, latest | pcsx2-qt.exe<br>pcsx2-qtx64.exe<br>pcsx2-qtx64-avx2.exe |
 * NOTE: PCSX2 will only hook with **BIOS versions 5XXXX and up**.
 
 ## Supported RetroArch Cores
