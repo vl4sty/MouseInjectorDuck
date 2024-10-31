@@ -207,15 +207,15 @@ uint8_t MEM_Init(void)
 		const char* pcsx2Executables[] = {"pcsx2-qtx64-avx2.exe","pcsx2-qtx64.exe","pcsx2-qt.exe"};
 		size_t numExecutables = sizeof(pcsx2Executables) / sizeof(pcsx2Executables[0]);
 		for (size_t i = 0; i < numExecutables; ++i) {
-    		if (strcmp(pe32.szExeFile, pcsx2Executables[i]) == 0) {
-        		strncpy(hookedEmulatorName, pcsx2Executables[i], strlen(pcsx2Executables[i]) - 4);
-        		hookedEmulatorName[strlen(pcsx2Executables[i]) - 4] = '\0';
+			if (strcmp(pe32.szExeFile, pcsx2Executables[i]) == 0) {
+				strncpy(hookedEmulatorName, pcsx2Executables[i], strlen(pcsx2Executables[i]) - 4);
+				hookedEmulatorName[strlen(pcsx2Executables[i]) - 4] = '\0';
 			isPcsx2handle = 1;
-        	emuhandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_QUERY_INFORMATION, FALSE, pe32.th32ProcessID);
+			emuhandle = OpenProcess(PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_QUERY_INFORMATION, FALSE, pe32.th32ProcessID);
 			Process_ID = pe32.th32ProcessID;
 			strncpy(PS2_EXE_Name, pe32.szExeFile, sizeof(PS2_EXE_Name) - 1);
-        	break;
-    		}
+			break;
+			}
 		}
 
 		if(strcmp(pe32.szExeFile, "flycast.exe") == 0) 
@@ -302,6 +302,9 @@ uint8_t MEM_FindRamOffset(void)
 			uint64_t foundValue;
 			ReadProcessMemory(emuhandle, (LPCVOID)pointerAddress, &foundValue, sizeof(foundValue), NULL);
 			emuoffset = foundValue;
+			printf(".\n");
+			printf("..\n");
+			printf("DEBUG - DUCKSTATION MEMORY BASE FOUND AT: 0x%p\n",foundValue);
 		}
 	}
 	//-----------------------------------------------------------------------
@@ -311,7 +314,7 @@ uint8_t MEM_FindRamOffset(void)
 		const TCHAR* processName = PS2_EXE_Name;
 		const TCHAR* moduleName = processName;
 		const char* symbol = "EEmem";
-		int chunk_size = 256;
+		int chunk_size = 4096;
 
 		HANDLE snapshot = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, Process_ID);
 		HMODULE hMod = RemoteHandle(Process_ID, moduleName);
@@ -331,10 +334,10 @@ uint8_t MEM_FindRamOffset(void)
 			SIZE_T bytesRead;
 			LPCVOID address = 0;
 
-			ReadProcessMemory(emuhandle, (LPCVOID)pointerAddress, &EEmem, sizeof(EEmem), NULL); //EEmem is now set > offset this by 93390 > load up a chunk of data > loop to find ram copy that does not cause issues with injector, substract the 0x93390 and set emuoffset
+			ReadProcessMemory(emuhandle, (LPCVOID)pointerAddress, &EEmem, sizeof(EEmem), NULL); //EEmem is now set > offset this by 0x100000 > load up a chunk of data > loop to find ram copy that does not cause issues with injector, substract the 0x93390 and set emuoffset
 			
 			unsigned char* chunk = (unsigned char*)malloc(chunk_size);
-			DWORD_PTR offset = EEmem + 0x93390;
+			DWORD_PTR offset = EEmem + 0x100000; //use an offset where the gamecode is, not 93390 that is determined by BIOS and not every games uses this offset
 			LPCVOID remotePtr = (LPCVOID)offset;
 			ReadProcessMemory(emuhandle, remotePtr, chunk, chunk_size, &bytesRead); // array gets loaded up correctly
 
@@ -358,11 +361,15 @@ uint8_t MEM_FindRamOffset(void)
 			free(chunk);// free the memory
 			free(buffer);
 
-			OtherCopyBase = AddressCopy - 0x93390; // this is the offset where SLUS string is located, SLES is hopefully at a similiar place, it is based on the BIOS version, need to check and test
-			printf("DEBUG - PCSX2 MEMORY BASE FOUND: %p\n",OtherCopyBase);
+			OtherCopyBase = AddressCopy - 0x100000;
+			printf(".\n");
+			printf("..\n");
+			printf("...\n");
+			printf("DEBUG - PCSX2 EEMEM BASE FOUND AT: 0x%p\n",EEmem);
+			printf("DEBUG - PCSX2 MEMORY BASE FOUND AT: 0x%p\n",OtherCopyBase);
 			emuoffset = OtherCopyBase;
 
-			// TODO: check the hotfix, clean up the code etc
+			// TODO: check the hotfix, clean up the code etc, remove the ridiculous printfs and code in normal debug page, and maybe some simple ui
 		}
 	}
 	//------------------------------------------------------------------------
@@ -1296,18 +1303,18 @@ void PSP_MEM_WriteFloat(const uint32_t addr, float value)
 
 void printdebug(uint64_t val) //hexadecimal addresses debug
 {
-    FILE *fp;
+	FILE *fp;
 
-    fp = fopen("test.txt", "w");
-    if (fp != NULL) {
-        char output[255];
-        sprintf(output, "0x%" PRIx64, val);
-        fprintf(fp, "%s", output);
+	fp = fopen("test.txt", "w");
+	if (fp != NULL) {
+		char output[255];
+		sprintf(output, "0x%" PRIx64, val);
+		fprintf(fp, "%s", output);
 
-        fclose(fp);
-    } else {
-        perror("Failed to open file");
-    }
+		fclose(fp);
+	} else {
+	perror("Failed to open file");
+	}
 }
 
 // =============================================================================================================================
@@ -1316,52 +1323,52 @@ void printdebug(uint64_t val) //hexadecimal addresses debug
 HMODULE RemoteHandle(DWORD Process_ID, const TCHAR* modName) {
 	HMODULE hMods[1024];
 	DWORD cbNeeded;
-    
-    HANDLE snapshot = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, Process_ID);
-    if (!snapshot) return NULL;
-    if (EnumProcessModulesEx(snapshot, hMods, sizeof(hMods), &cbNeeded, LIST_MODULES_ALL)) {
-        for (unsigned int i = 0; i < (cbNeeded / sizeof(HMODULE)); i++) {
-            TCHAR szModName[MAX_PATH];
-            if (GetModuleBaseName(snapshot, hMods[i], szModName, sizeof(szModName) / sizeof(TCHAR))) {
-                if (_tcscmp(szModName, modName) == 0) {
-                    CloseHandle(snapshot);
-                    return hMods[i];
-                }
-            }
-        }
-    }
-    CloseHandle(snapshot);
-    return NULL;
+	
+	HANDLE snapshot = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, Process_ID);
+	if (!snapshot) return NULL;
+	if (EnumProcessModulesEx(snapshot, hMods, sizeof(hMods), &cbNeeded, LIST_MODULES_ALL)) {
+		for (unsigned int i = 0; i < (cbNeeded / sizeof(HMODULE)); i++) {
+			TCHAR szModName[MAX_PATH];
+			if (GetModuleBaseName(snapshot, hMods[i], szModName, sizeof(szModName) / sizeof(TCHAR))) {
+				if (_tcscmp(szModName, modName) == 0) {
+					CloseHandle(snapshot);
+					return hMods[i];
+				}
+			}
+		}
+	}
+	CloseHandle(snapshot);
+	return NULL;
 }
 FARPROC RemoteAddress(HANDLE snapshot, HMODULE hMod, const char* procName) {
-    BYTE* base = (BYTE*)hMod;
-    IMAGE_DOS_HEADER dosHeader;
-    IMAGE_NT_HEADERS ntHeaders;
-    IMAGE_EXPORT_DIRECTORY expDir;
+	BYTE* base = (BYTE*)hMod;
+	IMAGE_DOS_HEADER dosHeader;
+	IMAGE_NT_HEADERS ntHeaders;
+	IMAGE_EXPORT_DIRECTORY expDir;
 
-    if (!ReadProcessMemory(snapshot, base, &dosHeader, sizeof(dosHeader), NULL)) return NULL; // Reads DOS header of the module
-    if (!ReadProcessMemory(snapshot, base + dosHeader.e_lfanew, &ntHeaders, sizeof(ntHeaders), NULL)) return NULL; // Reads the PE header
-    if (!ReadProcessMemory(snapshot, base + ntHeaders.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress, &expDir, sizeof(expDir), NULL)) return NULL; //Reads the exported directory
+	if (!ReadProcessMemory(snapshot, base, &dosHeader, sizeof(dosHeader), NULL)) return NULL; // Reads DOS header of the module
+	if (!ReadProcessMemory(snapshot, base + dosHeader.e_lfanew, &ntHeaders, sizeof(ntHeaders), NULL)) return NULL; // Reads the PE header
+	if (!ReadProcessMemory(snapshot, base + ntHeaders.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress, &expDir, sizeof(expDir), NULL)) return NULL; //Reads the exported directory
 
-    DWORD* funcs = (DWORD*)malloc(expDir.NumberOfFunctions * sizeof(DWORD));
-    DWORD* names = (DWORD*)malloc(expDir.NumberOfNames * sizeof(DWORD));
-    WORD* ordinals = (WORD*)malloc(expDir.NumberOfNames * sizeof(WORD));
-    if (!ReadProcessMemory(snapshot, base + expDir.AddressOfFunctions, funcs, expDir.NumberOfFunctions * sizeof(DWORD), NULL)) return NULL;
-    if (!ReadProcessMemory(snapshot, base + expDir.AddressOfNames, names, expDir.NumberOfNames * sizeof(DWORD), NULL)) return NULL;
-    if (!ReadProcessMemory(snapshot, base + expDir.AddressOfNameOrdinals, ordinals, expDir.NumberOfNames * sizeof(WORD), NULL)) return NULL;
+	DWORD* funcs = (DWORD*)malloc(expDir.NumberOfFunctions * sizeof(DWORD));
+	DWORD* names = (DWORD*)malloc(expDir.NumberOfNames * sizeof(DWORD));
+	WORD* ordinals = (WORD*)malloc(expDir.NumberOfNames * sizeof(WORD));
+	if (!ReadProcessMemory(snapshot, base + expDir.AddressOfFunctions, funcs, expDir.NumberOfFunctions * sizeof(DWORD), NULL)) return NULL;
+	if (!ReadProcessMemory(snapshot, base + expDir.AddressOfNames, names, expDir.NumberOfNames * sizeof(DWORD), NULL)) return NULL;
+	if (!ReadProcessMemory(snapshot, base + expDir.AddressOfNameOrdinals, ordinals, expDir.NumberOfNames * sizeof(WORD), NULL)) return NULL;
 
-    FARPROC addr = NULL;
-    for (DWORD i = 0; i < expDir.NumberOfNames; i++) {
-        char funcName[256];
-        if (ReadProcessMemory(snapshot, base + names[i], funcName, sizeof(funcName), NULL) && strcmp(funcName, procName) == 0) {
-            addr = (FARPROC)(base + funcs[ordinals[i]]);
-            break;
-        }
-    }
+	FARPROC addr = NULL;
+	for (DWORD i = 0; i < expDir.NumberOfNames; i++) {
+		char funcName[256];
+		if (ReadProcessMemory(snapshot, base + names[i], funcName, sizeof(funcName), NULL) && strcmp(funcName, procName) == 0) {
+			addr = (FARPROC)(base + funcs[ordinals[i]]);
+			break;
+		}
+	}
 
-    free(funcs);
+	free(funcs);
 	free(names);
 	free(ordinals);
 	
-    return addr;
+	return addr;
 }
