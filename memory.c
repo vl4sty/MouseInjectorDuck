@@ -302,14 +302,11 @@ uint8_t MEM_FindRamOffset(void)
 			uint64_t foundValue;
 			ReadProcessMemory(emuhandle, (LPCVOID)pointerAddress, &foundValue, sizeof(foundValue), NULL);
 			emuoffset = foundValue;
-			printf(".\n");
-			printf("..\n");
-			printf("DEBUG - DUCKSTATION MEMORY BASE FOUND AT: 0x%p\n",foundValue);
 		}
 	}
 	//-----------------------------------------------------------------------
 	//--------------------PCSX2 RAM export pointer---------------------------
-	//Using EEmem address causes some sort out of sync value updating in some games, seems like a PCSX2 thing or something with the injector?? -> use of a pointer to a different copy of PS2 virtual memory (hotfixed below)
+	//Using EEmem address causes some sort out of sync value updating in some games, only in CoD: FH?, seems like a PCSX2 thing or something with the injector?? -> use of a pointer to a different copy of PS2 virtual memory (hotfixed below)
 	if (isPcsx2handle == 1) {
 		const TCHAR* processName = PS2_EXE_Name;
 		const TCHAR* moduleName = processName;
@@ -334,10 +331,10 @@ uint8_t MEM_FindRamOffset(void)
 			SIZE_T bytesRead;
 			LPCVOID address = 0;
 
-			ReadProcessMemory(emuhandle, (LPCVOID)pointerAddress, &EEmem, sizeof(EEmem), NULL); //EEmem is now set > offset this by 0x100000 > load up a chunk of data > loop to find ram copy that does not cause issues with injector, substract the 0x93390 and set emuoffset
+			ReadProcessMemory(emuhandle, (LPCVOID)pointerAddress, &EEmem, sizeof(EEmem), NULL); //EEmem is now set > offset this by 0x100000 > load up a chunk of data > loop to find ram copy that does not cause issues with injector, substract the 0x100000 and set emuoffset
 			
 			unsigned char* chunk = (unsigned char*)malloc(chunk_size);
-			DWORD_PTR offset = EEmem + 0x100000; //use an offset where the gamecode is, not 93390 that is determined by BIOS and not every games uses this offset
+			DWORD_PTR offset = EEmem + 0x100000; //use an offset where the gamecode is
 			LPCVOID remotePtr = (LPCVOID)offset;
 			ReadProcessMemory(emuhandle, remotePtr, chunk, chunk_size, &bytesRead); // array gets loaded up correctly
 
@@ -362,11 +359,6 @@ uint8_t MEM_FindRamOffset(void)
 			free(buffer);
 
 			OtherCopyBase = AddressCopy - 0x100000;
-			printf(".\n");
-			printf("..\n");
-			printf("...\n");
-			printf("DEBUG - PCSX2 EEMEM BASE FOUND AT: 0x%p\n",EEmem);
-			printf("DEBUG - PCSX2 MEMORY BASE FOUND AT: 0x%p\n",OtherCopyBase);
 			emuoffset = OtherCopyBase;
 
 			// TODO: check the hotfix, clean up the code etc, remove the ridiculous printfs and code in normal debug page, and maybe some simple ui
@@ -1045,9 +1037,7 @@ void SNES_MEM_WriteWord(const uint32_t addr, uint16_t value) // 16bit word
 		return;
 	WriteProcessMemory(emuhandle, (LPVOID)(emuoffset + addr), &value, sizeof(value), NULL);
 }
-//==========================================================================
-//PS2 hooking via pointer. Use the base address of pcsx2.exe module -> point to static pointer/symbol "EEmem" -> Use its value as a "emuoffset". 
-//==========================================================================
+
 uint32_t PS2_MEM_ReadPointer(const uint32_t addr)
 {
 	if(!emuoffset || PS2NOTWITHINMEMRANGE(addr))
@@ -1340,6 +1330,7 @@ HMODULE RemoteHandle(DWORD Process_ID, const TCHAR* modName) {
 	CloseHandle(snapshot);
 	return NULL;
 }
+
 FARPROC RemoteAddress(HANDLE snapshot, HMODULE hMod, const char* procName) {
 	BYTE* base = (BYTE*)hMod;
 	IMAGE_DOS_HEADER dosHeader;
