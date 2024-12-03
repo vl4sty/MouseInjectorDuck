@@ -284,8 +284,8 @@ uint8_t MEM_FindRamOffset(void)
 
 	//--------------------Duckstation RAM export pointer-----------------------
 	if (isPS1handle == 1) {
-		const TCHAR* processName = "duckstation-qt-x64-ReleaseLTCG.exe";
-		const TCHAR* moduleName = processName;
+		const char* processName = "duckstation-qt-x64-ReleaseLTCG.exe";
+		const char* moduleName = processName;
 		const char* symbol = "RAM";
 
 		printf("Scanning memory.\n");
@@ -294,6 +294,7 @@ uint8_t MEM_FindRamOffset(void)
 		if (!hMod) {
 			return;
 		}
+
 		FARPROC addr = RemoteAddress(snapshot, hMod, symbol);
 		CloseHandle(snapshot);
 
@@ -308,16 +309,18 @@ uint8_t MEM_FindRamOffset(void)
 	//--------------------PCSX2 RAM export pointer---------------------------
 	//Using EEmem address causes some sort out of sync value updating in some games, only in CoD: FH?, seems like a PCSX2 thing or something with the injector?? -> use of a pointer to a different copy of PS2 virtual memory (hotfixed below)
 	if (isPcsx2handle == 1) {
-		const TCHAR* processName = PS2_EXE_Name;
-		const TCHAR* moduleName = processName;
+		const char* processName = PS2_EXE_Name;
+		const char* moduleName = processName;
 		const char* symbol = "EEmem";
-		int chunk_size = 4096;
+		int chunk_size = 4096; //mem region size
 
 		HANDLE snapshot = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, Process_ID);
 		HMODULE hMod = RemoteHandle(Process_ID, moduleName);
+		
 		if (!hMod) {
 			return;
 		}
+
 		FARPROC addr = RemoteAddress(snapshot, hMod, symbol);
 		CloseHandle(snapshot);
 		//search from EEmem SLUS string offset to different copy of virtual PS2 RAM
@@ -333,8 +336,12 @@ uint8_t MEM_FindRamOffset(void)
 
 			ReadProcessMemory(emuhandle, (LPCVOID)pointerAddress, &EEmem, sizeof(EEmem), NULL); //EEmem is now set > offset this by 0x100000 > load up a chunk of data > loop to find ram copy that does not cause issues with injector, substract the 0x100000 and set emuoffset
 			
-			unsigned char* chunk = (unsigned char*)malloc(chunk_size);
-			DWORD_PTR offset = EEmem + 0x100000; //use an offset where the gamecode is
+			BYTE* chunk = (BYTE*)malloc(chunk_size);
+			if (!chunk) {
+				return;
+			}
+
+			uint64_t offset = EEmem + 0x100000; //use an offset where the gamecode is
 			LPCVOID remotePtr = (LPCVOID)offset;
 			ReadProcessMemory(emuhandle, remotePtr, chunk, chunk_size, &bytesRead); // array gets loaded up correctly
 
