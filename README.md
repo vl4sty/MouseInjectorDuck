@@ -1,8 +1,8 @@
-# Mouse Injector for Dolphin 5.0, DuckStation, PCSX2, and other emulators
+# Mouse Injector for DuckStation, PCSX2 and PPSSPP.
 
 An external app that injects cursor input into game memory. 
 
-### !This fork is focused only on Duckstation and PCSX2 emulators!
+### !This fork is focused only on Duckstation and PCSX2 emulators! Hooking of the other emulators could break without notice.
 ## Additional games for PS2 - NTSC ONLY:
 | Game Title | Issues |
 | --------- | ------------------ |
@@ -22,19 +22,6 @@ An external app that injects cursor input into game memory.
 | PCSX2 | stable, latest | pcsx2-qt.exe<br>pcsx2-qtx64.exe<br>pcsx2-qtx64-avx2.exe |
 * NOTE: PCSX2 will only hook with **BIOS versions 5XXXX and up**.
 
-## Supported RetroArch Cores
-| Console | Core | Version |
-| :---: | :---: | :---: |
-| N64 | Mupen64Plus-Next | 2.4-Vulkan bc24153 |
-| PS1 | Beetle PSX HW | 0.9.44.1 234433f |
-| PS1 | Beetle PSX | 0.9.44.1 6ed5790 |
-| PS1 | PCSX-ReARMed | r23l 4373e29 |
-| PS1 | DuckStation | |
-| PS1 | SwanStation | 1.00 bc5f6c8 |
-| SNES | bsnes-mercury Balanced | v094 |
-* NOTE: For RetroArch the window needs to be focused for it to hook initially.
-* NOTE: All cores have not been tested exhaustively
-
 ## How to Use
 1. Start emulator first
 2. Start MouseInjector, read initial information then press ctrl+1
@@ -49,23 +36,6 @@ An external app that injects cursor input into game memory.
 work very well if you have also mapped the mouse buttons as you may click off the window. Fullscreen is
 recommended and with dual-monitors it is recommended to put the cursor in the corner before hooking to
 avoid clicking off the window.
-
-## Supported Dolphin Titles (NTSC Only)
-| Game Title | Mouse Support | Issues |
-| --- | :---: | ----------- |
-| 007: NightFire | Poor | <sup>Vehicle mode is semi-functional - last level is broken</sub> |
-| Call of Duty 2: Big Red One | Good | <sup>None</sub> |
-| Die Hard: Vendetta | Fair | <sup>Sentry mode not supported</sub> |
-| Geist | Fair | <sup> ** *Requires MMU be disabled for game in Dolphin* ** <br />Camera broken on elevators, truck sentry on motorcycle level broken</sub> |
-| Medal of Honor: European Assault | Good | <sup>None</sub> |
-| Medal of Honor: Frontline | Fair | <sup>Minecart level is broken</sub> |
-| Medal of Honor: Rising Sun | Poor | <sup>Looking down scope while in turret mode is broken</sub> |
-| Metal Arms | Good | <sup>Rat driving or rat turret may not work correctly<sup> |
-| Serious Sam: Next Encounter | Fair | <sup>Vehicle/submarine interfaces are not supported</sub> |
-| TimeSplitters 2 | Fair | <sup>Camera/sentry modes not supported</sub> |
-| TimeSplitters: Future Perfect | Poor | <sup>All non-first person modes are not supported</sub> |
-| Trigger Man | Good | <sup>None</sub> |
-| Turok: Evolution | Good | <sup>Optional cheats/patches in **'cheats/TurokEvolutionGTKE51.txt'**</sub> |
 
 ## Supported PS1 Titles
 | Game Title | Serial | Mouse Support | Issues | In-game Options | Cheat/Patch File |
@@ -121,23 +91,6 @@ avoid clicking off the window.
     * Patched cue: *007 The World Is Not Enough (USA) (MouseInjector).cue*
 * Open '.cue' file in a text editor and change first line to match patched file
     * *FILE "007 The World Is Not Enough (USA) (MouseInjector).bin" BINARY"*
-
-## Supported N64 Titles
-| Game Title | Mouse Support | Issues | In-game Options | Cheat File |
-| --- | :---: | :-----------: | :---: | :---: |
-| GoldenEye: 007 (USA) | Fair | <sup>None</sub> | - | - |
-| Sin and Punishment (J) | Good | <sup>Not fully tested</sub> | - | - |
-| 007: The World Is Not Enough (USA) | Good | <sup>Requires cheat for 'Cold Reception' mission</br>(disable cheat for multiplayer, may require restart)</br>Not fully tested</sub> | <sup>Auto Aim: Off</br>Look Ahead: Off</br>Auto Level: Off</sub>| <sup>**007 - The World Is Not Enough (USA).cht**</sub> |
-
-## Supported SNES Titles
-| Game Title | Mouse Support | Issues |
-| --- | :---: | ----------- |
-| Pac-Man 2: The New Adventures (USA) | Good | <sup>Not fully tested</sub> |
-| R-Type III: The Third Lightning (USA) | Good | <sup>Not fully tested</sub> |
-| Timon & Pumbaa's Jungle Games (USA) | Good | <sup>None</sub> |
-| Untouchables, The (USA) | Good | <sup>Crosshair shooting sections only</sub> |
-| Wild Guns (USA) | Good | <sup>Recommended use of supplied patch to disable cursor movement when moving character (Disables x-axis cursor movement for both players)</sub> |
-* NOTE: Patches must either be applied with an IPS patching tool, such as Lunar IPS, or by using softpatching with RetroArch
 
 ## Supported PCSX2 Titles
 | Game Title | Serial | Mouse Support | Issues | In-game Options | Cheat File |
@@ -202,11 +155,7 @@ avoid clicking off the window.
     (Newer or older versions may work, but the listed version is tested working)
     - ROM/ISO match the version/serial listed in this README
     - **PCSX2**: PS2 BIOS version is **5XXXX or higher**
-    - **RetroArch**: RA window must be **focused** for it to hook initially
-  - Some emulator settings prevent hooking so you can also try **restoring the default emulator settings**:
-    - **PCSX2**: *Settings->Interface->Restore Defaults*
-    - **DuckStation**: *Settings->General->Restore Defaults*
-  - **NOTE**: The program has only been tested on **Windows 10** and may not be compatible<br>
+  - **NOTE**: The program has only been tested on **Windows 11 24H2** and may not be compatible<br>
   with other versions of Windows
   - **NOTE**: If emulator is restarted, the injector must be restarted as well
 ### Q: Game hooks but is not listed as supported?
