@@ -291,15 +291,12 @@ uint8_t MEM_FindRamOffset(void)
 		printf("Scanning memory.\n");
 		HANDLE snapshot = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, Process_ID);
 		HMODULE hMod = RemoteHandle(Process_ID, moduleName);
-		if (!hMod) {
-			return;
-		}
 
 		FARPROC addr = RemoteAddress(snapshot, hMod, symbol);
 		CloseHandle(snapshot);
 
 		if (addr != 0) {
-			uint64_t pointerAddress = addr;
+			uint64_t pointerAddress = (uint64_t)(uintptr_t)addr;
 			uint64_t foundValue;
 			ReadProcessMemory(emuhandle, (LPCVOID)pointerAddress, &foundValue, sizeof(foundValue), NULL);
 			emuoffset = foundValue;
@@ -317,16 +314,12 @@ uint8_t MEM_FindRamOffset(void)
 		HANDLE snapshot = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, Process_ID);
 		HMODULE hMod = RemoteHandle(Process_ID, moduleName);
 		
-		if (!hMod) {
-			return;
-		}
-
 		FARPROC addr = RemoteAddress(snapshot, hMod, symbol);
 		CloseHandle(snapshot);
 		//search from EEmem SLUS string offset to different copy of virtual PS2 RAM
-		uint64_t PS2_Address = addr;
+		uint64_t pointerAddress = (uint64_t)(uintptr_t)addr;
 		if (addr != 0) {
-			uint64_t pointerAddress = addr;
+			uint64_t pointerAddress = (uint64_t)(uintptr_t)addr;
 			uint64_t EEmem;
 			uint64_t AddressCopy;
 			uint64_t OtherCopyBase;
@@ -337,9 +330,6 @@ uint8_t MEM_FindRamOffset(void)
 			ReadProcessMemory(emuhandle, (LPCVOID)pointerAddress, &EEmem, sizeof(EEmem), NULL); //EEmem is now set > offset this by 0x100000 > load up a chunk of data > loop to find ram copy that does not cause issues with injector, substract the 0x100000 and set emuoffset
 			
 			BYTE* chunk = (BYTE*)malloc(chunk_size);
-			if (!chunk) {
-				return;
-			}
 
 			uint64_t offset = EEmem + 0x100000; //use an offset where the gamecode is
 			LPCVOID remotePtr = (LPCVOID)offset;
@@ -352,11 +342,13 @@ uint8_t MEM_FindRamOffset(void)
 					if (buffer && ReadProcessMemory(emuhandle, info.BaseAddress, buffer, info.RegionSize, &bytesRead)) {
 						for (SIZE_T i = 0; i <= bytesRead - chunk_size; i++) {
 							if (memcmp(buffer + i, chunk, chunk_size) == 0) { // if found match, exit, break out of the nested loop on the first match, will find EEmem if it wont find other memory
-								AddressCopy = (uint64_t*)((BYTE*)info.BaseAddress + i);
+								AddressCopy = (uint64_t)(uintptr_t)((BYTE*)info.BaseAddress + i);
+								printdebug(AddressCopy);
 								goto breakout;
 							}
 						}
 					}
+					free(buffer);
 				}
 				address = (BYTE*)info.BaseAddress + info.RegionSize;
 			}

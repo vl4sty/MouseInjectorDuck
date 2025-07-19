@@ -415,7 +415,7 @@ void AccumulateAddRemainder(float *value, float *accumulator, float dir, float d
 	float r = fmod(dx, 1.f);
 
 	// if remainder + accumulation > 1, add 1
-	if (abs(r + *accumulator) >= 1)
+	if (fabsf(r + *accumulator) >= 1)
 	{
 		if (dir > 0)
 			*value += 1;
