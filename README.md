@@ -9,6 +9,7 @@ An external app that injects cursor input into game memory.
 | 007: Quantum of Solace | <sup>Needs a cheat file enabled to fix aiming in a cover: [5A6A935D.pnach](https://github.com/vl4sty/MouseInjectorDolphinDuck/blob/master/cheats/PS2/5A6A935D.pnach)</sub> |
 | Medal of Honor: Frontline | <sup>None.</sub> |
 | Medal of Honor: Rising Sun | <sup>X-axis while ADS is not working in the truck section in the mission "The Fall of the Philippines".</sub> |
+| Duke Nukem: Total Meltdown| <sup>None. Created control profile for DuckStation. For better gameplay I made some cheats that will enable modern free look: [DukeNukemTotalMeltdown_SLUS-00355.cht](https://github.com/vl4sty/MouseInjectorDolphinDuck/blob/master/cheats/PS1/DukeNukemTotalMeltdown_SLUS-00355.cht)</sub> |
 
 
 ### *If you have a game request, please go to the 'Discussions' tab and post it!*
@@ -20,6 +21,7 @@ An external app that injects cursor input into game memory.
 | --- | :---: | :---: |
 | DuckStation | stable, latest | duckstation-qt-x64-ReleaseLTCG.exe |
 | PCSX2 | stable, latest | pcsx2-qt.exe<br>pcsx2-qtx64.exe<br>pcsx2-qtx64-avx2.exe |
+| PCSX-REDUX | latest | pcsx-redux.exe |
 * NOTE: PCSX2 will only hook with **BIOS versions 5XXXX and up**.
 
 ## How to Use
@@ -36,6 +38,24 @@ An external app that injects cursor input into game memory.
 work very well if you have also mapped the mouse buttons as you may click off the window. Fullscreen is
 recommended and with dual-monitors it is recommended to put the cursor in the corner before hooking to
 avoid clicking off the window.
+
+# How to use PCSX-REDUX
+For debugging and patch creating it is a better to use PCSX-REDUX. It has handsdown the best PSX code debugger out there. 
+To use this injector with the emulator, you will need to run this lua script in PCSX-REDUX everytime you want to use the
+Mouse injector with it. This script creates a simple text file in the emulator's directory with the pointer to 
+the game's memory within the emulator process.
+
+```lua
+local ffi = require("ffi")
+local mem = PCSX.getMemPtr()
+local base = tonumber(ffi.cast("uintptr_t", mem))
+
+local file = io.open("emuoffset.txt", "w")
+file:write(string.format("0x%X\n", base))
+file:close()
+
+print(string.format("ADDRESS DUMPED TO TXT: 0x%08X", base))
+```
 
 ## Supported PS1 Titles
 | Game Title | Serial | Mouse Support | Issues | In-game Options | Cheat/Patch File |

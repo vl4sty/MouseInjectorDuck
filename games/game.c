@@ -184,6 +184,7 @@ extern const GAMEDRIVER *GAME_PS2_MOHRISINGSUN;
 extern const GAMEDRIVER *GAME_PS1_RS6;
 extern const GAMEDRIVER *GAME_PS2_007QS;
 extern const GAMEDRIVER *GAME_PS2_SFDM;
+extern const GAMEDRIVER *GAME_PS1_DUKE_3D;
 
 static const GAMEDRIVER **GAMELIST[] =
 {	// UNF - Unfinished
@@ -349,6 +350,7 @@ static const GAMEDRIVER **GAMELIST[] =
 	&GAME_PS1_RS6, // UNF
 	&GAME_PS2_007QS,
 	// &GAME_PS2_SFDM // UNF
+	&GAME_PS1_DUKE_3D, 
 };
 
 static const GAMEDRIVER *CURRENT_GAME = NULL;

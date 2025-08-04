@@ -19,21 +19,21 @@
 //==========================================================================
 A ICON MOVEABLE PURE LOADONCALL DISCARDABLE "icon.ico"
 1 VERSIONINFO
-FILEVERSION 0,3,1,0
-PRODUCTVERSION 0,3,1,0
+FILEVERSION 0,4,0
+PRODUCTVERSION 0,4,0
 {
 	BLOCK "StringFileInfo"
 	{
 		BLOCK "040904E4"
 		{
-			VALUE "FileVersion", "0, 3, 1, 0"
-			VALUE "FileDescription", "Mouse Injector for Dolphin"
+			VALUE "FileVersion", "0,4,0"
+			VALUE "FileDescription", "Mouse Injector for Dolphin (DuckStation and PCSX2 fork)"
 			VALUE "InternalName", "Mouse Injector"
 			VALUE "LegalCopyright", "Copyright (C) 2020 Carnivorous"
 			VALUE "LegalTrademarks", ""
 			VALUE "OriginalFilename", "Mouse Injector.exe"
-			VALUE "ProductName", "Mouse Injector for Dolphin"
-			VALUE "ProductVersion", "0, 3, 1, 0"
+			VALUE "ProductName", "Mouse Injector for Dolphin (DuckStation and PCSX2 fork)"
+			VALUE "ProductVersion", "0,4,0"
 			VALUE "CompanyName", ""
 		}
 	}

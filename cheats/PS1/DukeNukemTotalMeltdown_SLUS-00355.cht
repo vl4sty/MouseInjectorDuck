@@ -1,0 +1,16 @@
+[Disable -1 and 1 correction for aiming (Breaks demos)]
+Description = This disables in-game clamping of the Y axis. Breaks in-game demos.
+Type = Gameshark
+Activation = EndFrame
+90061194 00000000
+
+[FPS Display]
+Type = Gameshark
+Activation = EndFrame
+900B5326 0001
+
+[Disable screen auto tilting]
+Type = Gameshark
+Activation = EndFrame
+9005E680 00000000
+

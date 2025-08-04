@@ -20,7 +20,7 @@
 #include <string.h>
 
 #define DOLPHINVERSION "emulators"
-#define BUILDINFO "(v0.31 - hotfix - "__DATE__")"
+#define BUILDINFO "(v0.41 - "__DATE__")"
 #define LINE "__________________________________________________________________"
 // input for interface
 #define K_1 GetAsyncKeyState(0x31) // key '1'
@@ -31,6 +31,8 @@
 #define K_6 GetAsyncKeyState(0x36) // key '6'
 #define K_7 GetAsyncKeyState(0x37) // key '7'
 #define K_8 GetAsyncKeyState(0x38) // key '8'
+#define K_9 GetAsyncKeyState(0x39) // key '9'
+#define K_0 GetAsyncKeyState(0x30) // key '0'
 #define K_CTRL0 (GetAsyncKeyState(0x11) && GetAsyncKeyState(0x30) || GetAsyncKeyState(0x30) && GetAsyncKeyState(0x11)) // key combo control + '0'
 #define K_CTRL1 (GetAsyncKeyState(0x11) && GetAsyncKeyState(0x31) || GetAsyncKeyState(0x31) && GetAsyncKeyState(0x11)) // key combo control + '1'
 #define K_PLUS (GetAsyncKeyState(0x6B) || GetAsyncKeyState(0xBB)) // key '+'

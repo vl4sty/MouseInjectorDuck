@@ -218,7 +218,7 @@ static void GUI_Interact(void)
 		optionToggle = !optionToggle;
 		updateinterface = 1;
 	}
-	if(K_PLUS && !locksettings && !updateinterface) // numpad plus (+)
+	if(K_0 || K_PLUS && !locksettings && !updateinterface) // number row key 0 or numpad plus (+)
 	{
 		if(selectedoption == EDITINGSENSITIVITY && sensitivity < 200)
 			sensitivity++, updateinterface = 1;
@@ -226,7 +226,7 @@ static void GUI_Interact(void)
 			crosshair++, updateinterface = 1;
 		updatequick = 1;
 	}
-	if(K_MINUS && !locksettings && !updateinterface) // numpad minus (-)
+	if(K_9 || K_MINUS && !locksettings && !updateinterface) // number row key 9 or numpad minus (-)
 	{
 		if(selectedoption == EDITINGSENSITIVITY && sensitivity > 1)
 			sensitivity--, updateinterface = 1;
@@ -261,19 +261,19 @@ static void GUI_Update(void)
 	GUI_Clear();
 	GAME_Status(); // refresh driver for title
 	// printf("\n Mouse Injector for %s %s - %s\n", GAME_Name(), BUILDINFO, hookedEmulatorName); // title
-	printf("\n Mouse Injector for %s - %s\n", hookedEmulatorName, GAME_Name()); // title
+	printf("\n Mouse Injector %s for %s - %s\n", BUILDINFO, hookedEmulatorName, GAME_Name()); // title
 	printf("%s\n\n   Main Menu - Press [#] to Use Menu\n\n\n", LINE);
 	printf(mousetoggle ? "   [4] - [ON] Mouse Injection\n\n" : "   [4] - [OFF] Mouse Injection\n\n");
 	if(!locksettings)
 	{
 		printf("   [5] - Mouse Sensitivity: %d%%", sensitivity * 5);
-		printf(selectedoption == EDITINGSENSITIVITY ? " [+/-]\n\n" : "\n\n");
+		printf(selectedoption == EDITINGSENSITIVITY ? " [9 or - / 0 or +]\n\n" : "\n\n");
 		printf("   [6] - Crosshair Sway: ");
 		if(GAME_CrosshairSwaySupported())
 			printf(crosshair ? "%d%%" : "Locked", crosshair * 100 / 6);
 		else
 			printf("Not Available For Game");
-		printf(selectedoption == EDITINGCROSSHAIR ? " [+/-]\n\n" : "\n\n");
+		printf(selectedoption == EDITINGCROSSHAIR ? " [9 or - / 0 or +]\n\n" : "\n\n");
 		printf(invertpitch ? "   [7] - [ON] Invert Pitch\n\n" : "   [7] - [OFF] Invert Pitch\n\n");
 		if (GAME_OptionSupported())
 			printf("   [8] - %s\n\n", GAME_OptionMessage());
@@ -286,9 +286,9 @@ static void GUI_Update(void)
 		printf("   [CTRL+0] - Unlock Settings\n\n");
 	}
 	if(mousetoggle || locksettings)
-		printf(" Note: [+/-] to Change Values\n%s\n", LINE);
+		printf(" Note: [9 or - / 0 or +] to Change Values\n%s\n", LINE);
 	else
-		printf(" Note: [+/-] to Change Values - [Insert] for Supported Games\n%s\n", LINE);
+		printf(" Note: [9 or - / 0 or +] to Change Values - [Insert] for Supported Games\n%s\n", LINE);
 	
 	// printf("tankBase: %X\n", uIntOut1);
 	// printf("turretbase: %X\n", uIntOut2);
