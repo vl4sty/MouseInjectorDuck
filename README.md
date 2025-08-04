@@ -39,8 +39,8 @@ work very well if you have also mapped the mouse buttons as you may click off th
 recommended and with dual-monitors it is recommended to put the cursor in the corner before hooking to
 avoid clicking off the window.
 
-# How to use PCSX-REDUX
-For debugging and patch creating it is a better to use PCSX-REDUX. It has handsdown the best PSX code debugger out there. 
+# How to use with PCSX-REDUX
+For debugging and patch creating it is a better to use PCSX-REDUX. It has hands down the best PSX code debugger out there. 
 To use this injector with the emulator, you will need to run this lua script in PCSX-REDUX everytime you want to use the
 Mouse injector with it. This script creates a simple text file in the emulator's directory with the pointer to 
 the game's memory within the emulator process.
